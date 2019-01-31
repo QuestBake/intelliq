@@ -1,103 +1,113 @@
 package config
 
 import (
-	"github.com/globalsign/mgo"
-	log "github.com/sirupsen/logrus"
+	"context"
+	"log"
+	"time"
+
+	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
 )
 
 const (
-	url  = "localhost"
-	port = "27017"
-	db   = "intelliQ"
+	url = "mongodb://localhost:27017"
+	db  = "intelliQ"
 )
 
-var dbSession *mgo.Session
+var client *mongo.Client
+var ctx context.Context
 
 //Connect db conn
-func Connect() (*mgo.Session, error) {
-	session, err := mgo.Dial(url)
+func Connect() error {
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	var err error
+	client, err = mongo.NewClient(url)
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
+		return err
 	}
-	log.Info("Successfully connected to DB at ", url)
-	dbSession = session
-	//	createIndices(session.Copy())
-	return session, nil
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	log.Printf("Successfully connected to DB at ", url)
+	return nil
 }
 
 //GetCollection copy of original session
-func GetCollection(dbName string, collName string) *mgo.Collection {
-	if dbSession == nil {
+func GetCollection(dbName string, collName string) *mongo.Collection {
+	if client == nil {
 		return nil
 	}
-	session := dbSession.Copy()
-	db := session.DB(dbName)
+	db := client.Database(dbName)
 	if db == nil {
 		return nil
 	}
-	coll := db.C(collName)
+	coll := db.Collection(collName)
 	if coll == nil {
 		return nil
 	}
 	return coll
 }
 
-type searchField struct {
-	field  string
-	weight int
-}
-
-func createIndices(session *mgo.Session) {
-	db := session.DB(db)
+func createIndices() {
+	db := client.Database(db)
 	if db == nil {
 		panic("No DB session")
 	}
 
-	var searchFields []searchField
-	searchFields = append(searchFields, searchField{field: "city", weight: 4})
-	searchFields = append(searchFields, searchField{field: "state", weight: 2})
+	var searchFields []string
+	searchFields = append(searchFields, "city")
+	searchFields = append(searchFields, "state")
 
 	addSearchIndex(db, "addresses", searchFields)
 	addUniqueIndex(db, "addresses", []string{"city"})
-	db.Session.Close()
 }
 
-func addSearchIndex(db *mgo.Database, collName string, searchFields []searchField) {
-	coll := db.C(collName)
+func addSearchIndex(db *mongo.Database, collName string, searchFields []string) {
+	coll := db.Collection(collName)
 	if coll == nil {
 		panic("No such Collection in DB" + collName)
 	}
-	var fields []string
-	weights := make(map[string]int)
+	var indexes []mongo.IndexModel
 
 	for _, val := range searchFields {
-		fields = append(fields, "$text:"+val.field)
-		weights[val.field] = val.weight
+		indexes = append(indexes, mongo.IndexModel{
+			Keys: bsonx.Doc{{
+				Key:   val,
+				Value: bsonx.Int32(1),
+			}},
+			Options: options.Index().SetName("textIndex"),
+		},
+		)
 	}
-	index := mgo.Index{
-		Key:     fields,
-		Weights: weights,
-		Name:    "textIndex",
-	}
-	err := coll.EnsureIndex(index)
+	iv := coll.Indexes()
+	_, err := iv.CreateMany(ctx, indexes)
 	if err != nil {
 		panic("Hi Could not create search index for " + collName + err.Error())
 	}
 }
 
-func addUniqueIndex(db *mgo.Database, collName string, fields []string) {
-	coll := db.C(collName)
+func addUniqueIndex(db *mongo.Database, collName string, fields []string) {
+	coll := db.Collection(collName)
 	if coll == nil {
 		panic("No such Collection in DB" + collName)
 	}
+	var indexes []mongo.IndexModel
+
 	for _, key := range fields {
-		index := mgo.Index{
-			Key:    []string{key},
-			Unique: true,
-		}
-		if err := coll.EnsureIndex(index); err != nil {
-			panic("Could not create unique index for " + collName)
-		}
+		indexes = append(indexes, mongo.IndexModel{
+			Keys: bsonx.Doc{{Key: key,
+				Value: bsonx.Int32(1),
+			}},
+			Options: options.Index().SetUnique(true),
+		})
+	}
+	iv := coll.Indexes()
+	_, err := iv.CreateMany(ctx, indexes)
+	if err != nil {
+		panic("Could not create unique index for " + collName)
 	}
 }
