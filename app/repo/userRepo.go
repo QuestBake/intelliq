@@ -1,7 +1,7 @@
 package repo
 
 import (
-	db "project/intelliq/app/config"
+	db "intelliq/app/config"
 
 	"github.com/globalsign/mgo"
 )
