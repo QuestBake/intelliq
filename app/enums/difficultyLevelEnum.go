@@ -1,10 +1,17 @@
 package enums
 
-//Difficulty enum question difficulty level
-type Difficulty string
+//Difficulty hide
+type Difficulty = int
 
-const (
-	EASY   = "Easy"
-	MEDIUM = "Medium"
-	HARD   = "Hard"
-)
+type level struct {
+	EASY   Difficulty
+	MEDIUM Difficulty
+	HARD   Difficulty
+}
+
+// DifficultyLvl for public use
+var DifficultyLvl = &level{
+	EASY:   0,
+	MEDIUM: 1,
+	HARD:   2,
+}

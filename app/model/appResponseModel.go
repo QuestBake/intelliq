@@ -1,8 +1,10 @@
 package model
 
+import "project/intelliq/app/enums"
+
 //AppResponse appResponse
 type AppResponse struct {
-	Status int         `json:"status"`
-	Body   interface{} `json:"body"`
-	Msg    string      `json:"msg"`
+	Status enums.ResponseStatus `json:"status"`
+	Body   interface{}          `json:"body"`
+	Msg    string               `json:"msg"`
 }
