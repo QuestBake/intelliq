@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	url  = "localhost"
-	port = "27017"
-	db   = "intelliQ"
+	url    = "localhost"
+	port   = "27017"
+	dbName = "intelliQ"
 )
 
 var dbSession *mgo.Session
@@ -27,7 +27,7 @@ func Connect() (*mgo.Session, error) {
 }
 
 //GetCollection copy of original session
-func GetCollection(dbName string, collName string) *mgo.Collection {
+func GetCollection(collName string) *mgo.Collection {
 	if dbSession == nil {
 		return nil
 	}
@@ -49,7 +49,7 @@ type searchField struct {
 }
 
 func createIndices(session *mgo.Session) {
-	db := session.DB(db)
+	db := session.DB(dbName)
 	if db == nil {
 		panic("No DB session")
 	}
