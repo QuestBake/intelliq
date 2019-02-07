@@ -43,6 +43,13 @@ func GetCollection(collName string) *mgo.Collection {
 	return coll
 }
 
+//CloseSession closes session
+func CloseSession(coll *mgo.Collection) {
+	if coll != nil {
+		coll.Database.Session.Close()
+	}
+}
+
 type searchField struct {
 	field  string
 	weight int
