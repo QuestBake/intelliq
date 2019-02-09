@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/globalsign/mgo"
 	log "github.com/sirupsen/logrus"
 )
@@ -30,7 +32,7 @@ func Connect() (*mgo.Session, error) {
 	}
 	log.Info("Successfully connected to DB at ", url)
 	dbSession = session
-	//	createIndices(session.Copy())
+	//createIndices(session.Copy())
 	return session, nil
 }
 
@@ -68,13 +70,7 @@ func createIndices(session *mgo.Session) {
 	if db == nil {
 		panic("No DB session")
 	}
-
-	var searchFields []searchField
-	searchFields = append(searchFields, searchField{field: "city", weight: 4})
-	searchFields = append(searchFields, searchField{field: "state", weight: 2})
-
-	addSearchIndex(db, "addresses", searchFields)
-	addUniqueIndex(db, "addresses", []string{"city"})
+	addUniqueIndex(db, COLL_GROUP, []string{"code"})
 	db.Session.Close()
 }
 
@@ -97,7 +93,7 @@ func addSearchIndex(db *mgo.Database, collName string, searchFields []searchFiel
 	}
 	err := coll.EnsureIndex(index)
 	if err != nil {
-		panic("Hi Could not create search index for " + collName + err.Error())
+		panic("Could not create search index for " + collName + err.Error())
 	}
 }
 
@@ -111,6 +107,7 @@ func addUniqueIndex(db *mgo.Database, collName string, fields []string) {
 			Key:    []string{key},
 			Unique: true,
 		}
+		fmt.Println("Creating unique index on := ", key)
 		if err := coll.EnsureIndex(index); err != nil {
 			panic("Could not create unique index for " + collName)
 		}

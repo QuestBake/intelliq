@@ -36,8 +36,12 @@ func addSchoolRouters() {
 }
 
 func addGroupRouters() {
-	//groupRoutes := mrouter.Group("/group"){}
-
+	groupRoutes := mrouter.Group("/group")
+	{
+		groupRoutes.POST("/add", controller.AddNewGroup)
+		groupRoutes.PUT("/update", controller.UpdateGroup)
+		groupRoutes.GET("/all/:restrict", controller.ListAllGroups)
+	}
 }
 
 func addQuestionRouters() {
