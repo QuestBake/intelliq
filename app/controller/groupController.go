@@ -11,8 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var res *model.AppResponse
-
 //AddNewGroup adds new group
 func AddNewGroup(ctx *gin.Context) {
 	var group model.Group

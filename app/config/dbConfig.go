@@ -70,7 +70,8 @@ func createIndices(session *mgo.Session) {
 	if db == nil {
 		panic("No DB session")
 	}
-	addUniqueIndex(db, COLL_GROUP, []string{"code"})
+	//addUniqueIndex(db, COLL_GROUP, []string{"code"})
+	addUniqueIndex(db, COLL_SCHOOL, []string{"code"})
 	db.Session.Close()
 }
 
@@ -107,7 +108,7 @@ func addUniqueIndex(db *mgo.Database, collName string, fields []string) {
 			Key:    []string{key},
 			Unique: true,
 		}
-		fmt.Println("Creating unique index on := ", key)
+		fmt.Println("Creating unique index on := ", key, " for coll := ", collName)
 		if err := coll.EnsureIndex(index); err != nil {
 			panic("Could not create unique index for " + collName)
 		}
