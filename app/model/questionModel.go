@@ -1,7 +1,7 @@
 package model
 
 import (
-	"project/intelliq/app/enums"
+	"intelliq/app/enums"
 	"time"
 
 	"github.com/globalsign/mgo/bson"

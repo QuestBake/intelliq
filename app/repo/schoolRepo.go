@@ -12,7 +12,7 @@ type schoolRepository struct {
 
 //NewSchoolRepository repo struct
 func NewSchoolRepository() *schoolRepository {
-	coll := db.GetCollection("schools")
+	coll := db.GetCollection(db.COLL_SCHOOL)
 	if coll == nil {
 		return nil
 	}

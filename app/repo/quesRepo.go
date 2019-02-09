@@ -11,8 +11,8 @@ type questionRepository struct {
 }
 
 //NewQuestionRepository repo struct
-func NewQuestionRepository(quesCollName string) *questionRepository {
-	coll := db.GetCollection(quesCollName)
+func NewQuestionRepository(groupCode string) *questionRepository {
+	coll := db.GetCollection(groupCode + db.COLL_QUES)
 	if coll == nil {
 		return nil
 	}

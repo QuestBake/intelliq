@@ -1,6 +1,8 @@
 package approuter
 
 import (
+	"intelliq/app/controller"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,8 +21,9 @@ func AddRouters(router *gin.Engine) {
 func addMetaRouters() {
 	metaRoutes := mrouter.Group("/meta")
 	{
-		metaRoutes.GET("/read", nil)
-
+		metaRoutes.POST("/add", controller.AddMetaData)
+		metaRoutes.PUT("/update", controller.UpdateMetaData)
+		metaRoutes.GET("/read", controller.ReadMetaData)
 	}
 }
 

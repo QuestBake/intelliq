@@ -12,7 +12,7 @@ type userRepository struct {
 
 //NewUserRepository repo struct
 func NewUserRepository() *userRepository {
-	coll := db.GetCollection("users")
+	coll := db.GetCollection(db.COLL_USER)
 	if coll == nil {
 		return nil
 	}

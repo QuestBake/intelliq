@@ -12,7 +12,7 @@ type groupRepository struct {
 
 //NewGroupRepository repo struct
 func NewGroupRepository() *groupRepository {
-	coll := db.GetCollection("groups")
+	coll := db.GetCollection(db.COLL_GROUP)
 	if coll == nil {
 		return nil
 	}

@@ -11,6 +11,14 @@ const (
 	dbName = "intelliQ"
 )
 
+const (
+	COLL_META   = "meta"
+	COLL_USER   = "users"
+	COLL_SCHOOL = "schools"
+	COLL_GROUP  = "groups"
+	COLL_QUES   = "_questions"
+)
+
 var dbSession *mgo.Session
 
 //Connect db conn

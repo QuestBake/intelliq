@@ -1,7 +1,7 @@
 package model
 
 import (
-	"project/intelliq/app/enums"
+	"intelliq/app/enums"
 )
 
 // Role role model
