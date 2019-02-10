@@ -7,7 +7,7 @@ const (
 	MSG_UPDATE_ERROR   string = "Could not save data !!"
 	MSG_REQUEST_FAILED string = "Could not process request. Try later !!"
 	MSG_INVALID_ID     string = "Invalid Identifier"
-	MSG_BAD_INPUT      string = "Could not read data"
+	MSG_BAD_INPUT      string = "Bad request params"
 
 	MSG_DUPLICATE_RECORD string = "Duplicate Record"
 )

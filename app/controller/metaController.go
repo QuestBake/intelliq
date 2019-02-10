@@ -10,17 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var res *model.AppResponse
-
 //AddMetaData adds meta data
 func AddMetaData(ctx *gin.Context) {
 	var metaData model.Meta
 	err := ctx.BindJSON(&metaData)
 	if err != nil {
-		res = utility.GetErrorResponse(common.MSG_BAD_INPUT)
-	} else {
-		res = service.AddNewData(&metaData)
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
 	}
+	res := service.AddNewData(&metaData)
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -29,15 +28,16 @@ func UpdateMetaData(ctx *gin.Context) {
 	var metaData model.Meta
 	err := ctx.BindJSON(&metaData)
 	if err != nil {
-		res = utility.GetErrorResponse(common.MSG_BAD_INPUT)
-	} else {
-		res = service.UpdateMetaData(&metaData)
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
 	}
+	res := service.UpdateMetaData(&metaData)
 	ctx.JSON(http.StatusOK, res)
 }
 
 //ReadMetaData fetches meta data
 func ReadMetaData(ctx *gin.Context) {
-	res = service.ReadMetaData()
+	res := service.ReadMetaData()
 	ctx.JSON(http.StatusOK, res)
 }

@@ -15,10 +15,11 @@ func AddNewSchool(ctx *gin.Context) {
 	var school model.School
 	err := ctx.BindJSON(&school)
 	if err != nil {
-		res = utility.GetErrorResponse(common.MSG_BAD_INPUT)
-	} else {
-		res = service.AddNewSchool(&school)
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
 	}
+	res := service.AddNewSchool(&school)
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -27,9 +28,10 @@ func ListAllSchools(ctx *gin.Context) {
 	key := ctx.Param("key")
 	val := ctx.Param("val")
 	if len(key) == 0 || len(val) == 0 || (key != common.PARAM_KEY_ID && key != common.PARAM_KEY_CODE) {
-		res = utility.GetErrorResponse(common.MSG_BAD_INPUT)
-	} else {
-		res = service.FetchAllSchools(key, val)
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
 	}
+	res := service.FetchAllSchools(key, val)
 	ctx.JSON(http.StatusOK, res)
 }

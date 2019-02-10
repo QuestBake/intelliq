@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
 	"intelliq/app/model"
@@ -17,10 +16,11 @@ func AddNewGroup(ctx *gin.Context) {
 	var group model.Group
 	err := ctx.BindJSON(&group)
 	if err != nil {
-		res = utility.GetErrorResponse(common.MSG_BAD_INPUT)
-	} else {
-		res = service.AddNewGroup(&group)
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
 	}
+	res := service.AddNewGroup(&group)
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -29,10 +29,11 @@ func UpdateGroup(ctx *gin.Context) {
 	var group model.Group
 	err := ctx.BindJSON(&group)
 	if err != nil {
-		res = utility.GetErrorResponse(common.MSG_BAD_INPUT)
-	} else {
-		res = service.UpdateGroup(&group)
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
 	}
+	res := service.UpdateGroup(&group)
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -40,12 +41,11 @@ func UpdateGroup(ctx *gin.Context) {
 func ListAllGroups(ctx *gin.Context) {
 	restrict := ctx.Param("restrict")
 	ctr, err := strconv.Atoi(restrict)
-	if err != nil || ctr < 0 {
-		res = utility.GetErrorResponse(common.MSG_BAD_INPUT)
+	if err != nil || ctr < 0 || ctr > 1 {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
-	fmt.Println("Still PRinting")
-	res = service.FetchAllGroups(ctr)
+	res := service.FetchAllGroups(ctr)
 	ctx.JSON(http.StatusOK, res)
 }
