@@ -24,9 +24,14 @@ func GetSuccessResponse(body interface{}) *model.AppResponse {
 	}
 }
 
-//IsPrimaryIDValid checks if bson is id is vaild
+//IsPrimaryIDValid checks if bson id is vaild
 func IsPrimaryIDValid(_id bson.ObjectId) bool {
 	return _id.Valid()
+}
+
+//IsStringIDValid checks if string id is vaild bson id
+func IsStringIDValid(_id string) bool {
+	return bson.IsObjectIdHex(_id)
 }
 
 //GetErrorMsg specific db errors

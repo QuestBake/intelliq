@@ -28,14 +28,19 @@ func addMetaRouters() {
 }
 
 func addUserRouters() {
-	//userRoutes := mrouter.Group("/user"){}
+	userRoutes := mrouter.Group("/user")
+	{
+		userRoutes.POST("/add", controller.AddNewUser)
+		userRoutes.PUT("/update", controller.UpdateUserProfile)
+		userRoutes.GET("/admins/all/:groupId", controller.ListAllSchoolAdmins)
+	}
 }
 
 func addSchoolRouters() {
 	schoolRoutes := mrouter.Group("/school")
 	{
 		schoolRoutes.POST("/add", controller.AddNewSchool)
-		schoolRoutes.GET("/all", controller.ListAllSchools)
+		schoolRoutes.GET("/all/:key/:val", controller.ListAllSchools)
 	}
 }
 

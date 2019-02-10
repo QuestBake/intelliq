@@ -15,3 +15,8 @@ const (
 const (
 	ERR_CODE_DUPLICATE int = 11000
 )
+
+const (
+	PARAM_KEY_ID   = "_id"
+	PARAM_KEY_CODE = "code"
+)

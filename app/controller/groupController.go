@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
 	"intelliq/app/model"
@@ -41,8 +42,10 @@ func ListAllGroups(ctx *gin.Context) {
 	ctr, err := strconv.Atoi(restrict)
 	if err != nil || ctr < 0 {
 		res = utility.GetErrorResponse(common.MSG_BAD_INPUT)
-	} else {
-		res = service.FetchAllGroups(ctr)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
 	}
+	fmt.Println("Still PRinting")
+	res = service.FetchAllGroups(ctr)
 	ctx.JSON(http.StatusOK, res)
 }
