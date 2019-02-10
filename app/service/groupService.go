@@ -12,7 +12,7 @@ import (
 //AddNewGroup adds new group
 func AddNewGroup(group *model.Group) *model.AppResponse {
 	groupRepo := repo.NewGroupRepository()
-	group.CreateDate = time.Now()
+	group.CreateDate = time.Now().UTC()
 	group.LastModifiedDate = time.Now().UTC()
 	err := groupRepo.Save(group)
 	if err != nil {
