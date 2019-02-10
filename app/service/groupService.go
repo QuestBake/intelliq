@@ -13,7 +13,7 @@ import (
 func AddNewGroup(group *model.Group) *model.AppResponse {
 	groupRepo := repo.NewGroupRepository()
 	group.CreateDate = time.Now()
-	group.LastModifiedDate = time.Now()
+	group.LastModifiedDate = time.Now().UTC()
 	err := groupRepo.Save(group)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -32,7 +32,7 @@ func UpdateGroup(group *model.Group) *model.AppResponse {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
 	groupRepo := repo.NewGroupRepository()
-	group.LastModifiedDate = time.Now()
+	group.LastModifiedDate = time.Now().UTC()
 	err := groupRepo.Update(group)
 	if err != nil {
 		fmt.Println(err.Error())

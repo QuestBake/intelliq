@@ -1,6 +1,6 @@
 package common
 
-const (
+const ( // app msgs
 	MSG_SAVE_SUCCESS   string = "Data Saved Successfully !!"
 	MSG_SAVE_ERROR     string = "Could not save data !!"
 	MSG_UPDATE_SUCCESS string = "Data Updated Successfully !!"
@@ -12,11 +12,16 @@ const (
 	MSG_DUPLICATE_RECORD string = "Duplicate Record"
 )
 
-const (
+const ( // codes
 	ERR_CODE_DUPLICATE int = 11000
 )
 
-const (
+const ( // congfig params
 	PARAM_KEY_ID   = "_id"
 	PARAM_KEY_CODE = "code"
+
+	DATE_TIME_FORMAT = "02 Jan,2006 03:04:05 PM"
+	DATE_FORMAT      = "02 Jan,2006" // 01= Month , 02 = Date
+
+	TEMP_PWD_PREFIX = "TP_"
 )

@@ -14,8 +14,8 @@ import (
 //AddNewUser adds new user
 func AddNewUser(user *model.User) *model.AppResponse {
 	userRepo := repo.NewUserRepository()
-	user.Password = "Temp_" + user.Mobile
-	user.CreateDate = time.Now()
+	user.Password = utility.EncryptData(common.TEMP_PWD_PREFIX + user.Mobile)
+	user.CreateDate = time.Now().UTC()
 	user.LastModifiedDate = time.Now()
 	err := userRepo.Save(user)
 	if err != nil {
@@ -35,7 +35,7 @@ func UpdateUser(user *model.User) *model.AppResponse {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
 	userRepo := repo.NewUserRepository()
-	user.LastModifiedDate = time.Now()
+	user.LastModifiedDate = time.Now().UTC()
 	err := userRepo.Update(user)
 	if err != nil {
 		fmt.Println(err.Error())

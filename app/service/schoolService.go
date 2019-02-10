@@ -15,8 +15,8 @@ import (
 func AddNewSchool(school *model.School) *model.AppResponse {
 	schoolRepo := repo.NewSchoolRepository()
 	school.Code = school.ShortName + "_" + school.Address.Pincode
-	school.CreateDate = time.Now()
-	school.LastModifiedDate = time.Now()
+	school.CreateDate = time.Now().UTC()
+	school.LastModifiedDate = time.Now().UTC()
 	err := schoolRepo.Save(school)
 	if err != nil {
 		fmt.Println(err.Error())

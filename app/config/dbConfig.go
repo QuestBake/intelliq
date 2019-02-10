@@ -70,10 +70,9 @@ func createIndices(session *mgo.Session) {
 	if db == nil {
 		panic("No DB session")
 	}
-	//addUniqueIndex(db, COLL_GROUP, []string{"code"})
-	//addUniqueIndex(db, COLL_SCHOOL, []string{"code"})
+	addUniqueIndex(db, COLL_GROUP, []string{"code"})
+	addUniqueIndex(db, COLL_SCHOOL, []string{"code"})
 	addUniqueIndex(db, COLL_USER, []string{"mobile"})
-
 	db.Session.Close()
 }
 

@@ -3,9 +3,12 @@ package common
 import (
 	"intelliq/app/enums"
 	"intelliq/app/model"
+	"log"
+	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"golang.org/x/crypto/bcrypt"
 )
 
 //GetErrorResponse prepares error response with msg
@@ -48,4 +51,37 @@ func GetErrorMsg(err error) string {
 	default:
 		return ""
 	}
+}
+
+//FormatDateToString formats date to readable string
+func FormatDateToString(date time.Time) string {
+	return date.Format(DATE_TIME_FORMAT)
+}
+
+//FormatStringToDate formats string to time
+func FormatStringToDate(date string) time.Time {
+	t, _ := time.Parse(DATE_TIME_FORMAT, date)
+	return t
+}
+
+//EncryptData data encryption
+func EncryptData(pwd string) string {
+	pwdHash := []byte(pwd)
+	hash, err := bcrypt.GenerateFromPassword(pwdHash, bcrypt.MinCost)
+	if err != nil {
+		log.Println(err)
+	}
+	return string(hash)
+}
+
+//ComparePasswords compare hashed and plain text
+func ComparePasswords(hashedPwd string, plainPwd string) bool {
+	byteHash := []byte(hashedPwd)
+	plainHash := []byte(plainPwd)
+	err := bcrypt.CompareHashAndPassword(byteHash, plainHash)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	return true
 }
