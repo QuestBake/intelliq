@@ -33,6 +33,7 @@ func addUserRouters() {
 		userRoutes.POST("/add", controller.AddNewUser)
 		userRoutes.PUT("/update", controller.UpdateUserProfile)
 		userRoutes.GET("/admins/all/:groupId", controller.ListAllSchoolAdmins)
+		userRoutes.PUT("/role/transfer/:roleType/:fromUser/:toUser", controller.TransferRole)
 	}
 }
 

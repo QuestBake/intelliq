@@ -4,6 +4,8 @@ import (
 	db "intelliq/app/config"
 	"intelliq/app/enums"
 	"intelliq/app/model"
+	"strconv"
+	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
@@ -53,4 +55,64 @@ func (repo *userRepository) FindAllSchoolAdmins(_id bson.ObjectId) (model.Users,
 		return nil, err
 	}
 	return users, nil
+}
+
+func (repo *userRepository) TransferRole(roleType enums.RoleType, fromUserID bson.ObjectId, toUserID bson.ObjectId) (string, error) {
+	defer db.CloseSession(repo.coll)
+	var users model.Users
+	fromUserFilter := bson.M{"$and": []bson.M{
+		{
+			"_id": fromUserID,
+		},
+		{
+			"roles.roleType": roleType,
+		},
+	},
+	}
+	toUserFilter := bson.M{"$and": []bson.M{
+		{
+			"_id": toUserID,
+		},
+		{
+			"roles.roleType": bson.M{"$ne": roleType},
+		},
+	},
+	}
+	orFilter := bson.M{"$or": []bson.M{
+		fromUserFilter,
+		toUserFilter,
+	},
+	}
+	err := repo.coll.Find(orFilter).All(&users)
+	if err != nil {
+		return "", err
+	}
+	count := len(users)
+	if count < 2 {
+		strconv.Itoa(count)
+		return "Expected 2 users, but found " + strconv.Itoa(count), nil
+	}
+	bulk := repo.coll.Bulk()
+	for _, user := range users {
+		if user.UserID == fromUserID { // remove the current role from role array
+
+			for index, role := range user.Roles {
+				if role.RoleType == roleType {
+					user.Roles = append(user.Roles[:index], //appends records before this point
+						user.Roles[index+1:]...) // appends records after this point
+				}
+			}
+		} else { //add new role to role array
+			user.Roles = append(user.Roles, model.Role{
+				RoleType: roleType,
+			})
+		}
+		user.LastModifiedDate = time.Now().UTC()
+		bulk.Update(bson.M{"_id": user.UserID}, user)
+	}
+	_, errs := bulk.Run()
+	if errs != nil {
+		return "", err
+	}
+	return "", nil
 }

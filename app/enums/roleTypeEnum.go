@@ -4,6 +4,7 @@ package enums
 type RoleType int
 
 type roletype struct {
+	NONE     RoleType
 	SUPER    RoleType
 	GROUP    RoleType
 	SCHOOL   RoleType
