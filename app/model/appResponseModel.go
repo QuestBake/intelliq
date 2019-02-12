@@ -1,6 +1,6 @@
 package model
 
-import "project/intelliq/app/enums"
+import "intelliq/app/enums"
 
 //AppResponse appResponse
 type AppResponse struct {

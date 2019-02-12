@@ -42,3 +42,6 @@ type Contact struct {
 	Email    string   `json:"email" bson:"email"`
 	Website  string   `json:"website" bson:"website"`
 }
+
+//Schools school array
+type Schools []School

@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/globalsign/mgo"
 	log "github.com/sirupsen/logrus"
 )
@@ -9,6 +11,14 @@ const (
 	url    = "localhost"
 	port   = "27017"
 	dbName = "intelliQ"
+)
+
+const (
+	COLL_META   = "meta"
+	COLL_USER   = "users"
+	COLL_SCHOOL = "schools"
+	COLL_GROUP  = "groups"
+	COLL_QUES   = "_questions"
 )
 
 var dbSession *mgo.Session
@@ -22,7 +32,7 @@ func Connect() (*mgo.Session, error) {
 	}
 	log.Info("Successfully connected to DB at ", url)
 	dbSession = session
-	//	createIndices(session.Copy())
+	//createIndices(session.Copy())
 	return session, nil
 }
 
@@ -60,13 +70,9 @@ func createIndices(session *mgo.Session) {
 	if db == nil {
 		panic("No DB session")
 	}
-
-	var searchFields []searchField
-	searchFields = append(searchFields, searchField{field: "city", weight: 4})
-	searchFields = append(searchFields, searchField{field: "state", weight: 2})
-
-	addSearchIndex(db, "addresses", searchFields)
-	addUniqueIndex(db, "addresses", []string{"city"})
+	addUniqueIndex(db, COLL_GROUP, []string{"code"})
+	addUniqueIndex(db, COLL_SCHOOL, []string{"code"})
+	addUniqueIndex(db, COLL_USER, []string{"mobile"})
 	db.Session.Close()
 }
 
@@ -89,7 +95,7 @@ func addSearchIndex(db *mgo.Database, collName string, searchFields []searchFiel
 	}
 	err := coll.EnsureIndex(index)
 	if err != nil {
-		panic("Hi Could not create search index for " + collName + err.Error())
+		panic("Could not create search index for " + collName + err.Error())
 	}
 }
 
@@ -103,6 +109,7 @@ func addUniqueIndex(db *mgo.Database, collName string, fields []string) {
 			Key:    []string{key},
 			Unique: true,
 		}
+		fmt.Println("Creating unique index on := ", key, " for coll := ", collName)
 		if err := coll.EnsureIndex(index); err != nil {
 			panic("Could not create unique index for " + collName)
 		}

@@ -21,3 +21,6 @@ type User struct {
 	PrevSchools      School        `json:"prevSchools" bson:"prevSchools"`
 	Roles            []Role        `json:"roles" bson:"roles"`
 }
+
+//Users user array
+type Users []User
