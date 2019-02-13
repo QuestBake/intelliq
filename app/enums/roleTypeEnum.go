@@ -3,10 +3,6 @@ package enums
 //RoleType enum roletype
 type RoleType int
 
-const (
-	HELLO int = 10
-)
-
 type roletype struct {
 	SUPER    RoleType
 	GROUP    RoleType
