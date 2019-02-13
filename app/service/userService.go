@@ -64,6 +64,20 @@ func FetchAllSchoolAdmins(groupID string) *model.AppResponse {
 	return utility.GetErrorResponse(common.MSG_INVALID_ID)
 }
 
+//FetchAllTeachers gets all teachers within school
+func FetchAllTeachers(schoolID string) *model.AppResponse {
+	if utility.IsStringIDValid(schoolID) {
+		userRepo := repo.NewUserRepository()
+		users, err := userRepo.FindAllSchoolTeachers(bson.ObjectIdHex(schoolID))
+		if err != nil {
+			fmt.Println(err.Error())
+			return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+		}
+		return utility.GetSuccessResponse(users)
+	}
+	return utility.GetErrorResponse(common.MSG_INVALID_ID)
+}
+
 //TransferUserRole transfers user roles
 func TransferUserRole(roleType string, fromUserID string, toUserID string) *model.AppResponse {
 	role, errs := strconv.Atoi(roleType)

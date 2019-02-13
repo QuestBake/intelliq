@@ -29,6 +29,25 @@ func AddNewSchool(school *model.School) *model.AppResponse {
 	return utility.GetSuccessResponse(common.MSG_SAVE_SUCCESS)
 }
 
+//UpdateSchool updates existing school
+func UpdateSchool(school *model.School) *model.AppResponse {
+	if !utility.IsPrimaryIDValid(school.SchoolID) {
+		return utility.GetErrorResponse(common.MSG_INVALID_ID)
+	}
+	schoolRepo := repo.NewSchoolRepository()
+	school.LastModifiedDate = time.Now().UTC()
+	err := schoolRepo.Update(school)
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_UPDATE_ERROR)
+	}
+	return utility.GetSuccessResponse(common.MSG_UPDATE_SUCCESS)
+}
+
 //FetchAllSchools gets all schools under one group with either groupID or groupCode
 func FetchAllSchools(key string, val string) *model.AppResponse {
 	var value interface{} = val

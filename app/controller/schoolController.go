@@ -23,6 +23,19 @@ func AddNewSchool(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+//UpdateSchoolProfile updates existing school profile
+func UpdateSchoolProfile(ctx *gin.Context) {
+	var school model.School
+	err := ctx.BindJSON(&school)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.UpdateSchool(&school)
+	ctx.JSON(http.StatusOK, res)
+}
+
 //ListAllSchools fetches all schools
 func ListAllSchools(ctx *gin.Context) {
 	key := ctx.Param("key")
