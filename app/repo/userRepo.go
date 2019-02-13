@@ -83,23 +83,24 @@ func (repo *userRepository) TransferRole(roleType enums.RoleType, fromUserID bso
 		toUserFilter,
 	},
 	}
-	err := repo.coll.Find(orFilter).All(&users)
+	cols := bson.M{"_id": 1, "roles": 1}
+
+	err := repo.coll.Find(orFilter).Select(cols).All(&users)
 	if err != nil {
 		return "", err
 	}
 	count := len(users)
 	if count < 2 {
-		strconv.Itoa(count)
 		return "Expected 2 users, but found " + strconv.Itoa(count), nil
 	}
 	bulk := repo.coll.Bulk()
 	for _, user := range users {
 		if user.UserID == fromUserID { // remove the current role from role array
-
 			for index, role := range user.Roles {
 				if role.RoleType == roleType {
 					user.Roles = append(user.Roles[:index], //appends records before this point
 						user.Roles[index+1:]...) // appends records after this point
+					break
 				}
 			}
 		} else { //add new role to role array
@@ -108,7 +109,10 @@ func (repo *userRepository) TransferRole(roleType enums.RoleType, fromUserID bso
 			})
 		}
 		user.LastModifiedDate = time.Now().UTC()
-		bulk.Update(bson.M{"_id": user.UserID}, user)
+
+		selector := bson.M{"_id": user.UserID}
+		updator := bson.M{"$set": bson.M{"roles": user.Roles, "lastModifiedDate": user.LastModifiedDate}}
+		bulk.Update(selector, updator)
 	}
 	_, errs := bulk.Run()
 	if errs != nil {
