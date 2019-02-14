@@ -8,6 +8,7 @@ const ( // app msgs
 	MSG_REQUEST_FAILED string = "Could not process request. Try later !!"
 	MSG_INVALID_ID     string = "Invalid Identifier"
 	MSG_BAD_INPUT      string = "Bad request params"
+	MSG_NO_ROLE        string = "No such role Exists !!"
 
 	MSG_DUPLICATE_RECORD string = "Duplicate Record"
 )
@@ -24,4 +25,7 @@ const ( // congfig params
 	DATE_FORMAT      = "02 Jan,2006" // 01= Month , 02 = Date
 
 	TEMP_PWD_PREFIX = "TP_"
+
+	MIN_VALID_ROLE = 0
+	MAX_VALID_ROLE = 4
 )
