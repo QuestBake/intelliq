@@ -32,7 +32,8 @@ func addUserRouters() {
 	{
 		userRoutes.POST("/add", controller.AddNewUser)
 		userRoutes.PUT("/update", controller.UpdateUserProfile)
-		userRoutes.GET("/admins/all/:groupId", controller.ListAllSchoolAdmins)
+		userRoutes.GET("/all/admins/:groupId", controller.ListAllSchoolAdmins)
+		userRoutes.GET("/all/school/:schoolId", controller.ListAllTeachers)
 		userRoutes.PUT("/role/transfer/:roleType/:fromUser/:toUser", controller.TransferRole)
 	}
 }
@@ -42,6 +43,7 @@ func addSchoolRouters() {
 	{
 		schoolRoutes.POST("/add", controller.AddNewSchool)
 		schoolRoutes.GET("/all/:key/:val", controller.ListAllSchools)
+		schoolRoutes.PUT("/update", controller.UpdateSchoolProfile)
 	}
 }
 

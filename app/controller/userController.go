@@ -43,6 +43,13 @@ func ListAllSchoolAdmins(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+//ListAllTeachers fetches all users within school
+func ListAllTeachers(ctx *gin.Context) {
+	schoolID := ctx.Param("schoolId")
+	res := service.FetchAllTeachers(schoolID)
+	ctx.JSON(http.StatusOK, res)
+}
+
 //TransferRole transfers role from one user to another
 func TransferRole(ctx *gin.Context) {
 	roleType := ctx.Param("roleType")

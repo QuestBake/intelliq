@@ -30,6 +30,12 @@ func (repo *schoolRepository) Save(school *model.School) error {
 	return err
 }
 
+func (repo *schoolRepository) Update(school *model.School) error {
+	defer db.CloseSession(repo.coll)
+	err := repo.coll.Update(bson.M{"_id": school.SchoolID}, school)
+	return err
+}
+
 func (repo *schoolRepository) FindAll(key string, val interface{}) (model.Schools, error) {
 	defer db.CloseSession(repo.coll)
 	var schools model.Schools

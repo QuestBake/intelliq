@@ -38,18 +38,29 @@ func (repo *userRepository) Update(user *model.User) error {
 	return err
 }
 
-func (repo *userRepository) FindAllSchoolAdmins(_id bson.ObjectId) (model.Users, error) {
+func (repo *userRepository) FindAllSchoolAdmins(groupID bson.ObjectId) (model.Users, error) {
 	defer db.CloseSession(repo.coll)
 	var users model.Users
 	filter := bson.M{"$and": []bson.M{
 		{
-			"school.group._id": _id,
+			"school.group._id": groupID,
 		},
 		{
 			"roles.roleType": enums.Role.SCHOOL,
 		},
 	},
 	}
+	err := repo.coll.Find(filter).All(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (repo *userRepository) FindAllSchoolTeachers(schoolID bson.ObjectId) (model.Users, error) {
+	defer db.CloseSession(repo.coll)
+	var users model.Users
+	filter := bson.M{"school._id": schoolID}
 	err := repo.coll.Find(filter).All(&users)
 	if err != nil {
 		return nil, err
