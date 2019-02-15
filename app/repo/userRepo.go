@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"intelliq/app/common"
 	db "intelliq/app/config"
 	"intelliq/app/enums"
 	"intelliq/app/model"
@@ -57,10 +58,15 @@ func (repo *userRepository) FindAllSchoolAdmins(groupID bson.ObjectId) (model.Us
 	return users, nil
 }
 
-func (repo *userRepository) FindAllSchoolTeachers(schoolID bson.ObjectId) (model.Users, error) {
+func (repo *userRepository) FindAllSchoolTeachers(schoolID bson.ObjectId, roleType interface{}) (model.Users, error) {
 	defer db.CloseSession(repo.coll)
 	var users model.Users
-	filter := bson.M{"school._id": schoolID}
+	var filter interface{}
+	if roleType == nil {
+		filter = bson.M{"school._id": schoolID}
+	} else {
+		filter = bson.M{"school._id": schoolID, "roles.roleType": roleType}
+	}
 	err := repo.coll.Find(filter).All(&users)
 	if err != nil {
 		return nil, err
@@ -102,7 +108,7 @@ func (repo *userRepository) TransferRole(roleType enums.RoleType, fromUserID bso
 	}
 	count := len(users)
 	if count < 2 {
-		return "Expected 2 users, but found " + strconv.Itoa(count), nil
+		return common.MSG_INSUFFICIENT_USER_COUNT + strconv.Itoa(count), nil
 	}
 	bulk := repo.coll.Bulk()
 	for _, user := range users {
@@ -130,4 +136,27 @@ func (repo *userRepository) TransferRole(roleType enums.RoleType, fromUserID bso
 		return "", err
 	}
 	return "", nil
+}
+
+func (repo *userRepository) RemoveSchoolTeacher(schoolID bson.ObjectId, userID bson.ObjectId) error {
+	defer db.CloseSession(repo.coll)
+	var user model.User
+	filter := bson.M{"_id": userID, "school._id": schoolID}
+	cols := bson.M{"_id": 1, "roles": 1, "school": 1, "prevSchools": 1}
+	err := repo.coll.Find(filter).Select(cols).One(&user)
+	if err != nil {
+		return err
+	}
+	user.PrevSchools = append(user.PrevSchools, user.School)
+	user.School = model.School{}
+	user.Roles = nil
+	user.LastModifiedDate = time.Now().UTC()
+	selector := bson.M{"_id": user.UserID}
+	updator := bson.M{"$set": bson.M{"school": user.School, "prevSchools": user.PrevSchools,
+		"roles": user.Roles, "lastModifiedDate": user.LastModifiedDate}}
+	errs := repo.coll.Update(selector, updator)
+	if errs != nil {
+		return err
+	}
+	return nil
 }
