@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"intelliq/app/enums"
 	"intelliq/app/model"
 	"log"
@@ -39,6 +40,10 @@ func IsStringIDValid(_id string) bool {
 
 //GetErrorMsg specific db errors
 func GetErrorMsg(err error) string {
+	fmt.Printf("error type: %T", err)
+	if err == mgo.ErrNotFound {
+		return MSG_NO_RECORD
+	}
 	switch err.(type) {
 	case *mgo.LastError:
 		errorCode := (err.(*mgo.LastError)).Code
@@ -48,6 +53,10 @@ func GetErrorMsg(err error) string {
 		default:
 			return ""
 		}
+	case *mgo.QueryError:
+		errorCode := (err.(*mgo.QueryError)).Code
+		fmt.Println("QUERY ERROR CODE => ", errorCode)
+		return err.Error()
 	default:
 		return ""
 	}

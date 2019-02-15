@@ -18,7 +18,7 @@ type User struct {
 	CreateDate       time.Time     `json:"createDate" bson:"createDate"`
 	LastModifiedDate time.Time     `json:"lastModifiedDate" bson:"lastModifiedDate"`
 	School           School        `json:"school" bson:"school"`
-	PrevSchools      School        `json:"prevSchools" bson:"prevSchools"`
+	PrevSchools      []School      `json:"prevSchools" bson:"prevSchools"`
 	Roles            []Role        `json:"roles" bson:"roles"`
 }
 

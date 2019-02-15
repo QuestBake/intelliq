@@ -34,7 +34,9 @@ func addUserRouters() {
 		userRoutes.PUT("/update", controller.UpdateUserProfile)
 		userRoutes.GET("/all/admins/:groupId", controller.ListAllSchoolAdmins)
 		userRoutes.GET("/all/school/:schoolId", controller.ListAllTeachers)
+		userRoutes.GET("/all/school/:schoolId/:roleType", controller.ListSelectedTeachers)
 		userRoutes.PUT("/role/transfer/:roleType/:fromUser/:toUser", controller.TransferRole)
+		userRoutes.DELETE("/remove/:schoolId/:userId", controller.RemoveUserFromSchool)
 	}
 }
 
