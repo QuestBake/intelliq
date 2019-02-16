@@ -79,3 +79,29 @@ func RemoveUserFromSchool(ctx *gin.Context) {
 	res := service.RemoveUserFromSchool(schoolID, userID)
 	ctx.JSON(http.StatusOK, res)
 }
+
+//AddBulkUsers adds new users
+func AddBulkUsers(ctx *gin.Context) {
+	var users model.Users
+	err := ctx.BindJSON(&users)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.AddBulkUser(users)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//UpdateBulkUsers updates bulk users
+func UpdateBulkUsers(ctx *gin.Context) {
+	var users model.Users
+	err := ctx.BindJSON(&users)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.UpdateBulkUsers(users)
+	ctx.JSON(http.StatusOK, res)
+}

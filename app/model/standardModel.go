@@ -1,5 +1,9 @@
 package model
 
+import (
+	"github.com/globalsign/mgo/bson"
+)
+
 //Standard std model
 type Standard struct {
 	Std      uint16    `json:"std" bson:"std"`
@@ -8,7 +12,7 @@ type Standard struct {
 
 //Subject subject model
 type Subject struct {
-	Title    string   `json:"std" bson:"std"`
-	Approver User     `json:"approver" bson:"approver"`
-	Topics   []string `json:"topics" bson:"topics"`
+	Title    string        `json:"title" bson:"title"`
+	Approver bson.ObjectId `json:"approverId" bson:"approver_id,omitempty"`
+	Topics   []string      `json:"topics" bson:"topics"`
 }
