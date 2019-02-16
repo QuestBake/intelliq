@@ -2,14 +2,16 @@ package common
 
 import (
 	"fmt"
-	"intelliq/app/enums"
-	"intelliq/app/model"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"golang.org/x/crypto/bcrypt"
+
+	"intelliq/app/enums"
+	"intelliq/app/model"
 )
 
 //GetErrorResponse prepares error response with msg
@@ -93,4 +95,10 @@ func ComparePasswords(hashedPwd string, plainPwd string) bool {
 		return false
 	}
 	return true
+}
+
+//IsValidMobile checks mobile number format or not
+func IsValidMobile(mobile string) bool {
+	_, err := strconv.ParseUint(mobile, 10, 64)
+	return err == nil
 }

@@ -1,11 +1,11 @@
 package repo
 
 import (
-	db "intelliq/app/config"
-	"intelliq/app/model"
-
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+
+	db "intelliq/app/config"
+	"intelliq/app/model"
 )
 
 type groupRepository struct {
@@ -49,4 +49,17 @@ func (repo *groupRepository) FindAll(restrict int) (model.Groups, error) {
 		return nil, err
 	}
 	return groups, nil
+}
+
+func (repo *groupRepository) FindOne(key string, val interface{}) (*model.Group, error) {
+	defer db.CloseSession(repo.coll)
+	var group model.Group
+	filter := bson.M{
+		key: val,
+	}
+	err := repo.coll.Find(filter).One(&group)
+	if err != nil {
+		return nil, err
+	}
+	return &group, nil
 }

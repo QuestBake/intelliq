@@ -2,15 +2,16 @@ package service
 
 import (
 	"fmt"
+	"strconv"
+	"time"
+
+	"github.com/globalsign/mgo/bson"
+
 	"intelliq/app/common"
 	utility "intelliq/app/common"
 	"intelliq/app/enums"
 	"intelliq/app/model"
 	"intelliq/app/repo"
-	"strconv"
-	"time"
-
-	"github.com/globalsign/mgo/bson"
 )
 
 //AddNewUser adds new user
@@ -174,4 +175,51 @@ func UpdateBulkUsers(users model.Users) *model.AppResponse {
 		return utility.GetErrorResponse(common.MSG_SAVE_ERROR)
 	}
 	return utility.GetSuccessResponse(common.MSG_SAVE_SUCCESS)
+}
+
+//AuthenticateUser authenicate give user and returns authenicated user details.
+func AuthenticateUser(user *model.User) *model.AppResponse {
+	if utility.IsValidMobile(user.Mobile) {
+		userRepo := repo.NewUserRepository()
+		loggedUser, err := userRepo.FindUserByMobile(user)
+		if err != nil {
+			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS)
+		}
+		if utility.ComparePasswords(loggedUser.Password, user.Password) {
+			return utility.GetSuccessResponse(loggedUser)
+		}
+		return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS)
+	}
+	return utility.GetErrorResponse(common.MSG_BAD_INPUT)
+}
+
+//Logout logs out the given user and clears session
+func Logout(userID string) *model.AppResponse {
+	if !utility.IsStringIDValid(userID) {
+		return utility.GetErrorResponse(common.MSG_INVALID_ID)
+	}
+	return utility.GetSuccessResponse("Logout Successful!!")
+}
+
+//FetchUserByMobileOrID fetch user info by mobile or ID
+func FetchUserByMobileOrID(key string, val string) *model.AppResponse {
+	var value interface{} = val
+	if key == common.PARAM_KEY_ID {
+		if utility.IsStringIDValid(val) {
+			value = bson.ObjectIdHex(val)
+		} else {
+			return utility.GetErrorResponse(common.MSG_INVALID_ID)
+		}
+	} else if key == common.PARAM_KEY_MOBILE {
+		if !utility.IsValidMobile(val) {
+			return utility.GetErrorResponse(common.MSG_INVALID_ID)
+		}
+	}
+	userRepo := repo.NewUserRepository()
+	user, err := userRepo.FindOne(key, value)
+	if err != nil {
+		fmt.Println(err.Error())
+		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+	}
+	return utility.GetSuccessResponse(user)
 }
