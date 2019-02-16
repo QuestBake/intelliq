@@ -138,3 +138,40 @@ func RemoveUserFromSchool(schoolID string, userID string) *model.AppResponse {
 	}
 	return utility.GetSuccessResponse(common.MSG_REMOVE_SUCCESS)
 }
+
+//AddBulkUser adds new users
+func AddBulkUser(users model.Users) *model.AppResponse {
+	userRepo := repo.NewUserRepository()
+	var userList []interface{}
+	for _, user := range users {
+		user.Password = utility.EncryptData(common.TEMP_PWD_PREFIX + user.Mobile)
+		user.CreateDate = time.Now().UTC()
+		user.LastModifiedDate = time.Now()
+		userList = append(userList, user)
+	}
+	err := userRepo.BulkSave(userList)
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_SAVE_ERROR)
+	}
+	return utility.GetSuccessResponse(common.MSG_SAVE_SUCCESS)
+}
+
+//UpdateBulkUsers adds new users
+func UpdateBulkUsers(users model.Users) *model.AppResponse {
+	userRepo := repo.NewUserRepository()
+	err := userRepo.BulkUpdate(users)
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_SAVE_ERROR)
+	}
+	return utility.GetSuccessResponse(common.MSG_SAVE_SUCCESS)
+}

@@ -126,7 +126,6 @@ func (repo *userRepository) TransferRole(roleType enums.RoleType, fromUserID bso
 			})
 		}
 		user.LastModifiedDate = time.Now().UTC()
-
 		selector := bson.M{"_id": user.UserID}
 		updator := bson.M{"$set": bson.M{"roles": user.Roles, "lastModifiedDate": user.LastModifiedDate}}
 		bulk.Update(selector, updator)
@@ -156,6 +155,32 @@ func (repo *userRepository) RemoveSchoolTeacher(schoolID bson.ObjectId, userID b
 		"roles": user.Roles, "lastModifiedDate": user.LastModifiedDate}}
 	errs := repo.coll.Update(selector, updator)
 	if errs != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *userRepository) BulkSave(users []interface{}) error {
+	defer db.CloseSession(repo.coll)
+	bulk := repo.coll.Bulk()
+	bulk.Insert(users...)
+	_, err := bulk.Run()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *userRepository) BulkUpdate(users model.Users) error {
+	defer db.CloseSession(repo.coll)
+	bulk := repo.coll.Bulk()
+	for _, user := range users {
+		selector := bson.M{"_id": user.UserID}
+		//	updator := bson.M{"$set": bson.M{"roles": user.Roles, "lastModifiedDate": time.Now().UTC()}}
+		bulk.Update(selector, user)
+	}
+	_, err := bulk.Run()
+	if err != nil {
 		return err
 	}
 	return nil
