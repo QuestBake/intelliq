@@ -16,6 +16,7 @@ func AddRouters(router *gin.Engine) {
 	addSchoolRouters()
 	addGroupRouters()
 	addQuestionRouters()
+	addAuxilaryQuestionRouters()
 }
 
 func addMetaRouters() {
@@ -67,5 +68,10 @@ func addGroupRouters() {
 
 func addQuestionRouters() {
 	//quesRoutes := mrouter.Group("/question"){}
+
+}
+
+func addAuxilaryQuestionRouters() {
+	//auxRoutes := mrouter.Group("/question/aux"){}
 
 }

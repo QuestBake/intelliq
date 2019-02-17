@@ -100,5 +100,10 @@ func ComparePasswords(hashedPwd string, plainPwd string) bool {
 //IsValidMobile checks mobile number format or not
 func IsValidMobile(mobile string) bool {
 	_, err := strconv.ParseUint(mobile, 10, 64)
-	return err == nil
+	return err == nil && len(mobile) == MOBILE_LENGTH
+}
+
+//GenerateUserName generates username from name,mobile e.g. user@FIR_MOB
+func GenerateUserName(name string, mobile string) string {
+	return USERNAME_PREFIX + name[0:USERNAME_STR_LEN] + "_" + mobile[MOBILE_LENGTH-USERNAME_STR_LEN:MOBILE_LENGTH]
 }

@@ -63,6 +63,10 @@ func FetchAllSchools(key string, val string) *model.AppResponse {
 	schools, err := schoolRepo.FindAll("group."+key, value)
 	if err != nil {
 		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
 	return utility.GetSuccessResponse(schools)
@@ -82,6 +86,10 @@ func FetchSchoolByCodeOrID(key string, val string) *model.AppResponse {
 	school, err := schoolRepo.FindOne(key, value)
 	if err != nil {
 		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
 	return utility.GetSuccessResponse(school)

@@ -73,6 +73,10 @@ func FetchGroupByCodeOrID(key string, val string) *model.AppResponse {
 	group, err := groupRepo.FindOne(key, value)
 	if err != nil {
 		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
 	return utility.GetSuccessResponse(group)
