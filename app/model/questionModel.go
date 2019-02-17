@@ -23,14 +23,13 @@ type Question struct {
 	Owner            User             `json:"owner" bson:"owner"`
 	Approver         User             `json:"approver" bson:"approver"`
 	School           School           `json:"school" bson:"school"`
-	Group            Group            `json:"group" bson:"group"`
 	CreateDate       time.Time        `json:"createDate" bson:"createDate"`
 	LastModifiedDate time.Time        `json:"lastModifiedDate" bson:"lastModifiedDate"`
 }
 
 //AuxQuestionRequest request to view aux questions
 type AuxQuestionRequest struct {
-	Group      Group         `json:"group" bson:"group"`
+	GroupCode  string        `json:"groupCode" bson:"groupCode"`
 	SchoolID   bson.ObjectId `json:"schoolId" bson:"schoolId"`
 	TeacherID  bson.ObjectId `json:"teacherId" bson:"teacherId"`
 	ApproverID bson.ObjectId `json:"approverId" bson:"approverId"`

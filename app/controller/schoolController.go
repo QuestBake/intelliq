@@ -37,7 +37,7 @@ func UpdateSchoolProfile(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-//ListAllSchools fetches all schools
+//ListAllSchools fetches all schools under a group using groupCode or groupID
 func ListAllSchools(ctx *gin.Context) {
 	key := ctx.Param("key")
 	val := ctx.Param("val")
