@@ -16,8 +16,12 @@ import (
 
 //AddNewUser adds new user
 func AddNewUser(user *model.User) *model.AppResponse {
+	if !utility.IsValidMobile(user.Mobile) {
+		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
+	}
 	userRepo := repo.NewUserRepository()
 	user.Password = utility.EncryptData(common.TEMP_PWD_PREFIX + user.Mobile)
+	user.UserName = utility.GenerateUserName(user.FullName, user.Mobile)
 	user.CreateDate = time.Now().UTC()
 	user.LastModifiedDate = time.Now()
 	err := userRepo.Save(user)
@@ -183,12 +187,12 @@ func AuthenticateUser(user *model.User) *model.AppResponse {
 		userRepo := repo.NewUserRepository()
 		loggedUser, err := userRepo.FindUserByMobile(user)
 		if err != nil {
-			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS)
+			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_MOBILE)
 		}
 		if utility.ComparePasswords(loggedUser.Password, user.Password) {
 			return utility.GetSuccessResponse(loggedUser)
 		}
-		return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS)
+		return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_PWD)
 	}
 	return utility.GetErrorResponse(common.MSG_BAD_INPUT)
 }
@@ -219,6 +223,10 @@ func FetchUserByMobileOrID(key string, val string) *model.AppResponse {
 	user, err := userRepo.FindOne(key, value)
 	if err != nil {
 		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
 	return utility.GetSuccessResponse(user)

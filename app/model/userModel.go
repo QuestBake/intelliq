@@ -10,6 +10,7 @@ import (
 type User struct {
 	UserID           bson.ObjectId `json:"userId" bson:"_id,omitempty"`
 	FullName         string        `json:"name" bson:"name"`
+	UserName         string        `json:"userName" bson:"userName"`
 	Gender           string        `json:"gender" bson:"gender"`
 	Mobile           string        `json:"mobile" bson:"mobile"`
 	Email            string        `json:"email" bson:"email"`
