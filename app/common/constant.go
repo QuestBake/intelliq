@@ -13,6 +13,8 @@ const ( // app msgs
 	MSG_INSUFFICIENT_USER_COUNT string = "Expected 2 users, but found "
 	MSG_REMOVE_SUCCESS          string = "User Removed Successfully !!"
 	MSG_REMOVE_ERROR            string = "Could not remove user !!"
+	MSG_LOGIN_SUCCESS           string = "Login Sucess !!"
+	MSG_INVALID_CREDENTIALS     string = "Invalid Credentials !!"
 
 	MSG_DUPLICATE_RECORD string = "Duplicate Record"
 )
@@ -22,8 +24,9 @@ const ( // codes
 )
 
 const ( // congfig params
-	PARAM_KEY_ID   = "_id"
-	PARAM_KEY_CODE = "code"
+	PARAM_KEY_ID     = "_id"
+	PARAM_KEY_CODE   = "code"
+	PARAM_KEY_MOBILE = "mobile"
 
 	DATE_TIME_FORMAT = "02 Jan,2006 03:04:05 PM"
 	DATE_FORMAT      = "02 Jan,2006" // 01= Month , 02 = Date

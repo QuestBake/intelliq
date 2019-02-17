@@ -1,12 +1,11 @@
 package repo
 
 import (
-	db "intelliq/app/config"
-	"intelliq/app/model"
-
+	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 
-	"github.com/globalsign/mgo"
+	db "intelliq/app/config"
+	"intelliq/app/model"
 )
 
 type schoolRepository struct {
@@ -47,4 +46,17 @@ func (repo *schoolRepository) FindAll(key string, val interface{}) (model.School
 		return nil, err
 	}
 	return schools, nil
+}
+
+func (repo *schoolRepository) FindOne(key string, val interface{}) (*model.School, error) {
+	defer db.CloseSession(repo.coll)
+	var school model.School
+	filter := bson.M{
+		key: val,
+	}
+	err := repo.coll.Find(filter).One(&school)
+	if err != nil {
+		return nil, err
+	}
+	return &school, nil
 }

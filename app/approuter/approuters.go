@@ -1,9 +1,9 @@
 package approuter
 
 import (
-	"intelliq/app/controller"
-
 	"github.com/gin-gonic/gin"
+
+	"intelliq/app/controller"
 )
 
 var mrouter *gin.Engine
@@ -39,6 +39,9 @@ func addUserRouters() {
 		userRoutes.DELETE("/remove/:schoolId/:userId", controller.RemoveUserFromSchool)
 		userRoutes.POST("/bulk/add", controller.AddBulkUsers)
 		userRoutes.POST("/bulk/update", controller.UpdateBulkUsers)
+		userRoutes.POST("/login", controller.AuthenticateUser)
+		userRoutes.GET("/logout/:userId", controller.Logout)
+		userRoutes.GET("/info/:key/:val", controller.ListUserByMobileOrID)
 	}
 }
 
@@ -48,6 +51,7 @@ func addSchoolRouters() {
 		schoolRoutes.POST("/add", controller.AddNewSchool)
 		schoolRoutes.GET("/all/:key/:val", controller.ListAllSchools)
 		schoolRoutes.PUT("/update", controller.UpdateSchoolProfile)
+		schoolRoutes.GET("info/:key/:val", controller.ListSchoolByCodeOrID)
 	}
 }
 
@@ -57,6 +61,7 @@ func addGroupRouters() {
 		groupRoutes.POST("/add", controller.AddNewGroup)
 		groupRoutes.PUT("/update", controller.UpdateGroup)
 		groupRoutes.GET("/all/:restrict", controller.ListAllGroups)
+		groupRoutes.GET("info/:key/:val", controller.ListGroupByCodeOrID)
 	}
 }
 

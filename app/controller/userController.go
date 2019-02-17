@@ -1,13 +1,14 @@
 package controller
 
 import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+
 	"intelliq/app/common"
 	utility "intelliq/app/common"
 	"intelliq/app/model"
 	"intelliq/app/service"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
 //AddNewUser adds new user
@@ -103,5 +104,38 @@ func UpdateBulkUsers(ctx *gin.Context) {
 		return
 	}
 	res := service.UpdateBulkUsers(users)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//AuthenticateUser authenticate and returns AppResponse object
+func AuthenticateUser(ctx *gin.Context) {
+	var user model.User
+	err := ctx.BindJSON(&user)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.AuthenticateUser(&user)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//Logout logs out user and clear sessions
+func Logout(ctx *gin.Context) {
+	userID := ctx.Param("userId")
+	res := service.Logout(userID)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//ListUserByMobileOrID get user info by id or mobile number
+func ListUserByMobileOrID(ctx *gin.Context) {
+	key := ctx.Param("key")
+	val := ctx.Param("val")
+	if len(key) == 0 || len(val) == 0 || (key != common.PARAM_KEY_ID && key != common.PARAM_KEY_MOBILE) {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.FetchUserByMobileOrID(key, val)
 	ctx.JSON(http.StatusOK, res)
 }

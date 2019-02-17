@@ -2,13 +2,14 @@ package service
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/globalsign/mgo/bson"
+
 	"intelliq/app/common"
 	utility "intelliq/app/common"
 	"intelliq/app/model"
 	"intelliq/app/repo"
-	"time"
-
-	"github.com/globalsign/mgo/bson"
 )
 
 //AddNewSchool adds new school
@@ -65,4 +66,23 @@ func FetchAllSchools(key string, val string) *model.AppResponse {
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
 	return utility.GetSuccessResponse(schools)
+}
+
+//FetchSchoolByCodeOrID get school by Code or id
+func FetchSchoolByCodeOrID(key string, val string) *model.AppResponse {
+	var value interface{} = val
+	if key == common.PARAM_KEY_ID {
+		if utility.IsStringIDValid(val) {
+			value = bson.ObjectIdHex(val)
+		} else {
+			return utility.GetErrorResponse(common.MSG_INVALID_ID)
+		}
+	}
+	schoolRepo := repo.NewSchoolRepository()
+	school, err := schoolRepo.FindOne(key, value)
+	if err != nil {
+		fmt.Println(err.Error())
+		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+	}
+	return utility.GetSuccessResponse(school)
 }

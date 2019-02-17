@@ -1,15 +1,16 @@
 package repo
 
 import (
-	"intelliq/app/common"
-	db "intelliq/app/config"
-	"intelliq/app/enums"
-	"intelliq/app/model"
 	"strconv"
 	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+
+	"intelliq/app/common"
+	db "intelliq/app/config"
+	"intelliq/app/enums"
+	"intelliq/app/model"
 )
 
 type userRepository struct {
@@ -184,4 +185,28 @@ func (repo *userRepository) BulkUpdate(users model.Users) error {
 		return err
 	}
 	return nil
+}
+
+//FindUserByMobile searches user collection by mobile number
+func (repo *userRepository) FindUserByMobile(user *model.User) (*model.User, error) {
+	defer db.CloseSession(repo.coll)
+	filter := bson.M{
+		"mobile": user.Mobile,
+	}
+	var loggedUser model.User
+	err := repo.coll.Find(filter).One(&loggedUser)
+	return &loggedUser, err
+}
+
+func (repo *userRepository) FindOne(key string, val interface{}) (*model.User, error) {
+	defer db.CloseSession(repo.coll)
+	var user model.User
+	filter := bson.M{
+		key: val,
+	}
+	err := repo.coll.Find(filter).One(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

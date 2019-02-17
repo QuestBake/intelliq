@@ -2,11 +2,14 @@ package service
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/globalsign/mgo/bson"
+
 	"intelliq/app/common"
 	utility "intelliq/app/common"
 	"intelliq/app/model"
 	"intelliq/app/repo"
-	"time"
 )
 
 //AddNewGroup adds new group
@@ -54,4 +57,23 @@ func FetchAllGroups(restrict int) *model.AppResponse {
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
 	return utility.GetSuccessResponse(groups)
+}
+
+//FetchGroupByCodeOrID get group by code or id
+func FetchGroupByCodeOrID(key string, val string) *model.AppResponse {
+	var value interface{} = val
+	if key == common.PARAM_KEY_ID {
+		if utility.IsStringIDValid(val) {
+			value = bson.ObjectIdHex(val)
+		} else {
+			return utility.GetErrorResponse(common.MSG_INVALID_ID)
+		}
+	}
+	groupRepo := repo.NewGroupRepository()
+	group, err := groupRepo.FindOne(key, value)
+	if err != nil {
+		fmt.Println(err.Error())
+		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+	}
+	return utility.GetSuccessResponse(group)
 }
