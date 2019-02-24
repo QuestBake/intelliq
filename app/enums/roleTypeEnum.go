@@ -7,7 +7,7 @@ type roletype struct {
 	SUPER    RoleType
 	GROUP    RoleType
 	SCHOOL   RoleType
-	APPROVER RoleType
+	REVIEWER RoleType
 	TEACHER  RoleType
 }
 
@@ -16,6 +16,6 @@ var Role = &roletype{
 	SUPER:    0,
 	GROUP:    1,
 	SCHOOL:   2,
-	APPROVER: 3,
+	REVIEWER: 3,
 	TEACHER:  4,
 }

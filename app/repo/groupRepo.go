@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"fmt"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 
@@ -62,4 +64,23 @@ func (repo *groupRepository) FindOne(key string, val interface{}) (*model.Group,
 		return nil, err
 	}
 	return &group, nil
+}
+
+func (repo *groupRepository) AddTopicTags(question *model.Question) error {
+	defer db.CloseSession(repo.coll)
+	fmt.Println("REPO TAGS = ", question.Tags)
+	bulk := repo.coll.Bulk()
+	selector := bson.M{"code": question.GroupCode, "subjects.title": question.Subject}
+	topicUpdator := bson.M{"$addToSet": bson.M{"subjects.$.topics": question.Topic}}
+	tagUpdator := bson.M{"$addToSet": bson.M{"subjects.$.tags": bson.M{"$each": question.Tags}}}
+	categoryUpdator := bson.M{"$addToSet": bson.M{"quesCategories": question.Category}}
+
+	bulk.Update(selector, topicUpdator)
+	bulk.Update(selector, tagUpdator)
+	bulk.Update(selector, categoryUpdator)
+	_, err := bulk.Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }

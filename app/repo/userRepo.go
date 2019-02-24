@@ -75,6 +75,22 @@ func (repo *userRepository) FindAllSchoolTeachers(schoolID bson.ObjectId, roleTy
 	return users, nil
 }
 
+func (repo *userRepository) FindAllteachersUnderReviewer(schoolID bson.ObjectId,
+	reviewerID bson.ObjectId) (model.Users, error) {
+	defer db.CloseSession(repo.coll)
+	var users model.Users
+	filter := bson.M{
+		"school._id":                     schoolID,
+		"roles.roleType":                 enums.Role.TEACHER,
+		"roles.std.subjects.approver_id": reviewerID,
+	}
+	err := repo.coll.Find(filter).All(&users)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 func (repo *userRepository) TransferRole(roleType enums.RoleType, fromUserID bson.ObjectId, toUserID bson.ObjectId) (string, error) {
 	defer db.CloseSession(repo.coll)
 	var users model.Users
@@ -185,17 +201,6 @@ func (repo *userRepository) BulkUpdate(users model.Users) error {
 		return err
 	}
 	return nil
-}
-
-//FindUserByMobile searches user collection by mobile number
-func (repo *userRepository) FindUserByMobile(user *model.User) (*model.User, error) {
-	defer db.CloseSession(repo.coll)
-	filter := bson.M{
-		"mobile": user.Mobile,
-	}
-	var loggedUser model.User
-	err := repo.coll.Find(filter).One(&loggedUser)
-	return &loggedUser, err
 }
 
 func (repo *userRepository) FindOne(key string, val interface{}) (*model.User, error) {

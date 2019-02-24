@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/globalsign/mgo"
@@ -16,8 +17,12 @@ import (
 
 //GetErrorResponse prepares error response with msg
 func GetErrorResponse(msg string) *model.AppResponse {
+	status := enums.Status.ERROR
+	if msg == MSG_NO_RECORD {
+		status = enums.Status.SUCCESS
+	}
 	return &model.AppResponse{
-		Status: enums.Status.ERROR,
+		Status: status,
 		Msg:    msg,
 	}
 }
@@ -105,5 +110,10 @@ func IsValidMobile(mobile string) bool {
 
 //GenerateUserName generates username from name,mobile e.g. user@FIR_MOB
 func GenerateUserName(name string, mobile string) string {
-	return USERNAME_PREFIX + name[0:USERNAME_STR_LEN] + "_" + mobile[MOBILE_LENGTH-USERNAME_STR_LEN:MOBILE_LENGTH]
+	return USERNAME_PREFIX + strings.ToLower(name[0:USERNAME_STR_LEN]) + "_" + mobile[MOBILE_LENGTH-USERNAME_STR_LEN:MOBILE_LENGTH]
+}
+
+//IsValidGroupCode checks for groupPrefix
+func IsValidGroupCode(groupCode string) bool {
+	return strings.HasPrefix(groupCode, GROUP_CODE_PREFIX) && len(GROUP_CODE_PREFIX) < len(groupCode)
 }

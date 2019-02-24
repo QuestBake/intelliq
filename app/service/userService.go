@@ -19,11 +19,11 @@ func AddNewUser(user *model.User) *model.AppResponse {
 	if !utility.IsValidMobile(user.Mobile) {
 		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
 	}
-	userRepo := repo.NewUserRepository()
 	user.Password = utility.EncryptData(common.TEMP_PWD_PREFIX + user.Mobile)
 	user.UserName = utility.GenerateUserName(user.FullName, user.Mobile)
 	user.CreateDate = time.Now().UTC()
 	user.LastModifiedDate = time.Now()
+	userRepo := repo.NewUserRepository()
 	err := userRepo.Save(user)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -41,8 +41,8 @@ func UpdateUser(user *model.User) *model.AppResponse {
 	if !utility.IsPrimaryIDValid(user.UserID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
-	userRepo := repo.NewUserRepository()
 	user.LastModifiedDate = time.Now().UTC()
+	userRepo := repo.NewUserRepository()
 	err := userRepo.Update(user)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -74,6 +74,21 @@ func FetchAllTeachers(schoolID string) *model.AppResponse {
 	if utility.IsStringIDValid(schoolID) {
 		userRepo := repo.NewUserRepository()
 		users, err := userRepo.FindAllSchoolTeachers(bson.ObjectIdHex(schoolID), nil)
+		if err != nil {
+			fmt.Println(err.Error())
+			return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+		}
+		return utility.GetSuccessResponse(users)
+	}
+	return utility.GetErrorResponse(common.MSG_INVALID_ID)
+}
+
+//FetchAllTeachersUnderReviewer gets all teachers under a reviewer
+func FetchAllTeachersUnderReviewer(schoolID string, reviewerID string) *model.AppResponse {
+	if utility.IsStringIDValid(schoolID) && utility.IsStringIDValid(reviewerID) {
+		userRepo := repo.NewUserRepository()
+		users, err := userRepo.FindAllteachersUnderReviewer(bson.ObjectIdHex(schoolID),
+			bson.ObjectIdHex(reviewerID))
 		if err != nil {
 			fmt.Println(err.Error())
 			return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
@@ -146,14 +161,15 @@ func RemoveUserFromSchool(schoolID string, userID string) *model.AppResponse {
 
 //AddBulkUser adds new users
 func AddBulkUser(users model.Users) *model.AppResponse {
-	userRepo := repo.NewUserRepository()
 	var userList []interface{}
 	for _, user := range users {
 		user.Password = utility.EncryptData(common.TEMP_PWD_PREFIX + user.Mobile)
+		user.UserName = utility.GenerateUserName(user.FullName, user.Mobile)
 		user.CreateDate = time.Now().UTC()
 		user.LastModifiedDate = time.Now()
 		userList = append(userList, user)
 	}
+	userRepo := repo.NewUserRepository()
 	err := userRepo.BulkSave(userList)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -185,11 +201,12 @@ func UpdateBulkUsers(users model.Users) *model.AppResponse {
 func AuthenticateUser(user *model.User) *model.AppResponse {
 	if utility.IsValidMobile(user.Mobile) {
 		userRepo := repo.NewUserRepository()
-		loggedUser, err := userRepo.FindUserByMobile(user)
+		loggedUser, err := userRepo.FindOne("mobile", user)
 		if err != nil {
 			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_MOBILE)
 		}
 		if utility.ComparePasswords(loggedUser.Password, user.Password) {
+			loggedUser.Password = ""
 			return utility.GetSuccessResponse(loggedUser)
 		}
 		return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_PWD)
@@ -216,7 +233,7 @@ func FetchUserByMobileOrID(key string, val string) *model.AppResponse {
 		}
 	} else if key == common.PARAM_KEY_MOBILE {
 		if !utility.IsValidMobile(val) {
-			return utility.GetErrorResponse(common.MSG_INVALID_ID)
+			return utility.GetErrorResponse(common.MSG_INVALID_MOBILE)
 		}
 	}
 	userRepo := repo.NewUserRepository()

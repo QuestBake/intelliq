@@ -4,16 +4,22 @@ package enums
 type QuestionStatus = int
 
 type qStatus struct {
-	PENDING  QuestionStatus
-	REJECTED QuestionStatus
-	APPROVED QuestionStatus
-	TRANSIT  QuestionStatus
+	NEW      QuestionStatus // newly added question
+	TRANSIT  QuestionStatus // approved ques under update request
+	REMOVE   QuestionStatus // approved ques under delete request
+	APPROVED QuestionStatus // approved ques
+	REJECTED QuestionStatus // rejected request for above cases
+	PENDING  QuestionStatus // comprises of NEW,TRANSIT,REMOVE : sent as param for teacher to view all sorts of pending requests
+	OBSOLETE QuestionStatus // dup copy is approved & is mainstream ;thus original becomes OBSOLETE to be later cleared by scheduler
 }
 
-// CurrentStatus for public use
-var CurrentStatus = &qStatus{
-	PENDING:  0,
-	REJECTED: 1,
-	APPROVED: 2,
-	TRANSIT:  3,
+// CurrentQuestionStatus for public use
+var CurrentQuestionStatus = &qStatus{
+	NEW:      0,
+	TRANSIT:  1,
+	REMOVE:   2,
+	APPROVED: 3,
+	REJECTED: 4,
+	PENDING:  5,
+	OBSOLETE: 6,
 }

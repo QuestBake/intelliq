@@ -37,17 +37,25 @@ func UpdateUserProfile(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-//ListAllSchoolAdmins fetches all users with role schooladmin
-func ListAllSchoolAdmins(ctx *gin.Context) {
+//ListAllSchoolAdminsUnderGroup fetches all users with role schooladmin
+func ListAllSchoolAdminsUnderGroup(ctx *gin.Context) {
 	groupID := ctx.Param("groupId")
 	res := service.FetchAllSchoolAdmins(groupID)
 	ctx.JSON(http.StatusOK, res)
 }
 
-//ListAllTeachers fetches all users within school
-func ListAllTeachers(ctx *gin.Context) {
+//ListAllTeachersUnderSchool fetches all users within school
+func ListAllTeachersUnderSchool(ctx *gin.Context) {
 	schoolID := ctx.Param("schoolId")
 	res := service.FetchAllTeachers(schoolID)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//ListAllTeachersUnderReviewer fetches all users within school
+func ListAllTeachersUnderReviewer(ctx *gin.Context) {
+	schoolID := ctx.Param("schoolId")
+	reviewerID := ctx.Param("reviewerId")
+	res := service.FetchAllTeachersUnderReviewer(schoolID, reviewerID)
 	ctx.JSON(http.StatusOK, res)
 }
 

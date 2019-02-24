@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"intelliq/app/common"
+	"strings"
 
 	"github.com/globalsign/mgo"
 	log "github.com/sirupsen/logrus"
@@ -45,6 +47,21 @@ func GetCollection(collName string) *mgo.Collection {
 	db := session.DB(dbName)
 	if db == nil {
 		return nil
+	}
+	if strings.HasPrefix(collName, common.GROUP_CODE_PREFIX) {
+		collNames, err := db.CollectionNames()
+		if err != nil {
+			log.Error("Failed to get coll names:", err)
+			return nil
+		}
+		for _, name := range collNames {
+			if collName == name {
+				break
+			} else {
+				log.Error("collection with name: ", collName, "  does not exist ..")
+				return nil
+			}
+		}
 	}
 	coll := db.C(collName)
 	if coll == nil {
