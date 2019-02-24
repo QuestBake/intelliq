@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
@@ -14,10 +15,10 @@ import (
 
 //AddNewSchool adds new school
 func AddNewSchool(school *model.School) *model.AppResponse {
-	schoolRepo := repo.NewSchoolRepository()
-	school.Code = school.ShortName + "_" + school.Address.Pincode
+	school.Code = strings.ToUpper(school.ShortName) + "_" + school.Address.Pincode
 	school.CreateDate = time.Now().UTC()
 	school.LastModifiedDate = time.Now().UTC()
+	schoolRepo := repo.NewSchoolRepository()
 	err := schoolRepo.Save(school)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -35,8 +36,8 @@ func UpdateSchool(school *model.School) *model.AppResponse {
 	if !utility.IsPrimaryIDValid(school.SchoolID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
-	schoolRepo := repo.NewSchoolRepository()
 	school.LastModifiedDate = time.Now().UTC()
+	schoolRepo := repo.NewSchoolRepository()
 	err := schoolRepo.Update(school)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -51,13 +52,24 @@ func UpdateSchool(school *model.School) *model.AppResponse {
 
 //FetchAllSchools gets all schools under one group with either groupID or groupCode
 func FetchAllSchools(key string, val string) *model.AppResponse {
-	var value interface{} = val
-	if key == common.PARAM_KEY_ID {
+	var value interface{}
+	switch key {
+	case common.PARAM_KEY_ID: // key == _id
 		if utility.IsStringIDValid(val) {
 			value = bson.ObjectIdHex(val)
 		} else {
 			return utility.GetErrorResponse(common.MSG_INVALID_ID)
 		}
+		break
+	case common.PARAM_KEY_CODE: // key == code
+		val = strings.ToUpper(val)
+		if !utility.IsValidGroupCode(val) {
+			return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
+		}
+		value = val
+		break
+	default:
+		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
 	}
 	schoolRepo := repo.NewSchoolRepository()
 	schools, err := schoolRepo.FindAll("group."+key, value)
@@ -74,13 +86,20 @@ func FetchAllSchools(key string, val string) *model.AppResponse {
 
 //FetchSchoolByCodeOrID get school by Code or id
 func FetchSchoolByCodeOrID(key string, val string) *model.AppResponse {
-	var value interface{} = val
-	if key == common.PARAM_KEY_ID {
+	var value interface{}
+	switch key {
+	case common.PARAM_KEY_ID: // key == _id
 		if utility.IsStringIDValid(val) {
 			value = bson.ObjectIdHex(val)
 		} else {
 			return utility.GetErrorResponse(common.MSG_INVALID_ID)
 		}
+		break
+	case common.PARAM_KEY_CODE: // key == code
+		value = strings.ToUpper(val)
+		break
+	default:
+		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
 	}
 	schoolRepo := repo.NewSchoolRepository()
 	school, err := schoolRepo.FindOne(key, value)

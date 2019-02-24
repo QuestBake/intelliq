@@ -2,6 +2,7 @@ package model
 
 import (
 	"intelliq/app/enums"
+	"strings"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
@@ -14,7 +15,6 @@ type Question struct {
 	Std              uint16               `json:"std" bson:"std"`
 	Subject          string               `json:"subject" bson:"subject"`
 	Topic            string               `json:"topic" bson:"topic"`
-	NewTopic         bool                 `json:"newTopic" bson:"newTopic"`
 	Difficulty       enums.Difficulty     `json:"difficulty" bson:"difficulty"`
 	Length           enums.QuesLength     `json:"length" bson:"length"`
 	Status           enums.QuestionStatus `json:"status" bson:"status"`
@@ -22,22 +22,28 @@ type Question struct {
 	Category         string               `json:"category" bson:"category"`
 	ImageURL         string               `json:"imageUrl" bson:"imageUrl"`
 	Owner            contributor          `json:"owner" bson:"owner"`
-	Approver         contributor          `json:"approver" bson:"approver"`
+	Reviewer         contributor          `json:"reviewer" bson:"reviewer"`
 	School           School               `json:"school" bson:"school"`
+	GroupCode        string               `json:"groupCode" bson:"groupCode"`
 	CreateDate       time.Time            `json:"createDate" bson:"createDate"`
 	LastModifiedDate time.Time            `json:"lastModifiedDate" bson:"lastModifiedDate"`
-}
-
-//AuxQuestionRequest request to view aux questions
-type AuxQuestionRequest struct {
-	GroupCode  string        `json:"groupCode" bson:"groupCode"`
-	SchoolID   bson.ObjectId `json:"schoolId" bson:"schoolId"`
-	TeacherID  bson.ObjectId `json:"teacherId" bson:"teacherId"`
-	ApproverID bson.ObjectId `json:"approverId" bson:"approverId"`
-	AuxQuesID  bson.ObjectId `json:"auxQuesId" bson:"auxQuesId"`
+	RejectDesc       string               `json:"rejectDesc" bson:"rejectDesc"`
+	OriginID         *bson.ObjectId       `json:"originId" bson:"originId,omitempty"`
 }
 
 type contributor struct {
 	UserID   bson.ObjectId `json:"userId" bson:"_id,omitempty"`
 	UserName string        `json:"userName" bson:"userName"`
+}
+
+//Questions question array
+type Questions []Question
+
+//FormatTopicTags formats topic and tags to lowercase
+func (question *Question) FormatTopicTags() {
+	question.Topic = strings.ToLower(question.Topic)
+	question.Category = strings.ToLower(question.Category)
+	for i := 0; i < len(question.Tags); i++ {
+		question.Tags[i] = strings.ToLower(question.Tags[i])
+	}
 }

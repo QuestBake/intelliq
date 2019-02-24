@@ -13,6 +13,7 @@ type Standard struct {
 //Subject subject model
 type Subject struct {
 	Title    string        `json:"title" bson:"title"`
-	Approver bson.ObjectId `json:"approverId" bson:"approver_id,omitempty"`
+	Reviewer bson.ObjectId `json:"reviewerId" bson:"reviewer_id,omitempty"`
 	Topics   []string      `json:"topics" bson:"topics"`
+	Tags     []string      `json:"tags" bson:"tags"`
 }
