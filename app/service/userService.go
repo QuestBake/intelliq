@@ -201,7 +201,7 @@ func UpdateBulkUsers(users model.Users) *model.AppResponse {
 func AuthenticateUser(user *model.User) *model.AppResponse {
 	if utility.IsValidMobile(user.Mobile) {
 		userRepo := repo.NewUserRepository()
-		loggedUser, err := userRepo.FindOne("mobile", user)
+		loggedUser, err := userRepo.FindOne("mobile", user.Mobile)
 		if err != nil {
 			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_MOBILE)
 		}
