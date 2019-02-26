@@ -31,7 +31,13 @@ func (repo *metaRepository) Save(meta *model.Meta) error {
 
 func (repo *metaRepository) Update(meta *model.Meta) error {
 	defer db.CloseSession(repo.coll)
-	err := repo.coll.Update(bson.M{"_id": meta.MetaID}, meta)
+	bulk := repo.coll.Bulk()
+	selector := bson.M{"_id": meta.MetaID}
+	topicUpdator := bson.M{"$addToSet": bson.M{"subjects": bson.M{"$each": meta.Subjects}}}
+	tagUpdator := bson.M{"$addToSet": bson.M{"standards": bson.M{"$each": meta.Standards}}}
+	bulk.Update(selector, topicUpdator)
+	bulk.Update(selector, tagUpdator)
+	_, err := bulk.Run()
 	return err
 }
 
@@ -43,4 +49,19 @@ func (repo *metaRepository) Read() (*model.Meta, error) {
 		return nil, err
 	}
 	return &meta, nil
+}
+
+func (repo *metaRepository) Remove(meta *model.Meta) error {
+	defer db.CloseSession(repo.coll)
+	bulk := repo.coll.Bulk()
+	selector := bson.M{"_id": meta.MetaID}
+	subjectUpdator := bson.M{"$pull": bson.M{"subjects": bson.M{"$in": meta.Subjects}}}
+	standardUpdator := bson.M{"$pull": bson.M{"standards": bson.M{"$in": meta.Standards}}}
+	bulk.Update(selector, subjectUpdator)
+	bulk.Update(selector, standardUpdator)
+	_, err := bulk.Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"intelliq/app/common"
 	utility "intelliq/app/common"
 	"intelliq/app/dto"
+	"intelliq/app/enums"
 	"intelliq/app/model"
 	"intelliq/app/service"
 	"net/http"
@@ -33,6 +34,12 @@ func RequestUpdate(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
+	if question.Status == enums.CurrentQuestionStatus.REJECTED &&
+		question.OriginID == nil { //resubmit new ques rejected by reviewer initially
+		res := service.RequestAddNewQuestion(&question)
+		ctx.JSON(http.StatusOK, res)
+		return
+	}
 	res := service.RequestApprovedQuestionUpdate(&question)
 	ctx.JSON(http.StatusOK, res)
 }
@@ -44,6 +51,11 @@ func RequestRemoval(ctx *gin.Context) {
 	if err != nil {
 		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	if question.Status == enums.CurrentQuestionStatus.REJECTED {
+		res := service.RemoveQuestion(&question)
+		ctx.JSON(http.StatusOK, res)
 		return
 	}
 	res := service.RequestApprovedQuesRemoval(&question)

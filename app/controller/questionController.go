@@ -4,7 +4,6 @@ import (
 	"intelliq/app/common"
 	utility "intelliq/app/common"
 	"intelliq/app/dto"
-	"intelliq/app/model"
 	"intelliq/app/service"
 	"net/http"
 
@@ -16,19 +15,6 @@ func FindQuestion(ctx *gin.Context) {
 	groupCode := ctx.Param("groupCode")
 	quesID := ctx.Param("quesId")
 	res := service.FetchOneQuestion(groupCode, quesID)
-	ctx.JSON(http.StatusOK, res)
-}
-
-//RemoveQuestion removes question from collection
-func RemoveQuestion(ctx *gin.Context) {
-	var question model.Question
-	err := ctx.BindJSON(&question)
-	if err != nil {
-		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
-		return
-	}
-	res := service.RemoveQuestion(&question)
 	ctx.JSON(http.StatusOK, res)
 }
 

@@ -19,7 +19,7 @@ func isQuestionInfoValid(question *model.Question) bool {
 		utility.IsPrimaryIDValid(question.School.SchoolID)
 }
 
-//RequestAddNewQuestion adds new aux question by teacher
+//RequestAddNewQuestion adds new question by teacher
 func RequestAddNewQuestion(question *model.Question) *model.AppResponse {
 	if !isQuestionInfoValid(question) {
 		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
@@ -48,27 +48,41 @@ func RequestAddNewQuestion(question *model.Question) *model.AppResponse {
 	return utility.GetSuccessResponse(common.MSG_QUES_SUBMIT_SUCCESS)
 }
 
-//RequestApprovedQuestionUpdate create updated verion of approved question by teacher
+//RequestApprovedQuestionUpdate create updated version of approved question by teacher else updates dup copy if resubmitted post rejection
 func RequestApprovedQuestionUpdate(question *model.Question) *model.AppResponse {
 	if !isQuestionInfoValid(question) || !utility.IsPrimaryIDValid(question.QuestionID) {
 		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
 	}
-	if question.Status != enums.CurrentQuestionStatus.APPROVED {
+	createCopyQues := true
+	switch question.Status {
+	case enums.CurrentQuestionStatus.APPROVED: // update request on approved ques by teacher
+		_id := question.QuestionID // create copy of original ques
+		question.OriginID = &_id
+		question.QuestionID = ""
+		question.CreateDate = time.Now().UTC()
+		updateQuestionAttributes(question, enums.CurrentQuestionStatus.TRANSIT, true, true)
+		break
+	case enums.CurrentQuestionStatus.REJECTED: // resubmit of approved ques which has been rejected before
+		if !utility.IsPrimaryIDValid(*question.OriginID) { //checks for validity of original question for this updated version
+			return utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		}
+		updateQuestionAttributes(question, enums.CurrentQuestionStatus.TRANSIT, false, false)
+		createCopyQues = false
+		break
+	default: // no other status permitted
 		return utility.GetErrorResponse(common.MSG_INVALID_STATE)
 	}
-	_id := question.QuestionID
-	question.OriginID = &_id
-	question.QuestionID = ""
-
-	updateQuestionAttributes(question, enums.CurrentQuestionStatus.TRANSIT, true, false)
-	question.CreateDate = time.Now().UTC()
-	question.LastModifiedDate = question.CreateDate
 	question.FormatTopicTags()
 	quesRepo := repo.NewQuestionRepository(question.GroupCode)
-	if quesRepo == nil { // panic - recover can be used here .....
+	if quesRepo == nil {
 		return utility.GetErrorResponse(common.MSG_UNATHORIZED_ACCESS)
 	}
-	err := quesRepo.Save(question) //  creates a duplicate copy of original ques with original id tagged
+	var err error
+	if createCopyQues {
+		err = quesRepo.Save(question) //  creates a duplicate copy of original ques with original id tagged
+	} else {
+		err = quesRepo.Update(question) // updates already created dup copy since it was rejected first time, teacher resubmitted again with few changes
+	}
 	if err != nil {
 		fmt.Println(err.Error())
 		errorMsg := utility.GetErrorMsg(err)
@@ -155,7 +169,7 @@ func RejectRequest(question *model.Question) *model.AppResponse {
 		updateQuestionAttributes(question, enums.CurrentQuestionStatus.REJECTED, false, true) // reject status
 		break
 	case enums.CurrentQuestionStatus.TRANSIT: // update existing approved question request by teacher
-		updateQuestionAttributes(question, enums.CurrentQuestionStatus.REJECTED, false, false) // reject status ; retain originID
+		updateQuestionAttributes(question, enums.CurrentQuestionStatus.REJECTED, false, false) // reject status ; retain originID & reject reason
 		break
 	default: // no other status processed
 		return utility.GetErrorResponse(common.MSG_INVALID_STATE)
