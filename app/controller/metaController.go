@@ -32,7 +32,20 @@ func UpdateMetaData(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
-	res := service.UpdateMetaData(&metaData)
+	res := service.UpdateMetaItems(&metaData)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//RemoveMetaData removes meta data fields
+func RemoveMetaData(ctx *gin.Context) {
+	var metaData model.Meta
+	err := ctx.BindJSON(&metaData)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.RemoveMetaItems(&metaData)
 	ctx.JSON(http.StatusOK, res)
 }
 

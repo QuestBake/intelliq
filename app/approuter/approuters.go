@@ -22,9 +22,11 @@ func AddRouters(router *gin.Engine) {
 func addMetaRouters() {
 	metaRoutes := mrouter.Group("/meta")
 	{
+		metaRoutes.GET("/read", controller.ReadMetaData)
 		metaRoutes.POST("/add", controller.AddMetaData)
 		metaRoutes.PUT("/update", controller.UpdateMetaData)
-		metaRoutes.GET("/read", controller.ReadMetaData)
+		metaRoutes.DELETE("/remove", controller.RemoveMetaData)
+
 	}
 }
 
@@ -71,21 +73,20 @@ func addGroupRouters() {
 func addQuestionRouters() {
 	quesRoutes := mrouter.Group("/question")
 	{
-		quesRoutes.GET("/:groupCode/:quesId", controller.FindQuestion)
-		quesRoutes.DELETE("/remove", controller.RemoveQuestion)
-		quesRoutes.POST("/all", controller.GetQuestionsFromBank)
+		quesRoutes.GET("/:groupCode/:quesId", controller.FindQuestion) // find particular ques
+		quesRoutes.POST("/all", controller.GetQuestionsFromBank)       // all approved ques from bank
 	}
 }
 
 func addQuestionRequestRouters() {
 	quesRoutes := mrouter.Group("/question/request")
 	{
-		quesRoutes.POST("/add", controller.RequestAdd)
-		quesRoutes.PUT("/update", controller.RequestUpdate)
-		quesRoutes.PUT("/remove", controller.RequestRemoval)
-		quesRoutes.PUT("/approve", controller.ApproveRequest)
-		quesRoutes.PUT("/reject", controller.RejectRequest)
-		quesRoutes.POST("/all", controller.GetReviewerRequests)
-		quesRoutes.POST("/all/self", controller.GetTeacherRequests)
+		quesRoutes.POST("/add", controller.RequestAdd)              // new ques request
+		quesRoutes.PUT("/update", controller.RequestUpdate)         // update approved ques || update approved rejected ques || update newly unapproved rejected ques
+		quesRoutes.DELETE("/remove", controller.RequestRemoval)     //remove approved ques request || remove rejected ques request
+		quesRoutes.PUT("/approve", controller.ApproveRequest)       // approve action by reviewer
+		quesRoutes.PUT("/reject", controller.RejectRequest)         // reject action by reviewer
+		quesRoutes.POST("/all", controller.GetReviewerRequests)     // all requests for reviewer
+		quesRoutes.POST("/all/self", controller.GetTeacherRequests) // all requests for teacher
 	}
 }

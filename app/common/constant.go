@@ -5,6 +5,8 @@ const ( // app msgs
 	MSG_SAVE_ERROR                 string = "Could not save data !!"
 	MSG_UPDATE_SUCCESS             string = "Data Updated Successfully !!"
 	MSG_UPDATE_ERROR               string = "Could not save data !!"
+	MSG_DELETE_SUCCESS             string = "Data removed Successfully !!"
+	MSG_DELETE_ERROR               string = "Could not remove data !!"
 	MSG_REQUEST_FAILED             string = "Could not process request. Try later !!"
 	MSG_INVALID_ID                 string = "Invalid Identifier"
 	MSG_INVALID_GROUP              string = "Invalid Group Code"
