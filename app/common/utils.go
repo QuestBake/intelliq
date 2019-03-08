@@ -1,8 +1,10 @@
 package common
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -116,4 +118,23 @@ func GenerateUserName(name string, mobile string) string {
 //IsValidGroupCode checks for groupPrefix
 func IsValidGroupCode(groupCode string) bool {
 	return strings.HasPrefix(groupCode, GROUP_CODE_PREFIX) && len(GROUP_CODE_PREFIX) < len(groupCode)
+}
+
+//GenerateRandom generated random number between give 0 & upperlimit excluding upperlimit
+func GenerateRandom(upperLimit int) int {
+	return rand.Intn(upperLimit)
+}
+
+//GetMin return min of 2 int args
+func GetMin(num1, num2 int) int {
+	if num1 < num2 {
+		return num1
+	}
+	return num2
+}
+
+//PrintJSON converts obj to json string
+func PrintJSON(obj interface{}) {
+	tagFilter, _ := json.Marshal(obj)
+	fmt.Println(string(tagFilter))
 }

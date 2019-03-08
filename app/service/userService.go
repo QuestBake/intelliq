@@ -73,7 +73,8 @@ func FetchAllSchoolAdmins(groupID string) *model.AppResponse {
 func FetchAllTeachers(schoolID string) *model.AppResponse {
 	if utility.IsStringIDValid(schoolID) {
 		userRepo := repo.NewUserRepository()
-		users, err := userRepo.FindAllSchoolTeachers(bson.ObjectIdHex(schoolID), nil)
+		users, err := userRepo.FindAllSchoolTeachers(
+			bson.ObjectIdHex(schoolID), nil)
 		if err != nil {
 			fmt.Println(err.Error())
 			return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
@@ -87,8 +88,8 @@ func FetchAllTeachers(schoolID string) *model.AppResponse {
 func FetchAllTeachersUnderReviewer(schoolID string, reviewerID string) *model.AppResponse {
 	if utility.IsStringIDValid(schoolID) && utility.IsStringIDValid(reviewerID) {
 		userRepo := repo.NewUserRepository()
-		users, err := userRepo.FindAllteachersUnderReviewer(bson.ObjectIdHex(schoolID),
-			bson.ObjectIdHex(reviewerID))
+		users, err := userRepo.FindAllteachersUnderReviewer(
+			bson.ObjectIdHex(schoolID), bson.ObjectIdHex(reviewerID))
 		if err != nil {
 			fmt.Println(err.Error())
 			return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
@@ -106,7 +107,8 @@ func FetchSelectedTeachers(schoolID string, roleType string) *model.AppResponse 
 	}
 	if utility.IsStringIDValid(schoolID) {
 		userRepo := repo.NewUserRepository()
-		users, err := userRepo.FindAllSchoolTeachers(bson.ObjectIdHex(schoolID), enums.RoleType(role))
+		users, err := userRepo.FindAllSchoolTeachers(
+			bson.ObjectIdHex(schoolID), enums.RoleType(role))
 		if err != nil {
 			fmt.Println(err.Error())
 			return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
@@ -119,14 +121,16 @@ func FetchSelectedTeachers(schoolID string, roleType string) *model.AppResponse 
 //TransferUserRole transfers user roles
 func TransferUserRole(roleType string, fromUserID string, toUserID string) *model.AppResponse {
 	role, errs := strconv.Atoi(roleType)
-	if errs != nil || role < common.MIN_VALID_ROLE || role > common.MAX_VALID_ROLE {
+	if errs != nil || role < common.MIN_VALID_ROLE ||
+		role > common.MAX_VALID_ROLE {
 		return utility.GetErrorResponse(common.MSG_NO_ROLE)
 	}
 	if !utility.IsStringIDValid(fromUserID) || !utility.IsStringIDValid(toUserID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
 	userRepo := repo.NewUserRepository()
-	msg, err := userRepo.TransferRole(enums.RoleType(role), bson.ObjectIdHex(fromUserID), bson.ObjectIdHex(toUserID))
+	msg, err := userRepo.TransferRole(enums.RoleType(role),
+		bson.ObjectIdHex(fromUserID), bson.ObjectIdHex(toUserID))
 	if err != nil || len(msg) > 0 {
 		if len(msg) > 0 {
 			return utility.GetErrorResponse(msg)
@@ -206,7 +210,7 @@ func AuthenticateUser(user *model.User) *model.AppResponse {
 			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_MOBILE)
 		}
 		if utility.ComparePasswords(loggedUser.Password, user.Password) {
-			loggedUser.Password = ""
+			//	loggedUser.Password = ""
 			return utility.GetSuccessResponse(loggedUser)
 		}
 		return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_PWD)

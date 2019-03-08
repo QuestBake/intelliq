@@ -8,6 +8,8 @@ import (
 	"intelliq/app/enums"
 	"intelliq/app/model"
 	"intelliq/app/repo"
+	"strconv"
+	"time"
 
 	"github.com/globalsign/mgo/bson"
 )
@@ -63,17 +65,13 @@ func RemoveQuestion(question *model.Question) *model.AppResponse {
 
 //FetchApprovedQuestions fetches all approved ques excluding requester's
 func FetchApprovedQuestions(requestDto *dto.QuesRequestDto) *model.AppResponse {
-	if !utility.IsValidGroupCode(requestDto.GroupCode) {
-		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
+	errResponse := validateRequest(requestDto.GroupCode,
+		requestDto.Subject, requestDto.Standard)
+	if errResponse != nil {
+		return errResponse
 	}
 	if !utility.IsPrimaryIDValid(requestDto.UserID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
-	}
-	if requestDto.Std < common.MIN_VALID_STD || requestDto.Std > common.MAX_VALID_STD || requestDto.Subject == "" {
-		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
-	}
-	if requestDto.Limit <= 0 {
-		requestDto.Limit = common.DEF_REQUESTS_LIMIT
 	}
 	quesRepo := repo.NewQuestionRepository(requestDto.GroupCode)
 	if quesRepo == nil {
@@ -89,4 +87,128 @@ func FetchApprovedQuestions(requestDto *dto.QuesRequestDto) *model.AppResponse {
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
 	return utility.GetSuccessResponse(questions)
+}
+
+//FetchQuestionSuggestions fetch similar questions as per search term
+func FetchQuestionSuggestions(criteriaDto *dto.QuestionCriteriaDto) *model.AppResponse {
+	errResponse := validateRequest(criteriaDto.GroupCode,
+		criteriaDto.Subject, criteriaDto.Standard)
+	if errResponse != nil {
+		return errResponse
+	}
+	quesRepo := repo.NewQuestionRepository(criteriaDto.GroupCode)
+	if quesRepo == nil {
+		return utility.GetErrorResponse(common.MSG_UNATHORIZED_ACCESS)
+	}
+	questions, err := quesRepo.FilterQuestionsPerSearchTerm(criteriaDto)
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+	}
+	return utility.GetSuccessResponse(questions)
+}
+
+//FilterQuestions filters questions as per criteria provided
+func FilterQuestions(criteriaDto *dto.QuestionCriteriaDto) *model.AppResponse {
+	errResponse := validateRequest(criteriaDto.GroupCode,
+		criteriaDto.Subject, criteriaDto.Standard)
+	if errResponse != nil {
+		return errResponse
+	}
+	quesRepo := repo.NewQuestionRepository(criteriaDto.GroupCode)
+	if quesRepo == nil {
+		return utility.GetErrorResponse(common.MSG_UNATHORIZED_ACCESS)
+	}
+	criteriaDto.GenerateNatives()
+	questions, err := quesRepo.FilterQuestionsPerCriteria(criteriaDto)
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+	}
+	if len(questions) == 0 {
+		return utility.GetErrorResponse(common.MSG_NO_RECORD)
+	}
+	return utility.GetSuccessResponse(questions)
+}
+
+func validateRequest(groupCode, subject string, std int) *model.AppResponse {
+	if !utility.IsValidGroupCode(groupCode) {
+		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
+	}
+	if std < common.MIN_VALID_STD ||
+		std > common.MAX_VALID_STD ||
+		subject == "" {
+		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
+	}
+	return nil
+}
+
+func SaveTestQuestions() {
+	quesRepo := repo.NewQuestionRepository("GP_DPS")
+	var quesList model.Questions
+	ctr := 1000
+	topics := []string{"T1", "T2", "T3", "T4", "T5"}
+	lengths := []enums.QuesLength{enums.Length.OBJECTIVE, enums.Length.SHORT, enums.Length.BRIEF,
+		enums.Length.LONG}
+	dificulties := []enums.Difficulty{enums.DifficultyLvl.EASY, enums.DifficultyLvl.MEDIUM,
+		enums.DifficultyLvl.HARD}
+	tags := []string{"mtag1", "mtag2", "mtag3", "mtag4", "mtag5"}
+	tagLen := len(tags)
+
+	for _, topic := range topics {
+		for _, length := range lengths {
+			for _, difficulty := range dificulties {
+				for i := 0; i < 5000; i++ {
+					question := model.Question{
+						GroupCode:        "GP_DPS",
+						Std:              3,
+						Subject:          "Mathematics",
+						Title:            "T" + strconv.Itoa(ctr),
+						Topic:            topic,
+						Difficulty:       difficulty,
+						Length:           length,
+						Status:           enums.CurrentQuestionStatus.APPROVED,
+						CreateDate:       time.Now().UTC(),
+						LastModifiedDate: time.Now().UTC(),
+						Owner: model.Contributor{
+							UserID:   bson.ObjectIdHex("5c67cbea2ed7b04f1bdc1817"),
+							UserName: "user@UT2_992",
+						},
+						Reviewer: model.Contributor{
+							UserID:   bson.ObjectIdHex("5c67cbea2ed7b04f1bdc1810"),
+							UserName: "user@UT3_998",
+						},
+						School: model.School{
+							SchoolID:  bson.ObjectIdHex("5c5ee4cd7a4b5e31a340dccf"),
+							ShortName: "DPS",
+							Code:      "DPS_143001",
+							Address: model.Address{
+								City:    "Amritsar",
+								State:   "PUNJAB",
+								Pincode: "143001",
+							},
+						},
+						Tags: []string{tags[ctr%tagLen], tags[(ctr*i)%tagLen]},
+					}
+					quesList = append(quesList, question)
+					ctr++
+				}
+			}
+		}
+	}
+
+	err := quesRepo.BulkSave(quesList)
+	if err != nil {
+		fmt.Println("BULK ERROR => ", err)
+	} else {
+		fmt.Println("BULK SUCCESS")
+	}
 }

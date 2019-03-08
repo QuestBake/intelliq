@@ -139,7 +139,8 @@ func Logout(ctx *gin.Context) {
 func ListUserByMobileOrID(ctx *gin.Context) {
 	key := ctx.Param("key")
 	val := ctx.Param("val")
-	if len(key) == 0 || len(val) == 0 || (key != common.PARAM_KEY_ID && key != common.PARAM_KEY_MOBILE) {
+	if len(key) == 0 || len(val) == 0 ||
+		(key != common.PARAM_KEY_ID && key != common.PARAM_KEY_MOBILE) {
 		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return

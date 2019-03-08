@@ -169,7 +169,8 @@ func RejectRequest(question *model.Question) *model.AppResponse {
 		updateQuestionAttributes(question, enums.CurrentQuestionStatus.REJECTED, false, true) // reject status
 		break
 	case enums.CurrentQuestionStatus.TRANSIT: // update existing approved question request by teacher
-		updateQuestionAttributes(question, enums.CurrentQuestionStatus.REJECTED, false, false) // reject status ; retain originID & reject reason
+		updateQuestionAttributes(question,
+			enums.CurrentQuestionStatus.REJECTED, false, false) // reject status ; retain originID & reject reason
 		break
 	default: // no other status processed
 		return utility.GetErrorResponse(common.MSG_INVALID_STATE)
@@ -190,7 +191,8 @@ func RejectRequest(question *model.Question) *model.AppResponse {
 	return utility.GetSuccessResponse(common.MSG_QUES_STATUS_SUCCESS)
 }
 
-func updateQuestionAttributes(question *model.Question, status enums.QuestionStatus, clearRejectReason bool, clearOriginID bool) {
+func updateQuestionAttributes(question *model.Question,
+	status enums.QuestionStatus, clearRejectReason bool, clearOriginID bool) {
 	question.Status = status
 	question.LastModifiedDate = time.Now().UTC()
 	if clearRejectReason {
@@ -209,9 +211,6 @@ func FetchReviewerRequests(requestDto *dto.QuesRequestDto) *model.AppResponse {
 	if !utility.IsPrimaryIDValid(requestDto.SchoolID) ||
 		!utility.IsPrimaryIDValid(requestDto.UserID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
-	}
-	if requestDto.Limit <= 0 { // default limit on record result
-		requestDto.Limit = common.DEF_REQUESTS_LIMIT
 	}
 	status := []enums.QuestionStatus{enums.CurrentQuestionStatus.NEW,
 		enums.CurrentQuestionStatus.TRANSIT, enums.CurrentQuestionStatus.REMOVE}
@@ -233,15 +232,14 @@ func FetchReviewerRequests(requestDto *dto.QuesRequestDto) *model.AppResponse {
 
 //FetchTeacherRequests fetches all ques with either od status : APPROVED / REJECTED/ PENDING for a teacher
 func FetchTeacherRequests(requestDto *dto.QuesRequestDto) *model.AppResponse {
-	if !utility.IsValidGroupCode(requestDto.GroupCode) {
-		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
+	errResponse := validateRequest(requestDto.GroupCode,
+		requestDto.Subject, requestDto.Standard)
+	if errResponse != nil {
+		return errResponse
 	}
 	if !utility.IsPrimaryIDValid(requestDto.SchoolID) ||
 		!utility.IsPrimaryIDValid(requestDto.UserID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
-	}
-	if requestDto.Std < common.MIN_VALID_STD || requestDto.Std > common.MAX_VALID_STD || requestDto.Subject == "" {
-		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
 	}
 	var status []enums.QuestionStatus
 	switch requestDto.Status {
@@ -257,9 +255,6 @@ func FetchTeacherRequests(requestDto *dto.QuesRequestDto) *model.AppResponse {
 		break
 	default:
 		return utility.GetErrorResponse(common.MSG_NO_STATUS)
-	}
-	if requestDto.Limit <= 0 {
-		requestDto.Limit = common.DEF_REQUESTS_LIMIT
 	}
 	quesRepo := repo.NewQuestionRepository(requestDto.GroupCode)
 	if quesRepo == nil {
