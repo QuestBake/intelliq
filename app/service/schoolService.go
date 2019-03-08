@@ -15,7 +15,8 @@ import (
 
 //AddNewSchool adds new school
 func AddNewSchool(school *model.School) *model.AppResponse {
-	school.Code = strings.ToUpper(school.ShortName) + "_" + school.Address.Pincode
+	school.ShortName = strings.ToUpper(school.ShortName)
+	school.Code = school.ShortName + "_" + school.Address.Pincode
 	school.CreateDate = time.Now().UTC()
 	school.LastModifiedDate = time.Now().UTC()
 	schoolRepo := repo.NewSchoolRepository()

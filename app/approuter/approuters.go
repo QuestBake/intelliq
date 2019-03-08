@@ -73,8 +73,11 @@ func addGroupRouters() {
 func addQuestionRouters() {
 	quesRoutes := mrouter.Group("/question")
 	{
-		quesRoutes.GET("/:groupCode/:quesId", controller.FindQuestion) // find particular ques
-		quesRoutes.POST("/all", controller.GetQuestionsFromBank)       // all approved ques from bank
+		quesRoutes.GET("/:groupCode/:quesId", controller.FindQuestion)       // find particular ques
+		quesRoutes.POST("/all", controller.GetQuestionsFromBank)             // all approved ques from bank
+		quesRoutes.POST("/paper/generate", controller.GenerateQuestionPaper) // creates ques paper
+		quesRoutes.POST("/suggestions", controller.GetQuestionSuggestions)
+		quesRoutes.POST("/filter", controller.GetFilteredQuestions)
 	}
 }
 

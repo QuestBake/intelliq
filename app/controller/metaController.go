@@ -51,6 +51,7 @@ func RemoveMetaData(ctx *gin.Context) {
 
 //ReadMetaData fetches meta data
 func ReadMetaData(ctx *gin.Context) {
-	res := service.ReadMetaData()
-	ctx.JSON(http.StatusOK, res)
+	service.SaveTestQuestions()
+	//res := service.ReadMetaData()
+	ctx.JSON(http.StatusOK, "done")
 }

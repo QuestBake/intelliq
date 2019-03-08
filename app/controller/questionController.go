@@ -30,3 +30,29 @@ func GetQuestionsFromBank(ctx *gin.Context) {
 	res := service.FetchApprovedQuestions(&requestDto)
 	ctx.JSON(http.StatusOK, res)
 }
+
+//GetQuestionSuggestions returns question suggestions on typing new ques
+func GetQuestionSuggestions(ctx *gin.Context) {
+	var quesCriteriaDto dto.QuestionCriteriaDto
+	err := ctx.BindJSON(&quesCriteriaDto)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.FetchQuestionSuggestions(&quesCriteriaDto)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//GetFilteredQuestions filters questions as per criteria
+func GetFilteredQuestions(ctx *gin.Context) {
+	var quesCriteriaDto dto.QuestionCriteriaDto
+	err := ctx.BindJSON(&quesCriteriaDto)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.FilterQuestions(&quesCriteriaDto)
+	ctx.JSON(http.StatusOK, res)
+}

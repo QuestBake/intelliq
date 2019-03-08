@@ -36,7 +36,11 @@ func (repo *userRepository) Save(user *model.User) error {
 
 func (repo *userRepository) Update(user *model.User) error {
 	defer db.CloseSession(repo.coll)
-	err := repo.coll.Update(bson.M{"_id": user.UserID}, user)
+	selector := bson.M{"_id": user.UserID}
+	updator := bson.M{"$set": bson.M{"name": user.FullName, "gender": user.Gender,
+		"email": user.Email, "dob": user.DOB, "school": user.School,
+		"roles": user.Roles, "lastModifiedDate": time.Now().UTC()}}
+	err := repo.coll.Update(selector, updator)
 	return err
 }
 
@@ -59,7 +63,8 @@ func (repo *userRepository) FindAllSchoolAdmins(groupID bson.ObjectId) (model.Us
 	return users, nil
 }
 
-func (repo *userRepository) FindAllSchoolTeachers(schoolID bson.ObjectId, roleType interface{}) (model.Users, error) {
+func (repo *userRepository) FindAllSchoolTeachers(schoolID bson.ObjectId,
+	roleType interface{}) (model.Users, error) {
 	defer db.CloseSession(repo.coll)
 	var users model.Users
 	var filter interface{}
@@ -91,7 +96,8 @@ func (repo *userRepository) FindAllteachersUnderReviewer(schoolID bson.ObjectId,
 	return users, nil
 }
 
-func (repo *userRepository) TransferRole(roleType enums.RoleType, fromUserID bson.ObjectId, toUserID bson.ObjectId) (string, error) {
+func (repo *userRepository) TransferRole(roleType enums.RoleType,
+	fromUserID bson.ObjectId, toUserID bson.ObjectId) (string, error) {
 	defer db.CloseSession(repo.coll)
 	var users model.Users
 	fromUserFilter := bson.M{"$and": []bson.M{
@@ -144,7 +150,8 @@ func (repo *userRepository) TransferRole(roleType enums.RoleType, fromUserID bso
 		}
 		user.LastModifiedDate = time.Now().UTC()
 		selector := bson.M{"_id": user.UserID}
-		updator := bson.M{"$set": bson.M{"roles": user.Roles, "lastModifiedDate": user.LastModifiedDate}}
+		updator := bson.M{"$set": bson.M{"roles": user.Roles,
+			"lastModifiedDate": user.LastModifiedDate}}
 		bulk.Update(selector, updator)
 	}
 	_, errs := bulk.Run()
@@ -154,7 +161,8 @@ func (repo *userRepository) TransferRole(roleType enums.RoleType, fromUserID bso
 	return "", nil
 }
 
-func (repo *userRepository) RemoveSchoolTeacher(schoolID bson.ObjectId, userID bson.ObjectId) error {
+func (repo *userRepository) RemoveSchoolTeacher(schoolID bson.ObjectId,
+	userID bson.ObjectId) error {
 	defer db.CloseSession(repo.coll)
 	var user model.User
 	filter := bson.M{"_id": userID, "school._id": schoolID}
