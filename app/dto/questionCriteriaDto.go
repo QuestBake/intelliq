@@ -17,7 +17,7 @@ type QuestionCriteriaDto struct {
 	SearchTerm       string           `json:"searchTerm"`
 	Page             int              `json:"page"`
 	NativeLength     []enums.QuesLength
-	NativeDifficulty []enums.Difficulty
+	NativeDifficulty []enums.QuesDifficulty
 }
 
 //QuesLength sectional length - OBJECTIVE,SHORT,BRIEF,LONG
@@ -29,8 +29,8 @@ type QuesLength struct {
 
 //QuesDifficulty difficulty level - EASY,MEDIUM,HARD
 type QuesDifficulty struct {
-	Level   enums.Difficulty `json:"level"`
-	Percent int              `json:"percent"`
+	Level   enums.QuesDifficulty `json:"level"`
+	Percent int                  `json:"percent"`
 }
 
 //GenerateNatives simplifies length 'n' difficulty arrays for db query

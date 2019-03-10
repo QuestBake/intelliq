@@ -16,11 +16,13 @@ const (
 )
 
 const (
-	COLL_META   = "meta"
-	COLL_USER   = "users"
-	COLL_SCHOOL = "schools"
-	COLL_GROUP  = "groups"
-	COLL_QUES   = "_questions"
+	COLL_META     = "meta"
+	COLL_USER     = "users"
+	COLL_SCHOOL   = "schools"
+	COLL_GROUP    = "groups"
+	COLL_QUES     = "_questions"
+	COLL_TEMPLATE = "_templates"
+	COLL_PAPER    = "_papers"
 )
 
 var dbSession *mgo.Session
@@ -92,7 +94,7 @@ func createIndices(session *mgo.Session) {
 	}
 	addUniqueIndex(db, COLL_GROUP, []string{"code"})
 	addUniqueIndex(db, COLL_SCHOOL, []string{"code"})
-	//addIndex(db, "GP_DPS"+COLL_QUES, []string{"std", "subject", "topic", "length", "difficulty", "tags"})
+	addUniqueIndex(db, "GP_DPS"+COLL_TEMPLATE, []string{"criteria512Hash"})
 	var searchFields []searchField
 	searchFields = append(searchFields, searchField{field: "title", weight: 4})
 	searchFields = append(searchFields, searchField{field: "topic", weight: 2})

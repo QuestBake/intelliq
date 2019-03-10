@@ -15,7 +15,7 @@ import (
 )
 
 //FetchOneQuestion fetches single ques based on quesID
-func FetchOneQuestion(groupCode string, quesID string) *model.AppResponse {
+func FetchOneQuestion(groupCode string, quesID string) *dto.AppResponseDto {
 	if !utility.IsValidGroupCode(groupCode) {
 		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
 	}
@@ -39,7 +39,7 @@ func FetchOneQuestion(groupCode string, quesID string) *model.AppResponse {
 }
 
 //RemoveQuestion deletes rejected/removed status question from coll by teacher
-func RemoveQuestion(question *model.Question) *model.AppResponse {
+func RemoveQuestion(question *model.Question) *dto.AppResponseDto {
 	if !utility.IsPrimaryIDValid(question.QuestionID) {
 		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
 	}
@@ -64,7 +64,7 @@ func RemoveQuestion(question *model.Question) *model.AppResponse {
 }
 
 //FetchApprovedQuestions fetches all approved ques excluding requester's
-func FetchApprovedQuestions(requestDto *dto.QuesRequestDto) *model.AppResponse {
+func FetchApprovedQuestions(requestDto *dto.QuesRequestDto) *dto.AppResponseDto {
 	errResponse := validateRequest(requestDto.GroupCode,
 		requestDto.Subject, requestDto.Standard)
 	if errResponse != nil {
@@ -90,7 +90,7 @@ func FetchApprovedQuestions(requestDto *dto.QuesRequestDto) *model.AppResponse {
 }
 
 //FetchQuestionSuggestions fetch similar questions as per search term
-func FetchQuestionSuggestions(criteriaDto *dto.QuestionCriteriaDto) *model.AppResponse {
+func FetchQuestionSuggestions(criteriaDto *dto.QuestionCriteriaDto) *dto.AppResponseDto {
 	errResponse := validateRequest(criteriaDto.GroupCode,
 		criteriaDto.Subject, criteriaDto.Standard)
 	if errResponse != nil {
@@ -113,7 +113,7 @@ func FetchQuestionSuggestions(criteriaDto *dto.QuestionCriteriaDto) *model.AppRe
 }
 
 //FilterQuestions filters questions as per criteria provided
-func FilterQuestions(criteriaDto *dto.QuestionCriteriaDto) *model.AppResponse {
+func FilterQuestions(criteriaDto *dto.QuestionCriteriaDto) *dto.AppResponseDto {
 	errResponse := validateRequest(criteriaDto.GroupCode,
 		criteriaDto.Subject, criteriaDto.Standard)
 	if errResponse != nil {
@@ -139,7 +139,7 @@ func FilterQuestions(criteriaDto *dto.QuestionCriteriaDto) *model.AppResponse {
 	return utility.GetSuccessResponse(questions)
 }
 
-func validateRequest(groupCode, subject string, std int) *model.AppResponse {
+func validateRequest(groupCode, subject string, std int) *dto.AppResponseDto {
 	if !utility.IsValidGroupCode(groupCode) {
 		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
 	}
@@ -158,7 +158,7 @@ func SaveTestQuestions() {
 	topics := []string{"T1", "T2", "T3", "T4", "T5"}
 	lengths := []enums.QuesLength{enums.Length.OBJECTIVE, enums.Length.SHORT, enums.Length.BRIEF,
 		enums.Length.LONG}
-	dificulties := []enums.Difficulty{enums.DifficultyLvl.EASY, enums.DifficultyLvl.MEDIUM,
+	dificulties := []enums.QuesDifficulty{enums.DifficultyLvl.EASY, enums.DifficultyLvl.MEDIUM,
 		enums.DifficultyLvl.HARD}
 	tags := []string{"mtag1", "mtag2", "mtag3", "mtag4", "mtag5"}
 	tagLen := len(tags)

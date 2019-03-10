@@ -20,7 +20,7 @@ func isQuestionInfoValid(question *model.Question) bool {
 }
 
 //RequestAddNewQuestion adds new question by teacher
-func RequestAddNewQuestion(question *model.Question) *model.AppResponse {
+func RequestAddNewQuestion(question *model.Question) *dto.AppResponseDto {
 	if !isQuestionInfoValid(question) {
 		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
 	}
@@ -49,7 +49,7 @@ func RequestAddNewQuestion(question *model.Question) *model.AppResponse {
 }
 
 //RequestApprovedQuestionUpdate create updated version of approved question by teacher else updates dup copy if resubmitted post rejection
-func RequestApprovedQuestionUpdate(question *model.Question) *model.AppResponse {
+func RequestApprovedQuestionUpdate(question *model.Question) *dto.AppResponseDto {
 	if !isQuestionInfoValid(question) || !utility.IsPrimaryIDValid(question.QuestionID) {
 		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
 	}
@@ -95,7 +95,7 @@ func RequestApprovedQuestionUpdate(question *model.Question) *model.AppResponse 
 }
 
 //RequestApprovedQuesRemoval changes status to REMOVE ; raised for approved ques by teacher
-func RequestApprovedQuesRemoval(question *model.Question) *model.AppResponse {
+func RequestApprovedQuesRemoval(question *model.Question) *dto.AppResponseDto {
 	if !utility.IsPrimaryIDValid(question.QuestionID) {
 		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
 	}
@@ -120,7 +120,7 @@ func RequestApprovedQuesRemoval(question *model.Question) *model.AppResponse {
 }
 
 //ApproveRequest updates existing question status by approver
-func ApproveRequest(question *model.Question) *model.AppResponse {
+func ApproveRequest(question *model.Question) *dto.AppResponseDto {
 	var quesList model.Questions
 	switch question.Status {
 	case enums.CurrentQuestionStatus.REMOVE: // remove request raised by teacher
@@ -160,7 +160,7 @@ func ApproveRequest(question *model.Question) *model.AppResponse {
 }
 
 //RejectRequest updates existing question status by approver
-func RejectRequest(question *model.Question) *model.AppResponse {
+func RejectRequest(question *model.Question) *dto.AppResponseDto {
 	switch question.Status {
 	case enums.CurrentQuestionStatus.REMOVE: // remove request raised by teacher
 		updateQuestionAttributes(question, enums.CurrentQuestionStatus.APPROVED, true, true) // switch status back to APPROVED
@@ -204,7 +204,7 @@ func updateQuestionAttributes(question *model.Question,
 }
 
 //FetchReviewerRequests fetches all ques with status NEW,TRANSIT,REMOVE for a reviewer
-func FetchReviewerRequests(requestDto *dto.QuesRequestDto) *model.AppResponse {
+func FetchReviewerRequests(requestDto *dto.QuesRequestDto) *dto.AppResponseDto {
 	if !utility.IsValidGroupCode(requestDto.GroupCode) {
 		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
 	}
@@ -231,7 +231,7 @@ func FetchReviewerRequests(requestDto *dto.QuesRequestDto) *model.AppResponse {
 }
 
 //FetchTeacherRequests fetches all ques with either od status : APPROVED / REJECTED/ PENDING for a teacher
-func FetchTeacherRequests(requestDto *dto.QuesRequestDto) *model.AppResponse {
+func FetchTeacherRequests(requestDto *dto.QuesRequestDto) *dto.AppResponseDto {
 	errResponse := validateRequest(requestDto.GroupCode,
 		requestDto.Subject, requestDto.Standard)
 	if errResponse != nil {

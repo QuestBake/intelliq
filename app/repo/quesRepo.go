@@ -40,12 +40,6 @@ func (repo *questionRepository) Update(question *model.Question) error {
 	return err
 }
 
-func (repo *questionRepository) Upsert(question *model.Question) error {
-	defer db.CloseSession(repo.coll)
-	_, err := repo.coll.Upsert(bson.M{"_id": question.QuestionID}, question)
-	return err
-}
-
 func (repo *questionRepository) Delete(questionID bson.ObjectId) error {
 	defer db.CloseSession(repo.coll)
 	err := repo.coll.Remove(bson.M{"_id": questionID})
@@ -156,7 +150,7 @@ func findAllRequests(repo *questionRepository, filter bson.M,
 }
 
 func (repo *questionRepository) FilterQuestionsForPaper(
-	quesCriteriaDto *dto.QuestionCriteriaDto) (map[enums.QuesLength]map[enums.Difficulty]model.Questions,
+	quesCriteriaDto *dto.QuestionCriteriaDto) (map[enums.QuesLength]map[enums.QuesDifficulty]model.Questions,
 	error) {
 	defer db.CloseSession(repo.coll)
 	filter := bson.M{
@@ -175,17 +169,16 @@ func (repo *questionRepository) FilterQuestionsForPaper(
 	}
 	cols := bson.M{"_id": 1, "title": 1, "difficulty": 1, "length": 1,
 		"topic": 1, "tags": 1, "imageUrl": 1}
-	var err error
 	var ques model.Question
-	itr := repo.coll.Find(filter).Batch(50000).Select(cols).Iter()
-	sectionQuesMap := make(map[enums.QuesLength]map[enums.Difficulty]model.Questions)
+	itr := repo.coll.Find(filter).Batch(common.QUES_BATCH_SIZE).Select(cols).Iter()
+	sectionQuesMap := make(map[enums.QuesLength]map[enums.QuesDifficulty]model.Questions)
 	ctr := 0
 	for itr.Next(&ques) {
 		helper.PopulateSectionalQuestionMap(&ques, sectionQuesMap)
 		ctr++
 	}
 	fmt.Println("Records: ", ctr)
-	if err = itr.Close(); err != nil {
+	if err := itr.Close(); err != nil {
 		return nil, err
 	}
 	return sectionQuesMap, nil

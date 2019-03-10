@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/dto"
 	"intelliq/app/model"
 	"intelliq/app/repo"
 )
 
 //AddNewData add meta data
-func AddNewData(meta *model.Meta) *model.AppResponse {
+func AddNewData(meta *model.Meta) *dto.AppResponseDto {
 	metaRepo := repo.NewMetaRepository()
 	err := metaRepo.Save(meta)
 	if err != nil {
@@ -24,7 +25,7 @@ func AddNewData(meta *model.Meta) *model.AppResponse {
 }
 
 //UpdateMetaItems updates meta data
-func UpdateMetaItems(meta *model.Meta) *model.AppResponse {
+func UpdateMetaItems(meta *model.Meta) *dto.AppResponseDto {
 	if !utility.IsPrimaryIDValid(meta.MetaID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
@@ -42,7 +43,7 @@ func UpdateMetaItems(meta *model.Meta) *model.AppResponse {
 }
 
 //RemoveMetaItems removes meta data items
-func RemoveMetaItems(meta *model.Meta) *model.AppResponse {
+func RemoveMetaItems(meta *model.Meta) *dto.AppResponseDto {
 	if !utility.IsPrimaryIDValid(meta.MetaID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
@@ -60,7 +61,7 @@ func RemoveMetaItems(meta *model.Meta) *model.AppResponse {
 }
 
 //ReadMetaData reads data from db
-func ReadMetaData() *model.AppResponse {
+func ReadMetaData() *dto.AppResponseDto {
 	metaRepo := repo.NewMetaRepository()
 	metaData, err := metaRepo.Read()
 	if err != nil {

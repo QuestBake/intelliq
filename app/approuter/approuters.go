@@ -17,6 +17,7 @@ func AddRouters(router *gin.Engine) {
 	addGroupRouters()
 	addQuestionRouters()
 	addQuestionRequestRouters()
+	addQuestionPaperRouters()
 }
 
 func addMetaRouters() {
@@ -73,23 +74,38 @@ func addGroupRouters() {
 func addQuestionRouters() {
 	quesRoutes := mrouter.Group("/question")
 	{
-		quesRoutes.GET("/:groupCode/:quesId", controller.FindQuestion)       // find particular ques
-		quesRoutes.POST("/all", controller.GetQuestionsFromBank)             // all approved ques from bank
-		quesRoutes.POST("/paper/generate", controller.GenerateQuestionPaper) // creates ques paper
+		quesRoutes.GET("/:groupCode/:quesId", controller.FindQuestion) // find particular ques
+		quesRoutes.POST("/all", controller.GetQuestionsFromBank)       // all approved ques from bank
 		quesRoutes.POST("/suggestions", controller.GetQuestionSuggestions)
 		quesRoutes.POST("/filter", controller.GetFilteredQuestions)
 	}
 }
 
 func addQuestionRequestRouters() {
-	quesRoutes := mrouter.Group("/question/request")
+	requestRoutes := mrouter.Group("/question/request")
 	{
-		quesRoutes.POST("/add", controller.RequestAdd)              // new ques request
-		quesRoutes.PUT("/update", controller.RequestUpdate)         // update approved ques || update approved rejected ques || update newly unapproved rejected ques
-		quesRoutes.DELETE("/remove", controller.RequestRemoval)     //remove approved ques request || remove rejected ques request
-		quesRoutes.PUT("/approve", controller.ApproveRequest)       // approve action by reviewer
-		quesRoutes.PUT("/reject", controller.RejectRequest)         // reject action by reviewer
-		quesRoutes.POST("/all", controller.GetReviewerRequests)     // all requests for reviewer
-		quesRoutes.POST("/all/self", controller.GetTeacherRequests) // all requests for teacher
+		requestRoutes.POST("/add", controller.RequestAdd)              // new ques request
+		requestRoutes.PUT("/update", controller.RequestUpdate)         // update approved ques || update approved rejected ques || update newly unapproved rejected ques
+		requestRoutes.DELETE("/remove", controller.RequestRemoval)     //remove approved ques request || remove rejected ques request
+		requestRoutes.PUT("/approve", controller.ApproveRequest)       // approve action by reviewer
+		requestRoutes.PUT("/reject", controller.RejectRequest)         // reject action by reviewer
+		requestRoutes.POST("/all", controller.GetReviewerRequests)     // all requests for reviewer
+		requestRoutes.POST("/all/self", controller.GetTeacherRequests) // all requests for teacher
+	}
+}
+
+func addQuestionPaperRouters() {
+	paperRoutes := mrouter.Group("/paper")
+	{
+		paperRoutes.POST("/generate", controller.GenerateQuestionPaper) // creates ques paper
+		paperRoutes.POST("/draft", controller.DraftTestPapers)
+		paperRoutes.POST("/save", controller.SaveTestPapers)
+
+		paperRoutes.GET("/templates/:groupCode/:teacherId", controller.GetTemplateSuggestions)
+		paperRoutes.GET("/template/:groupCode/:templateId", controller.FindTemplate)
+
+		paperRoutes.GET("/drafts/:groupCode/:teacherId", controller.GetDraftSuggestions)
+		paperRoutes.GET("/draft/:groupCode/:testId", controller.FindDraft)
+
 	}
 }

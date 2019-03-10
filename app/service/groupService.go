@@ -9,12 +9,13 @@ import (
 
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/dto"
 	"intelliq/app/model"
 	"intelliq/app/repo"
 )
 
 //AddNewGroup adds new group
-func AddNewGroup(group *model.Group) *model.AppResponse {
+func AddNewGroup(group *model.Group) *dto.AppResponseDto {
 	group.Code = common.GROUP_CODE_PREFIX + strings.ToUpper(group.Code)
 	group.CreateDate = time.Now().UTC()
 	group.LastModifiedDate = time.Now().UTC()
@@ -32,7 +33,7 @@ func AddNewGroup(group *model.Group) *model.AppResponse {
 }
 
 //UpdateGroup updates existing group
-func UpdateGroup(group *model.Group) *model.AppResponse {
+func UpdateGroup(group *model.Group) *dto.AppResponseDto {
 	if !utility.IsPrimaryIDValid(group.GroupID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
@@ -51,7 +52,7 @@ func UpdateGroup(group *model.Group) *model.AppResponse {
 }
 
 //FetchAllGroups gets all groups
-func FetchAllGroups(restrict int) *model.AppResponse {
+func FetchAllGroups(restrict int) *dto.AppResponseDto {
 	groupRepo := repo.NewGroupRepository()
 	groups, err := groupRepo.FindAll(restrict)
 	if err != nil {
@@ -62,7 +63,7 @@ func FetchAllGroups(restrict int) *model.AppResponse {
 }
 
 //FetchGroupByCodeOrID get group by code or id
-func FetchGroupByCodeOrID(key string, val string) *model.AppResponse {
+func FetchGroupByCodeOrID(key string, val string) *dto.AppResponseDto {
 	var value interface{}
 	switch key {
 	case common.PARAM_KEY_ID: // key == _id
