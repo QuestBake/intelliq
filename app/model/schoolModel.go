@@ -8,20 +8,19 @@ import (
 
 //School school model
 type School struct {
-	SchoolID         bson.ObjectId   `json:"schoolId" bson:"_id,omitempty"`
-	ShortName        string          `json:"shortName" bson:"shortName"`
-	FullName         string          `json:"fullName" bson:"fullName"`
-	Code             string          `json:"code" bson:"code"`
-	Address          Address         `json:"address" bson:"address"`
-	Contact          Contact         `json:"contact" bson:"contact"`
-	Board            string          `json:"board" bson:"board"`
-	Group            Group           `json:"group" bson:"group"`
-	PrevGroups       []Group         `json:"prevGroups" bson:"prevGroups"`
-	Standards        []uint16        `json:"stds" bson:"stds"`
-	AuxQuesPaper     []QuestionPaper `json:"auxQuesPaper" bson:"auxQuesPaper"`
-	CreateDate       time.Time       `json:"createDate" bson:"createDate"`
-	LastModifiedDate time.Time       `json:"lastModifiedDate" bson:"lastModifiedDate"`
-	RenewalDate      time.Time       `json:"renewalDate" bson:"renewalDate"`
+	SchoolID         bson.ObjectId `json:"schoolId" bson:"_id,omitempty"`
+	ShortName        string        `json:"shortName" bson:"shortName"`
+	FullName         string        `json:"fullName" bson:"fullName"`
+	Code             string        `json:"code" bson:"code"`
+	Address          Address       `json:"address" bson:"address"`
+	Contact          Contact       `json:"contact" bson:"contact"`
+	Board            string        `json:"board" bson:"board"`
+	Group            Group         `json:"group" bson:"group"`
+	PrevGroups       []Group       `json:"prevGroups" bson:"prevGroups"`
+	Standards        []uint16      `json:"stds" bson:"stds"`
+	CreateDate       time.Time     `json:"createDate" bson:"createDate"`
+	LastModifiedDate time.Time     `json:"lastModifiedDate" bson:"lastModifiedDate"`
+	RenewalDate      time.Time     `json:"renewalDate" bson:"renewalDate"`
 }
 
 //Address address model

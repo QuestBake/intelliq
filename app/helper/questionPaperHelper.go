@@ -26,10 +26,10 @@ func PrioritiseDifficultyList(difficulty []dto.QuesDifficulty) {
 
 //PopulateSectionalQuestionMap group available db questions per section i.e OBJECTIVE-ques[] , LONG-ques[] ...
 func PopulateSectionalQuestionMap(ques *model.Question,
-	sectionQuesMap map[enums.QuesLength]map[enums.Difficulty]model.Questions) {
+	sectionQuesMap map[enums.QuesLength]map[enums.QuesDifficulty]model.Questions) {
 	lvlMap := sectionQuesMap[ques.Length]
 	if lvlMap == nil {
-		lvlMap = make(map[enums.Difficulty]model.Questions)
+		lvlMap = make(map[enums.QuesDifficulty]model.Questions)
 	}
 	quesList := lvlMap[ques.Difficulty]
 	quesList = append(quesList, *ques)
@@ -39,23 +39,23 @@ func PopulateSectionalQuestionMap(ques *model.Question,
 
 //GetResultSectionQuesList get questions for each section passed, split into mulitple sets requested per level
 //e.g OBJECTIVE -> {EASY: [],[]},{MEDIUM: [],[]} ,{HARD : [],[]} where set =2
-func GetResultSectionQuesList(levelBasedQuesMap map[enums.Difficulty]model.Questions, difficultyList []dto.QuesDifficulty,
-	section enums.QuesLength, requestedQuesCount int, requestedSets int, sectionChannel chan<- *model.Section) { // go routine
+func GetResultSectionQuesList(levelBasedQuesMap map[enums.QuesDifficulty]model.Questions, difficultyList []dto.QuesDifficulty,
+	section enums.QuesLength, requestedQuesCount int, requestedSets int, sectionChannel chan<- *dto.Section) { // go routine
 	// generate ques count per each difficuly level i.e EASY-10,MEIDUM-20,HARD-6
-	levelBasedQuesCountMap := make(map[enums.Difficulty]int)
+	levelBasedQuesCountMap := make(map[enums.QuesDifficulty]int)
 	for difficulty, quesList := range levelBasedQuesMap {
 		levelBasedQuesCountMap[difficulty] = len(quesList)
 	}
 	//deduce ques count per difficulty level based on percentage requested
 	levelQuesProportionMap := getLevelProportionMap(requestedQuesCount, levelBasedQuesCountMap, difficultyList)
 	// get questions for each set per level where level = EASY,MEIUM,HARD & set count = requested Sets
-	levelQuesSetMap := make(map[enums.Difficulty][]model.Questions)
+	levelQuesSetMap := make(map[enums.QuesDifficulty][]model.Questions)
 	for level, deducedCount := range levelQuesProportionMap {
 		levelSets := getLevelBasedQuestionSets(levelBasedQuesMap[level], deducedCount, requestedSets)
 		levelQuesSetMap[level] = levelSets
 	}
 	// return section model with section name and per level ques sets map
-	sectionChannel <- &model.Section{
+	sectionChannel <- &dto.Section{
 		Type:     section,
 		LevelMap: levelQuesSetMap,
 	}
@@ -63,11 +63,11 @@ func GetResultSectionQuesList(levelBasedQuesMap map[enums.Difficulty]model.Quest
 
 //deduce ques count per difficulty level based on percentage requested
 //e.g requested : EASY-30%,MEDIUM-40%,HARD-30% ; MaxQuesInSection = 10 ;; output : EASY-3,MEIDIUM-4,HARD-3
-func getLevelProportionMap(requestedQuesCountPerSection int, levelQuesCountMap map[enums.Difficulty]int,
-	difficultyList []dto.QuesDifficulty) map[enums.Difficulty]int {
+func getLevelProportionMap(requestedQuesCountPerSection int, levelQuesCountMap map[enums.QuesDifficulty]int,
+	difficultyList []dto.QuesDifficulty) map[enums.QuesDifficulty]int {
 	quesLeft, levelExhaustCount, availableLevelsCount := requestedQuesCountPerSection, 0, len(levelQuesCountMap)
-	levelProportionMap := make(map[enums.Difficulty]int)
-	levelPercentMap := make(map[enums.Difficulty]int)
+	levelProportionMap := make(map[enums.QuesDifficulty]int)
+	levelPercentMap := make(map[enums.QuesDifficulty]int)
 	for _, difficultyLvl := range difficultyList {
 		levelPercentMap[difficultyLvl.Level] = difficultyLvl.Percent
 	}
@@ -156,16 +156,16 @@ func getShuffleIndexArray(totalQuestions, requiredQuestions int) []int {
 }
 
 //GenerateQuestionPaper generated ques paper from given section
-func GenerateQuestionPaper(sectionList []model.Section, currentSet int,
-	difficultyList []dto.QuesDifficulty, paperChannel chan<- *model.QuestionPaper) {
-	var sections []model.Section
+func GenerateQuestionPaper(sectionList []dto.Section, currentSet int,
+	difficultyList []dto.QuesDifficulty, paperChannel chan<- *dto.QuestionPaperDto) {
+	var sections []dto.Section
 	var sectionalQuesList model.Questions
 	for _, section := range sectionList {
 		for _, difficulty := range difficultyList {
 			sectionalQuesList = append(sectionalQuesList, section.LevelMap[difficulty.Level][currentSet]...)
 		}
-		sections = append(sections, model.Section{Type: section.Type, Questions: sectionalQuesList})
+		sections = append(sections, dto.Section{Type: section.Type, Questions: sectionalQuesList})
 		sectionalQuesList = nil
 	}
-	paperChannel <- &model.QuestionPaper{Set: currentSet + 1, Sections: sections}
+	paperChannel <- &dto.QuestionPaperDto{Set: currentSet + 1, Sections: sections}
 }

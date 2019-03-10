@@ -96,7 +96,7 @@ func (repo *userRepository) FindAllteachersUnderReviewer(schoolID bson.ObjectId,
 	return users, nil
 }
 
-func (repo *userRepository) TransferRole(roleType enums.RoleType,
+func (repo *userRepository) TransferRole(roleType enums.UserRole,
 	fromUserID bson.ObjectId, toUserID bson.ObjectId) (string, error) {
 	defer db.CloseSession(repo.coll)
 	var users model.Users

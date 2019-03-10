@@ -1,14 +1,14 @@
 package enums
 
-//RoleType enum roletype
-type RoleType int
+//UserRole enum roletype
+type UserRole int
 
 type roletype struct {
-	SUPER    RoleType
-	GROUP    RoleType
-	SCHOOL   RoleType
-	REVIEWER RoleType
-	TEACHER  RoleType
+	SUPER    UserRole
+	GROUP    UserRole
+	SCHOOL   UserRole
+	REVIEWER UserRole
+	TEACHER  UserRole
 }
 
 // Role for public use

@@ -15,7 +15,7 @@ type Question struct {
 	Std              uint16               `json:"std" bson:"std"`
 	Subject          string               `json:"subject" bson:"subject"`
 	Topic            string               `json:"topic" bson:"topic"`
-	Difficulty       enums.Difficulty     `json:"difficulty" bson:"difficulty"`
+	Difficulty       enums.QuesDifficulty `json:"difficulty" bson:"difficulty"`
 	Length           enums.QuesLength     `json:"length" bson:"length"`
 	Status           enums.QuestionStatus `json:"status" bson:"status"`
 	Tags             []string             `json:"tags" bson:"tags"`

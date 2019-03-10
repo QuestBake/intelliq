@@ -9,12 +9,13 @@ import (
 
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/dto"
 	"intelliq/app/model"
 	"intelliq/app/repo"
 )
 
 //AddNewSchool adds new school
-func AddNewSchool(school *model.School) *model.AppResponse {
+func AddNewSchool(school *model.School) *dto.AppResponseDto {
 	school.ShortName = strings.ToUpper(school.ShortName)
 	school.Code = school.ShortName + "_" + school.Address.Pincode
 	school.CreateDate = time.Now().UTC()
@@ -33,7 +34,7 @@ func AddNewSchool(school *model.School) *model.AppResponse {
 }
 
 //UpdateSchool updates existing school
-func UpdateSchool(school *model.School) *model.AppResponse {
+func UpdateSchool(school *model.School) *dto.AppResponseDto {
 	if !utility.IsPrimaryIDValid(school.SchoolID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
@@ -52,7 +53,7 @@ func UpdateSchool(school *model.School) *model.AppResponse {
 }
 
 //FetchAllSchools gets all schools under one group with either groupID or groupCode
-func FetchAllSchools(key string, val string) *model.AppResponse {
+func FetchAllSchools(key string, val string) *dto.AppResponseDto {
 	var value interface{}
 	switch key {
 	case common.PARAM_KEY_ID: // key == _id
@@ -86,7 +87,7 @@ func FetchAllSchools(key string, val string) *model.AppResponse {
 }
 
 //FetchSchoolByCodeOrID get school by Code or id
-func FetchSchoolByCodeOrID(key string, val string) *model.AppResponse {
+func FetchSchoolByCodeOrID(key string, val string) *dto.AppResponseDto {
 	var value interface{}
 	switch key {
 	case common.PARAM_KEY_ID: // key == _id

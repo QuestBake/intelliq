@@ -1,12 +1,12 @@
 package enums
 
-//Difficulty hide
-type Difficulty = int
+//QuesDifficulty hide
+type QuesDifficulty = int
 
 type level struct {
-	EASY   Difficulty
-	MEDIUM Difficulty
-	HARD   Difficulty
+	EASY   QuesDifficulty
+	MEDIUM QuesDifficulty
+	HARD   QuesDifficulty
 }
 
 // DifficultyLvl for public use
