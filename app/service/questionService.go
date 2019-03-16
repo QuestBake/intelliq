@@ -33,7 +33,7 @@ func FetchOneQuestion(groupCode string, quesID string) *dto.AppResponseDto {
 		if len(errorMsg) > 0 {
 			return utility.GetErrorResponse(errorMsg)
 		}
-		return utility.GetErrorResponse(common.MSG_REMOVE_ERROR)
+		return utility.GetErrorResponse(common.MSG_NO_RECORD)
 	}
 	return utility.GetSuccessResponse(ques)
 }

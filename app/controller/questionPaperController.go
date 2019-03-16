@@ -80,3 +80,19 @@ func FindTemplate(ctx *gin.Context) {
 	res := service.FetchSingleTemplate(groupCode, templateID)
 	ctx.JSON(http.StatusOK, res)
 }
+
+//RemoveDraft removes test paper from coll
+func RemoveDraft(ctx *gin.Context) {
+	groupCode := ctx.Param("groupCode")
+	testID := ctx.Param("testId")
+	res := service.RemoveDraft(groupCode, testID)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//RemoveTemplate removes template from coll
+func RemoveTemplate(ctx *gin.Context) {
+	groupCode := ctx.Param("groupCode")
+	templateID := ctx.Param("templateId")
+	res := service.RemoveTemplate(groupCode, templateID)
+	ctx.JSON(http.StatusOK, res)
+}

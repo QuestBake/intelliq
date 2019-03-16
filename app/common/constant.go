@@ -17,8 +17,12 @@ const ( // app msgs
 	MSG_NO_STATUS                  string = "No such status Exists !!"
 	MSG_NO_RECORD                  string = "No record found !!"
 	MSG_INSUFFICIENT_USER_COUNT    string = "Expected 2 users, but found "
-	MSG_REMOVE_SUCCESS             string = "User Removed Successfully !!"
-	MSG_REMOVE_ERROR               string = "Could not remove user !!"
+	MSG_REMOVE_USER_SUCCESS        string = "User Removed Successfully !!"
+	MSG_REMOVE_USER_ERROR          string = "Could not remove user !!"
+	MSG_REMOVE_TEMPLATE_SUCCESS    string = "Template Removed Successfully !!"
+	MSG_REMOVE_TEMPLATE_ERROR      string = "Could not remove template !!"
+	MSG_REMOVE_TEST_SUCCESS        string = "Test Paper Removed Successfully !!"
+	MSG_REMOVE_TEST_ERROR          string = "Could not remove test paper !!"
 	MSG_LOGIN_SUCCESS              string = "Login Sucess !!"
 	MSG_INVALID_CREDENTIALS_MOBILE string = "Mobile number not registered with us !!"
 	MSG_INVALID_CREDENTIALS_PWD    string = "Invalid Password!!"
@@ -29,8 +33,12 @@ const ( // app msgs
 	MSG_QUES_REMOVE_SUCCESS        string = "Successfully removed question !!"
 	MSG_QUES_REMOVE_ERROR          string = "Question could not be removed !!"
 	MSG_CORRUPT_DATA               string = "Corrupt Criteria Data"
-
-	MSG_DUPLICATE_RECORD string = "Duplicate Record"
+	MSG_DUPLICATE_RECORD           string = "Duplicate Record"
+	MSG_NAME_MIN_LENGTH_ERROR      string = "Name should be atleast 3 characters"
+	MSG_MOBILE_MIN_LENGTH_ERROR    string = "Mobile should be 10 digits"
+	MSG_PWD_MIN_LENGTH_ERROR       string = "Password should be atleast 8 characters"
+	MSG_PWD_RESET_SUCCESS          string = "Password changed successfully !!"
+	MSG_MOBILE_UPDATE_SUCCESS      string = "Mobile number changed successfully !!"
 )
 
 const ( // codes
@@ -54,12 +62,17 @@ const ( // congfig params
 	MIN_VALID_STD = 1
 	MAX_VALID_STD = 12
 
-	MOBILE_LENGTH    = 10
-	USERNAME_STR_LEN = 3
+	MOBILE_LENGTH       = 10
+	USERNAME_STR_LEN    = 3
+	USERNAME_MIN_LENGTH = 3
+	PWD_MIN_LENGTH      = 8
 
 	DEF_REQUESTS_LIMIT = 60
 	DEF_REQUESTS_PAGE  = 0
 	QUES_BATCH_SIZE    = 10000
+
+	OTP_UPPER_BOUND = 989899
+	OTP_LOWER_BOUND = 101010
 
 	GROUP_CODE_PREFIX = "GP_"
 )

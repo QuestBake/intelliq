@@ -21,6 +21,7 @@ type School struct {
 	CreateDate       time.Time     `json:"createDate" bson:"createDate"`
 	LastModifiedDate time.Time     `json:"lastModifiedDate" bson:"lastModifiedDate"`
 	RenewalDate      time.Time     `json:"renewalDate" bson:"renewalDate"`
+	PrevUserRoles    []Role        `json:"prevUserRoles" bson:"prevUserRoles"`
 }
 
 //Address address model

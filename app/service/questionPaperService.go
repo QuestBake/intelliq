@@ -240,3 +240,45 @@ func FetchSingleTemplate(groupCode, testPaperID string) *dto.AppResponseDto {
 	}
 	return utility.GetErrorResponse(common.MSG_INVALID_ID)
 }
+
+//RemoveDraft deletes testpaper
+func RemoveDraft(groupCode string, testID string) *dto.AppResponseDto {
+	if !utility.IsStringIDValid(testID) {
+		return utility.GetErrorResponse(common.MSG_INVALID_ID)
+	}
+	testPaperRepo := repo.NewTestPaperRepository(groupCode)
+	if testPaperRepo == nil {
+		return utility.GetErrorResponse(common.MSG_UNATHORIZED_ACCESS)
+	}
+	err := testPaperRepo.Delete(bson.ObjectIdHex(testID))
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_REMOVE_TEST_ERROR)
+	}
+	return utility.GetSuccessResponse(common.MSG_REMOVE_TEST_SUCCESS)
+}
+
+//RemoveTemplate deletes template
+func RemoveTemplate(groupCode string, templateID string) *dto.AppResponseDto {
+	if !utility.IsStringIDValid(templateID) {
+		return utility.GetErrorResponse(common.MSG_INVALID_ID)
+	}
+	templateRepo := repo.NewTemmplateRepository(groupCode)
+	if templateRepo == nil {
+		return utility.GetErrorResponse(common.MSG_UNATHORIZED_ACCESS)
+	}
+	err := templateRepo.Delete(bson.ObjectIdHex(templateID))
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_REMOVE_TEMPLATE_ERROR)
+	}
+	return utility.GetSuccessResponse(common.MSG_REMOVE_TEMPLATE_SUCCESS)
+}
