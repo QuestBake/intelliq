@@ -63,3 +63,9 @@ func (repo *testPaperRepository) FindOne(draftID bson.ObjectId) (*model.TestPape
 	}
 	return &testPaper, nil
 }
+
+func (repo *testPaperRepository) Delete(testID bson.ObjectId) error {
+	defer db.CloseSession(repo.coll)
+	err := repo.coll.Remove(bson.M{"_id": testID})
+	return err
+}

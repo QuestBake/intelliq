@@ -122,8 +122,8 @@ func IsValidGroupCode(groupCode string) bool {
 }
 
 //GenerateRandom generated random number between give 0 & upperlimit excluding upperlimit
-func GenerateRandom(upperLimit int) int {
-	return rand.Intn(upperLimit)
+func GenerateRandom(lowerLimit, upperLimit int) int {
+	return rand.Intn(upperLimit-lowerLimit) + lowerLimit
 }
 
 //GetMin return min of 2 int args

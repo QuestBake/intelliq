@@ -61,3 +61,9 @@ func (repo *templateRepository) FindOne(templateID bson.ObjectId) (*model.Templa
 	}
 	return &template, nil
 }
+
+func (repo *templateRepository) Delete(testID bson.ObjectId) error {
+	defer db.CloseSession(repo.coll)
+	err := repo.coll.Remove(bson.M{"_id": testID})
+	return err
+}

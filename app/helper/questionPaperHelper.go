@@ -144,7 +144,7 @@ func getShuffleIndexArray(totalQuestions, requiredQuestions int) []int {
 	indexMap := make(map[int]struct{})
 	size := 0
 	for size < shuffledLenth {
-		index := utility.GenerateRandom(totalQuestions)
+		index := utility.GenerateRandom(0, totalQuestions)
 		if _, ok := indexMap[index]; ok {
 			continue
 		}

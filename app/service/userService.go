@@ -18,7 +18,10 @@ import (
 //AddNewUser adds new user
 func AddNewUser(user *model.User) *dto.AppResponseDto {
 	if !utility.IsValidMobile(user.Mobile) {
-		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		return utility.GetErrorResponse(common.MSG_MOBILE_MIN_LENGTH_ERROR)
+	}
+	if len(user.FullName) < common.USERNAME_MIN_LENGTH {
+		return utility.GetErrorResponse(common.MSG_NAME_MIN_LENGTH_ERROR)
 	}
 	user.Password = utility.EncryptData(common.TEMP_PWD_PREFIX + user.Mobile)
 	user.UserName = utility.GenerateUserName(user.FullName, user.Mobile)
@@ -41,6 +44,9 @@ func AddNewUser(user *model.User) *dto.AppResponseDto {
 func UpdateUser(user *model.User) *dto.AppResponseDto {
 	if !utility.IsPrimaryIDValid(user.UserID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
+	}
+	if len(user.FullName) < common.USERNAME_MIN_LENGTH {
+		return utility.GetErrorResponse(common.MSG_NAME_MIN_LENGTH_ERROR)
 	}
 	user.LastModifiedDate = time.Now().UTC()
 	userRepo := repo.NewUserRepository()
@@ -159,9 +165,9 @@ func RemoveUserFromSchool(schoolID string, userID string) *dto.AppResponseDto {
 		if len(errorMsg) > 0 {
 			return utility.GetErrorResponse(errorMsg)
 		}
-		return utility.GetErrorResponse(common.MSG_REMOVE_ERROR)
+		return utility.GetErrorResponse(common.MSG_REMOVE_USER_ERROR)
 	}
-	return utility.GetSuccessResponse(common.MSG_REMOVE_SUCCESS)
+	return utility.GetSuccessResponse(common.MSG_REMOVE_USER_SUCCESS)
 }
 
 //AddBulkUser adds new users
@@ -216,7 +222,7 @@ func AuthenticateUser(user *model.User) *dto.AppResponseDto {
 		}
 		return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_PWD)
 	}
-	return utility.GetErrorResponse(common.MSG_BAD_INPUT)
+	return utility.GetErrorResponse(common.MSG_MOBILE_MIN_LENGTH_ERROR)
 }
 
 //Logout logs out the given user and clears session
@@ -252,4 +258,86 @@ func FetchUserByMobileOrID(key string, val string) *dto.AppResponseDto {
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
 	return utility.GetSuccessResponse(user)
+}
+
+//ResetPassword resets user password
+func ResetPassword(pwdDTO *dto.PasswordDto) *dto.AppResponseDto {
+	if len(pwdDTO.NewPwd) < common.PWD_MIN_LENGTH {
+		return utility.GetErrorResponse(common.MSG_PWD_MIN_LENGTH_ERROR)
+	}
+	if pwdDTO.ForgotPwd {
+		if !utility.IsValidMobile(pwdDTO.Mobile) {
+			return utility.GetErrorResponse(common.MSG_MOBILE_MIN_LENGTH_ERROR)
+		}
+		pwdDTO.NewPwd = utility.EncryptData(pwdDTO.NewPwd)
+		userRepo := repo.NewUserRepository()
+		err := userRepo.UpdateMobilePwd("mobile", "password", pwdDTO.Mobile, pwdDTO.NewPwd)
+		if err != nil {
+			fmt.Println(err.Error())
+			errorMsg := utility.GetErrorMsg(err)
+			if len(errorMsg) > 0 {
+				return utility.GetErrorResponse(errorMsg)
+			}
+			return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+		}
+	} else {
+		userRepo := repo.NewUserRepository()
+		user, err := userRepo.FindOne("_id", pwdDTO.UserID)
+		if err != nil {
+			fmt.Println(err)
+			errorMsg := utility.GetErrorMsg(err)
+			if len(errorMsg) > 0 {
+				return utility.GetErrorResponse(errorMsg)
+			}
+			return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+		}
+		if !utility.ComparePasswords(user.Password, pwdDTO.OldPwd) {
+			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_PWD)
+		}
+		userRepo1 := repo.NewUserRepository()
+		pwdDTO.NewPwd = utility.EncryptData(pwdDTO.NewPwd)
+		updateErr := userRepo1.UpdateMobilePwd("_id", "password", user.UserID, pwdDTO.NewPwd)
+		if updateErr != nil {
+			fmt.Println(updateErr.Error())
+			return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+		}
+	}
+	return utility.GetSuccessResponse(common.MSG_PWD_RESET_SUCCESS)
+}
+
+//UpdateMobile updates user mobile number
+func UpdateMobile(pwdDTO *dto.PasswordDto) *dto.AppResponseDto {
+	if !utility.IsValidMobile(pwdDTO.Mobile) {
+		return utility.GetErrorResponse(common.MSG_MOBILE_MIN_LENGTH_ERROR)
+	}
+	userRepo := repo.NewUserRepository()
+	err := userRepo.UpdateMobilePwd("_id", "mobile", pwdDTO.UserID, pwdDTO.Mobile)
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+	}
+	return utility.GetSuccessResponse(common.MSG_MOBILE_UPDATE_SUCCESS)
+}
+
+//SendOTP send 6-digit OTP to user mobile
+func SendOTP(mobile string, forgotPassword bool) *dto.AppResponseDto {
+	if !utility.IsValidMobile(mobile) {
+		return utility.GetErrorResponse(common.MSG_MOBILE_MIN_LENGTH_ERROR)
+	}
+	if forgotPassword {
+		userRepo := repo.NewUserRepository()
+		_, err := userRepo.FindOne("mobile", mobile)
+		if err != nil {
+			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_MOBILE)
+		}
+	}
+	otp := utility.GenerateRandom(common.OTP_LOWER_BOUND, common.OTP_UPPER_BOUND)
+	fmt.Println("OTP=> ", otp)
+	//generate session id
+	//save to cache
+	return utility.GetSuccessResponse(otp)
 }

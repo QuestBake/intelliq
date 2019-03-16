@@ -44,17 +44,21 @@ func (repo *userRepository) Update(user *model.User) error {
 	return err
 }
 
+func (repo *userRepository) UpdateMobilePwd(selectorField string,
+	updatorField string, selectorVal interface{}, updatorVal string) error {
+	defer db.CloseSession(repo.coll)
+	selector := bson.M{selectorField: selectorVal}
+	updator := bson.M{"$set": bson.M{updatorField: updatorVal}}
+	err := repo.coll.Update(selector, updator)
+	return err
+}
+
 func (repo *userRepository) FindAllSchoolAdmins(groupID bson.ObjectId) (model.Users, error) {
 	defer db.CloseSession(repo.coll)
 	var users model.Users
-	filter := bson.M{"$and": []bson.M{
-		{
-			"school.group._id": groupID,
-		},
-		{
-			"roles.roleType": enums.Role.SCHOOL,
-		},
-	},
+	filter := bson.M{
+		"school.group._id": groupID,
+		"roles.roleType":   enums.Role.SCHOOL,
 	}
 	err := repo.coll.Find(filter).All(&users)
 	if err != nil {
@@ -100,23 +104,13 @@ func (repo *userRepository) TransferRole(roleType enums.UserRole,
 	fromUserID bson.ObjectId, toUserID bson.ObjectId) (string, error) {
 	defer db.CloseSession(repo.coll)
 	var users model.Users
-	fromUserFilter := bson.M{"$and": []bson.M{
-		{
-			"_id": fromUserID,
-		},
-		{
-			"roles.roleType": roleType,
-		},
-	},
+	fromUserFilter := bson.M{
+		"_id":            fromUserID,
+		"roles.roleType": roleType,
 	}
-	toUserFilter := bson.M{"$and": []bson.M{
-		{
-			"_id": toUserID,
-		},
-		{
-			"roles.roleType": bson.M{"$ne": roleType},
-		},
-	},
+	toUserFilter := bson.M{
+		"_id":            toUserID,
+		"roles.roleType": bson.M{"$ne": roleType},
 	}
 	orFilter := bson.M{"$or": []bson.M{
 		fromUserFilter,
@@ -171,6 +165,7 @@ func (repo *userRepository) RemoveSchoolTeacher(schoolID bson.ObjectId,
 	if err != nil {
 		return err
 	}
+	user.School.PrevUserRoles = user.Roles
 	user.PrevSchools = append(user.PrevSchools, user.School)
 	user.School = model.School{}
 	user.Roles = nil

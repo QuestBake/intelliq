@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"intelliq/app/dto"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -147,4 +148,52 @@ func ListUserByMobileOrID(ctx *gin.Context) {
 	}
 	res := service.FetchUserByMobileOrID(key, val)
 	ctx.JSON(http.StatusOK, res)
+}
+
+//ResetUserPassword resets user password either forgotten or renew
+func ResetUserPassword(ctx *gin.Context) {
+	var pwdDto dto.PasswordDto
+	err := ctx.BindJSON(&pwdDto)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.ResetPassword(&pwdDto)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//UpdateUserMobile updates user mobile no post OTP verification
+func UpdateUserMobile(ctx *gin.Context) {
+	var pwdDto dto.PasswordDto
+	err := ctx.BindJSON(&pwdDto)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.UpdateMobile(&pwdDto)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//ForgotPasswordOTP sends OTP to existing mobile number
+func ForgotPasswordOTP(ctx *gin.Context) {
+	mobile := ctx.Param("mobile")
+	res := service.SendOTP(mobile, true)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//SendUserOTP sends OTP to new mobile number
+func SendUserOTP(ctx *gin.Context) {
+	mobile := ctx.Param("mobile")
+	res := service.SendOTP(mobile, false)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//VerifyOTP verifies OTP
+func VerifyOTP(ctx *gin.Context) {
+	otp := ctx.Param("otp")
+	//res := service.SendOTP(mobile, false)
+	//check from session id otp and compare with param otp
+	ctx.JSON(http.StatusOK, "OK->"+otp)
 }
