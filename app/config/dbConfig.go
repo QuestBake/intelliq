@@ -27,8 +27,8 @@ const (
 
 var dbSession *mgo.Session
 
-//Connect db conn
-func Connect() (*mgo.Session, error) {
+//DBConnect db conn
+func DBConnect() (*mgo.Session, error) {
 	session, err := mgo.Dial(url)
 	if err != nil {
 		log.Fatal(err)

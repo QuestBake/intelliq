@@ -13,6 +13,7 @@ import (
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"intelliq/app/enums"
@@ -113,12 +114,15 @@ func IsValidMobile(mobile string) bool {
 
 //GenerateUserName generates username from name,mobile e.g. user@FIR_MOB
 func GenerateUserName(name string, mobile string) string {
-	return USERNAME_PREFIX + strings.ToLower(name[0:USERNAME_STR_LEN]) + "_" + mobile[MOBILE_LENGTH-USERNAME_STR_LEN:MOBILE_LENGTH]
+	return USERNAME_PREFIX + strings.ToLower(
+		name[0:USERNAME_MIN_LENGTH]) + "_" +
+		mobile[MOBILE_LENGTH-USERNAME_MIN_LENGTH:MOBILE_LENGTH]
 }
 
 //IsValidGroupCode checks for groupPrefix
 func IsValidGroupCode(groupCode string) bool {
-	return strings.HasPrefix(groupCode, GROUP_CODE_PREFIX) && len(GROUP_CODE_PREFIX) < len(groupCode)
+	return strings.HasPrefix(groupCode,
+		GROUP_CODE_PREFIX) && len(GROUP_CODE_PREFIX) < len(groupCode)
 }
 
 //GenerateRandom generated random number between give 0 & upperlimit excluding upperlimit
@@ -159,4 +163,15 @@ func ObjectToJSON(obj interface{}) []byte {
 		return nil
 	}
 	return json
+}
+
+//GenerateUUID generates random uuid
+func GenerateUUID() string {
+	uuid, err := uuid.NewV4()
+	if err != nil {
+		fmt.Printf(err.Error())
+		return ""
+	}
+	fmt.Printf("UUIDv4: %s\n", uuid)
+	return uuid.String()
 }

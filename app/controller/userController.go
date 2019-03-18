@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"intelliq/app/cachestore"
 	"intelliq/app/dto"
+	"intelliq/app/enums"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -126,13 +128,27 @@ func AuthenticateUser(ctx *gin.Context) {
 		return
 	}
 	res := service.AuthenticateUser(&user)
+	if res.Status == enums.Status.SUCCESS {
+		sessionID := cachestore.GenerateSessionID(ctx)
+		if len(sessionID) > 0 {
+			user := res.Body.(*model.User)
+			cachestore.SetCache(ctx, sessionID, user.UserID.String(),
+				common.CACHE_SESSION_TIMEOUT)
+			ctx.Writer.Header().Set(common.RESPONSE_SESSION_ID_KEY,
+				sessionID)
+		} else {
+			res = utility.GetErrorResponse(
+				"Could not create session!! Try later ...")
+		}
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
 //Logout logs out user and clear sessions
 func Logout(ctx *gin.Context) {
-	userID := ctx.Param("userId")
-	res := service.Logout(userID)
+	sessionID := ctx.Request.Header.Get(common.REQUEST_SESSION_ID_KEY)
+	cachestore.RemoveCache(ctx, sessionID)
+	res := utility.GetSuccessResponse("Logout Successful !!")
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -179,21 +195,64 @@ func UpdateUserMobile(ctx *gin.Context) {
 //ForgotPasswordOTP sends OTP to existing mobile number
 func ForgotPasswordOTP(ctx *gin.Context) {
 	mobile := ctx.Param("mobile")
-	res := service.SendOTP(mobile, true)
-	ctx.JSON(http.StatusOK, res)
+	res, otp := service.SendOTP(mobile, true)
+	if res.Status == enums.Status.SUCCESS {
+		if createOTPSession(ctx, otp) {
+			ctx.JSON(http.StatusOK, res)
+		} else {
+			ctx.JSON(http.StatusOK, utility.GetErrorResponse(
+				"Could not create otp session!! Try later ..."))
+		}
+	}
 }
 
 //SendUserOTP sends OTP to new mobile number
 func SendUserOTP(ctx *gin.Context) {
 	mobile := ctx.Param("mobile")
-	res := service.SendOTP(mobile, false)
-	ctx.JSON(http.StatusOK, res)
+	res, otp := service.SendOTP(mobile, false)
+	if res.Status == enums.Status.SUCCESS {
+		if createOTPSession(ctx, otp) {
+			ctx.JSON(http.StatusOK, res)
+		} else {
+			ctx.JSON(http.StatusOK, utility.GetErrorResponse(
+				"Could not create otp session!! Try later ..."))
+		}
+	}
+}
+
+func createOTPSession(ctx *gin.Context, otp string) bool {
+	OTPSessionID := cachestore.GenerateSessionID(ctx)
+	if len(OTPSessionID) > 0 {
+		cachestore.SetCache(ctx, OTPSessionID, otp,
+			common.CACHE_OTP_TIMEOUT)
+		ctx.Writer.Header().Set(common.RESPONSE_OTP_SESSION_ID_KEY,
+			OTPSessionID)
+		return true
+	}
+	return false
 }
 
 //VerifyOTP verifies OTP
 func VerifyOTP(ctx *gin.Context) {
-	otp := ctx.Param("otp")
-	//res := service.SendOTP(mobile, false)
-	//check from session id otp and compare with param otp
-	ctx.JSON(http.StatusOK, "OK->"+otp)
+	userOTP := ctx.Param("otp")
+	if len(userOTP) != 6 {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+	} else {
+		otpSessionID := ctx.Request.Header.Get(common.REQUEST_SESSION_ID_KEY)
+		if cachestore.CheckCache(ctx, otpSessionID) {
+			sessionOTP := cachestore.GetCache(ctx, otpSessionID).(string)
+			if sessionOTP == userOTP {
+				cachestore.RemoveCache(ctx, otpSessionID)
+				ctx.JSON(http.StatusOK, utility.GetSuccessResponse(
+					"OTP Verified !!"))
+			} else {
+				ctx.JSON(http.StatusOK, utility.GetErrorResponse(
+					"Incorrect OTP !!"))
+			}
+		} else {
+			ctx.JSON(http.StatusOK, utility.GetErrorResponse(
+				"Session Expired !!"))
+		}
+	}
 }

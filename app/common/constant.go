@@ -39,6 +39,8 @@ const ( // app msgs
 	MSG_PWD_MIN_LENGTH_ERROR       string = "Password should be atleast 8 characters"
 	MSG_PWD_RESET_SUCCESS          string = "Password changed successfully !!"
 	MSG_MOBILE_UPDATE_SUCCESS      string = "Mobile number changed successfully !!"
+	MSG_USER_AUTH_ERROR            string = "User Authentication Error !!"
+	MSG_USER_SESSION_ERROR         string = "Session Not Found !!"
 )
 
 const ( // codes
@@ -63,7 +65,6 @@ const ( // congfig params
 	MAX_VALID_STD = 12
 
 	MOBILE_LENGTH       = 10
-	USERNAME_STR_LEN    = 3
 	USERNAME_MIN_LENGTH = 3
 	PWD_MIN_LENGTH      = 8
 
@@ -74,5 +75,15 @@ const ( // congfig params
 	OTP_UPPER_BOUND = 989899
 	OTP_LOWER_BOUND = 101010
 
-	GROUP_CODE_PREFIX = "GP_"
+	GROUP_CODE_PREFIX           = "GP_"
+	CACHE_STORE_KEY             = "CACHE_STORE"
+	REQUEST_SESSION_ID_KEY      = "RQST_SESS_ID"
+	RESPONSE_SESSION_ID_KEY     = "RESP_SESS_ID"
+	REQUEST_OTP_SESSION_ID_KEY  = "RQST_OTP_SESS_ID"
+	RESPONSE_OTP_SESSION_ID_KEY = "RESP_OTP_SESS_ID"
+
+	CACHE_SESSION_TIMEOUT   = 10 //minutes
+	CACHE_OTP_TIMEOUT       = 5
+	CACHE_OBJ_LONG_TIMEOUT  = 30
+	CACHE_OBJ_SHORT_TIMEOUT = 10
 )
