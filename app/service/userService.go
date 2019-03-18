@@ -225,14 +225,6 @@ func AuthenticateUser(user *model.User) *dto.AppResponseDto {
 	return utility.GetErrorResponse(common.MSG_MOBILE_MIN_LENGTH_ERROR)
 }
 
-//Logout logs out the given user and clears session
-func Logout(userID string) *dto.AppResponseDto {
-	if !utility.IsStringIDValid(userID) {
-		return utility.GetErrorResponse(common.MSG_INVALID_ID)
-	}
-	return utility.GetSuccessResponse("Logout Successful!!")
-}
-
 //FetchUserByMobileOrID fetch user info by mobile or ID
 func FetchUserByMobileOrID(key string, val string) *dto.AppResponseDto {
 	var value interface{} = val
@@ -324,20 +316,18 @@ func UpdateMobile(pwdDTO *dto.PasswordDto) *dto.AppResponseDto {
 }
 
 //SendOTP send 6-digit OTP to user mobile
-func SendOTP(mobile string, forgotPassword bool) *dto.AppResponseDto {
+func SendOTP(mobile string, forgotPassword bool) (*dto.AppResponseDto, string) {
 	if !utility.IsValidMobile(mobile) {
-		return utility.GetErrorResponse(common.MSG_MOBILE_MIN_LENGTH_ERROR)
+		return utility.GetErrorResponse(common.MSG_MOBILE_MIN_LENGTH_ERROR), ""
 	}
 	if forgotPassword {
 		userRepo := repo.NewUserRepository()
 		_, err := userRepo.FindOne("mobile", mobile)
 		if err != nil {
-			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_MOBILE)
+			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_MOBILE), ""
 		}
 	}
 	otp := utility.GenerateRandom(common.OTP_LOWER_BOUND, common.OTP_UPPER_BOUND)
 	fmt.Println("OTP=> ", otp)
-	//generate session id
-	//save to cache
-	return utility.GetSuccessResponse(otp)
+	return utility.GetSuccessResponse("OTP sent successfullt !!"), strconv.Itoa(otp)
 }

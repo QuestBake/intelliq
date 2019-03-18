@@ -45,15 +45,13 @@ func addUserRouters() {
 		userRoutes.POST("/bulk/add", controller.AddBulkUsers)
 		userRoutes.POST("/bulk/update", controller.UpdateBulkUsers)
 		userRoutes.POST("/login", controller.AuthenticateUser)
-		userRoutes.GET("/logout/:userId", controller.Logout)
+		userRoutes.GET("/logout", controller.Logout)
 		userRoutes.GET("/info/:key/:val", controller.ListUserByMobileOrID)
-
 		userRoutes.GET("/forgot/pwd/:mobile", controller.ForgotPasswordOTP)
 		userRoutes.GET("/new/mobile/:mobile", controller.SendUserOTP)
 		userRoutes.GET("/otp/verify/:otp", controller.VerifyOTP)
 		userRoutes.POST("/reset/pwd", controller.ResetUserPassword)
 		userRoutes.POST("/update/mobile", controller.UpdateUserMobile)
-
 	}
 }
 
