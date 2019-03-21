@@ -1,17 +1,17 @@
 package controller
 
 import (
-	"intelliq/app/cachestore"
-	"intelliq/app/dto"
-	"intelliq/app/enums"
-	"intelliq/app/security"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
+	"intelliq/app/cachestore"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/dto"
+	"intelliq/app/enums"
 	"intelliq/app/model"
+	"intelliq/app/security"
 	"intelliq/app/service"
 )
 
@@ -25,6 +25,10 @@ func AddNewUser(ctx *gin.Context) {
 		return
 	}
 	res := service.AddNewUser(&user)
+	if res.Status == enums.Status.SUCCESS {
+		cachestore.SetCache(ctx, user.Mobile, user, common.CACHE_OBJ_LONG_TIMEOUT)
+		cachestore.SetCache(ctx, user.UserID.String(), user, common.CACHE_OBJ_LONG_TIMEOUT)
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -38,6 +42,10 @@ func UpdateUserProfile(ctx *gin.Context) {
 		return
 	}
 	res := service.UpdateUser(&user)
+	if res.Status == enums.Status.SUCCESS {
+		cachestore.SetCache(ctx, user.Mobile, user, common.CACHE_OBJ_LONG_TIMEOUT)
+		cachestore.SetCache(ctx, user.UserID.String(), user, common.CACHE_OBJ_LONG_TIMEOUT)
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -82,6 +90,9 @@ func TransferRole(ctx *gin.Context) {
 		return
 	}
 	res := service.TransferUserRole(roleType, fromUserID, toUserID)
+	if res.Status == enums.Status.SUCCESS {
+		//TODO
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -103,6 +114,13 @@ func AddBulkUsers(ctx *gin.Context) {
 		return
 	}
 	res := service.AddBulkUser(users)
+	if res.Status == enums.Status.SUCCESS {
+		for i := 0; i < len(users); i++ {
+			u := users[i]
+			cachestore.SetCache(ctx, u.Mobile, u, common.CACHE_OBJ_LONG_TIMEOUT)
+			cachestore.SetCache(ctx, u.UserID.String(), u, common.CACHE_OBJ_LONG_TIMEOUT)
+		}
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -116,6 +134,13 @@ func UpdateBulkUsers(ctx *gin.Context) {
 		return
 	}
 	res := service.UpdateBulkUsers(users)
+	if res.Status == enums.Status.SUCCESS {
+		for i := 0; i < len(users); i++ {
+			u := users[i]
+			cachestore.SetCache(ctx, u.Mobile, u, common.CACHE_OBJ_LONG_TIMEOUT)
+			cachestore.SetCache(ctx, u.UserID.String(), u, common.CACHE_OBJ_LONG_TIMEOUT)
+		}
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -130,8 +155,17 @@ func ListUserByMobileOrID(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
-	res := service.FetchUserByMobileOrID(key, val)
-	ctx.JSON(http.StatusOK, res)
+	if cachestore.CheckCache(ctx, key) {
+		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, key))
+		ctx.JSON(http.StatusOK, res)
+	} else if cachestore.CheckCache(ctx, val) {
+		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, key))
+		ctx.JSON(http.StatusOK, res)
+	} else {
+		res := service.FetchUserByMobileOrID(key, val)
+		ctx.JSON(http.StatusOK, res)
+	}
+
 }
 
 //ResetUserPassword resets user password either forgotten or renew

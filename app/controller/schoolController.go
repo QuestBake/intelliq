@@ -5,8 +5,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"intelliq/app/cachestore"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/enums"
 	"intelliq/app/model"
 	"intelliq/app/service"
 )
@@ -21,6 +23,10 @@ func AddNewSchool(ctx *gin.Context) {
 		return
 	}
 	res := service.AddNewSchool(&school)
+	if res.Status == enums.Status.SUCCESS {
+		cachestore.SetCache(ctx, school.Code, school, common.CACHE_OBJ_LONG_TIMEOUT)
+		cachestore.SetCache(ctx, school.SchoolID.String(), school, common.CACHE_OBJ_LONG_TIMEOUT)
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -34,6 +40,10 @@ func UpdateSchoolProfile(ctx *gin.Context) {
 		return
 	}
 	res := service.UpdateSchool(&school)
+	if res.Status == enums.Status.SUCCESS {
+		cachestore.SetCache(ctx, school.Code, school, common.CACHE_OBJ_LONG_TIMEOUT)
+		cachestore.SetCache(ctx, school.SchoolID.String(), school, common.CACHE_OBJ_LONG_TIMEOUT)
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -49,6 +59,13 @@ func ListAllSchools(ctx *gin.Context) {
 func ListSchoolByCodeOrID(ctx *gin.Context) {
 	key := ctx.Param("key")
 	val := ctx.Param("val")
+	if cachestore.CheckCache(ctx, key) {
+		res := cachestore.GetCache(ctx, key)
+		ctx.JSON(http.StatusOK, res)
+	} else if cachestore.CheckCache(ctx, val) {
+		res := cachestore.GetCache(ctx, key)
+		ctx.JSON(http.StatusOK, res)
+	}
 	res := service.FetchSchoolByCodeOrID(key, val)
 	ctx.JSON(http.StatusOK, res)
 }
