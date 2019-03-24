@@ -1,12 +1,16 @@
 package common
 
 import (
+	"bufio"
+	"bytes"
 	"crypto/sha512"
 	"encoding/json"
 	"fmt"
 	"intelliq/app/dto"
+	"io"
 	"log"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -174,4 +178,34 @@ func GenerateUUID() string {
 	}
 	fmt.Printf("UUIDv4: %s\n", uuid)
 	return uuid.String()
+}
+
+//ReadFile reads file content
+func ReadFile(filePath string) []byte {
+	file, err := os.Open(filePath)
+	defer file.Close()
+	if err != nil {
+		fmt.Printf("Read File failed: %v\n", err)
+		return nil
+	}
+	reader := bufio.NewReader(file)
+	var buffer bytes.Buffer
+	for {
+		var line []byte
+		for {
+			line, err = reader.ReadBytes('\n')
+			buffer.Write(line)
+			if err != nil {
+				break
+			}
+		}
+		if err == io.EOF {
+			break
+		}
+	}
+	if err != io.EOF {
+		fmt.Printf("Read File failed: %v\n", err)
+		return nil
+	}
+	return buffer.Bytes()
 }

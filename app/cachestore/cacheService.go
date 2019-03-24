@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/security"
 	"net/http"
 	"strings"
 	"time"
@@ -24,28 +25,25 @@ func RegisterRequestValidation() gin.HandlerFunc {
 				return
 			}
 		}
-		sessionID := ctx.Request.Header.Get(common.REQUEST_SESSION_ID_KEY)
-		if len(sessionID) == 0 {
+		sessionToken, err := ctx.Cookie(common.COOKIE_SESSION_KEY)
+		if err != nil {
+			fmt.Println("COOKIE FETCH ERROR: ", err)
 			ctx.AbortWithStatusJSON(http.StatusForbidden,
 				common.GetErrorResponse(common.MSG_USER_SESSION_ERROR))
 			return
 		}
-		store, _ := ctx.Get(common.CACHE_STORE_KEY)
-		if store == nil {
-			panic("NO REDIS INSTANCE RUNNING...")
-		} else {
-			cacheStore := store.(*cache.Codec)
-			isSessionOK := cacheStore.Exists(sessionID)
-			if !isSessionOK {
-				ctx.AbortWithStatusJSON(http.StatusForbidden,
-					common.GetErrorResponse(common.MSG_USER_AUTH_ERROR))
-				return
-			}
+		if len(sessionToken) == 0 {
+			ctx.AbortWithStatusJSON(http.StatusForbidden,
+				common.GetErrorResponse(common.MSG_USER_SESSION_ERROR))
+			return
+		}
+		isSessionOK, status := security.VerifyToken(sessionToken)
+		if !isSessionOK {
+			ctx.AbortWithStatusJSON(http.StatusForbidden,
+				common.GetErrorResponse(common.MSG_USER_AUTH_ERROR+"\n"+status))
+			return
 		}
 		ctx.Next()
-		if !strings.Contains(requestURL, "logout") {
-			RefreshCache(ctx, sessionID)
-		}
 	}
 }
 
@@ -100,22 +98,6 @@ func RemoveCache(ctx *gin.Context, key string) error {
 	} else {
 		cacheStore := store.(*cache.Codec)
 		return cacheStore.Delete(key)
-	}
-}
-
-//RefreshCache resets session timeout value in cache
-func RefreshCache(ctx *gin.Context, key string) {
-	store, _ := ctx.Get(common.CACHE_STORE_KEY)
-	if store == nil {
-		panic("NO REDIS INSTANCE RUNNING...")
-	} else {
-		val := GetCache(ctx, key)
-		if val != nil {
-			SetCache(ctx, key, val,
-				common.CACHE_SESSION_TIMEOUT)
-		} else {
-			fmt.Println("Cache Refresh Failed :=> ", key)
-		}
 	}
 }
 
