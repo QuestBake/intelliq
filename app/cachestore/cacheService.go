@@ -4,48 +4,11 @@ import (
 	"fmt"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
-	"intelliq/app/security"
-	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/cache"
 )
-
-var skipURIS = []string{"login", "forgot"}
-
-//RegisterRequestValidation validates for valid sesionId for each request
-func RegisterRequestValidation() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		requestURL := ctx.Request.RequestURI
-		for _, uri := range skipURIS {
-			if strings.Contains(requestURL, uri) {
-				ctx.Next()
-				return
-			}
-		}
-		sessionToken, err := ctx.Cookie(common.COOKIE_SESSION_KEY)
-		if err != nil {
-			fmt.Println("COOKIE FETCH ERROR: ", err)
-			ctx.AbortWithStatusJSON(http.StatusForbidden,
-				common.GetErrorResponse(common.MSG_USER_SESSION_ERROR))
-			return
-		}
-		if len(sessionToken) == 0 {
-			ctx.AbortWithStatusJSON(http.StatusForbidden,
-				common.GetErrorResponse(common.MSG_USER_SESSION_ERROR))
-			return
-		}
-		isSessionOK, status := security.VerifyToken(sessionToken)
-		if !isSessionOK {
-			ctx.AbortWithStatusJSON(http.StatusForbidden,
-				common.GetErrorResponse(common.MSG_USER_AUTH_ERROR+"\n"+status))
-			return
-		}
-		ctx.Next()
-	}
-}
 
 //SetCache sets value in cache
 func SetCache(ctx *gin.Context, key string, val interface{}, minutes int) {

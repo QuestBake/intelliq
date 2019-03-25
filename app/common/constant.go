@@ -87,6 +87,12 @@ const ( // congfig params
 	CACHE_OBJ_LONG_TIMEOUT  = 60
 	CACHE_OBJ_SHORT_TIMEOUT = 30
 
+	APP_NAME     = "IntelliQ"
+	APP_PORT     = ":8080"
+	CACHE_PORT   = ":6379"
+	CACHE_DOMAIN = "localhost"
+
 	PRIVATE_KEY_FILEPATH = "/Users/lionheart/.ssh/appKey.priv"
-	APP_NAME             = "IntelliQ"
+	SSL_CERT_FILEPATH    = "/Users/lionheart/.ssh/ssl.crt"
+	SSL_KEY_FILEPATH     = "/Users/lionheart/.ssh/sslKey.key"
 )

@@ -6,11 +6,65 @@ import (
 	"encoding/pem"
 	"fmt"
 	"intelliq/app/common"
+	utility "intelliq/app/common"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gbrlsnchs/jwt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
+
+var skipURIS = []string{"login", "forgot"}
+
+//EnableSecurity enables app security
+func EnableSecurity(router *gin.Engine) {
+	router.Use(authenticateRequest())
+	router.Use(enableCors())
+}
+
+func enableCors() gin.HandlerFunc {
+	return cors.New(cors.Config{
+		AllowAllOrigins:        true,
+		AllowMethods:           []string{"PUT", "GET", "POST", "DELETE", "OPTIONS"},
+		AllowHeaders:           []string{"Origin", "Content-Type", "X-Requested-With", "Accept"},
+		AllowCredentials:       false,
+		MaxAge:                 12 * time.Hour,
+		AllowBrowserExtensions: true,
+	})
+}
+
+func authenticateRequest() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		requestURL := ctx.Request.RequestURI
+		for _, uri := range skipURIS {
+			if strings.Contains(requestURL, uri) {
+				ctx.Next()
+				return
+			}
+		}
+		sessionToken, err := ctx.Cookie(common.COOKIE_SESSION_KEY)
+		if err != nil {
+			fmt.Println("COOKIE FETCH ERROR: ", err)
+			ctx.AbortWithStatusJSON(http.StatusForbidden,
+				common.GetErrorResponse(common.MSG_USER_SESSION_ERROR))
+			return
+		}
+		if len(sessionToken) == 0 {
+			ctx.AbortWithStatusJSON(http.StatusForbidden,
+				common.GetErrorResponse(common.MSG_USER_SESSION_ERROR))
+			return
+		}
+		isSessionOK, status := VerifyToken(sessionToken)
+		if !isSessionOK {
+			ctx.AbortWithStatusJSON(http.StatusForbidden,
+				common.GetErrorResponse(common.MSG_USER_AUTH_ERROR+"\n"+status))
+			return
+		}
+		ctx.Next()
+	}
+}
 
 //GenerateToken generates JWT token
 func GenerateToken(subject, val string, expiry int) string {
@@ -37,7 +91,7 @@ func GenerateToken(subject, val string, expiry int) string {
 }
 
 func getPrivateKey() *ecdsa.PrivateKey {
-	privKeyString := common.ReadFile(common.PRIVATE_KEY_FILEPATH)
+	privKeyString := utility.ReadFile(common.PRIVATE_KEY_FILEPATH)
 	if privKeyString == nil {
 		fmt.Println("Could not fetch private key from file")
 		return nil
@@ -98,7 +152,7 @@ func VerifyToken(token string) (bool, string) {
 func SetCookie(ctx *gin.Context, body string, expiry int) {
 	ctx.SetCookie(common.COOKIE_SESSION_KEY, body,
 		expiry*60, "", "localhost",
-		false, true)
+		true, true)
 }
 
 //RemoveCookie removes cookie attribute
