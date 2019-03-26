@@ -1,13 +1,16 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
+	"intelliq/app/cachestore"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/enums"
 	"intelliq/app/model"
 	"intelliq/app/service"
 )
@@ -22,6 +25,10 @@ func AddNewGroup(ctx *gin.Context) {
 		return
 	}
 	res := service.AddNewGroup(&group)
+	if res.Status == enums.Status.SUCCESS {
+		cachestore.SetCache(ctx, group.Code, group, common.CACHE_OBJ_LONG_TIMEOUT)
+		cachestore.SetCache(ctx, group.GroupID.String(), group, common.CACHE_OBJ_LONG_TIMEOUT)
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -35,6 +42,10 @@ func UpdateGroup(ctx *gin.Context) {
 		return
 	}
 	res := service.UpdateGroup(&group)
+	if res.Status == enums.Status.SUCCESS {
+		cachestore.SetCache(ctx, group.Code, group, common.CACHE_OBJ_LONG_TIMEOUT)
+		cachestore.SetCache(ctx, group.GroupID.String(), group, common.CACHE_OBJ_LONG_TIMEOUT)
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -55,6 +66,12 @@ func ListAllGroups(ctx *gin.Context) {
 func ListGroupByCodeOrID(ctx *gin.Context) {
 	key := ctx.Param("key")
 	val := ctx.Param("val")
-	res := service.FetchGroupByCodeOrID(key, val)
-	ctx.JSON(http.StatusOK, res)
+	if cachestore.CheckCache(ctx, val) {
+		res := cachestore.GetCache(ctx, val)
+		fmt.Println("Reading group details from cache!!")
+		ctx.JSON(http.StatusOK, res)
+	} else {
+		res := service.FetchGroupByCodeOrID(key, val)
+		ctx.JSON(http.StatusOK, res)
+	}
 }
