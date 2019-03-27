@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -156,9 +155,11 @@ func ListUserByMobileOrID(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
-	if cachestore.CheckCache(ctx, val) {
-		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, val))
-		fmt.Println("Reading user details from cache!!")
+	if cachestore.CheckCache(ctx, key) {
+		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, key))
+		ctx.JSON(http.StatusOK, res)
+	} else if cachestore.CheckCache(ctx, val) {
+		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, key))
 		ctx.JSON(http.StatusOK, res)
 	} else {
 		res := service.FetchUserByMobileOrID(key, val)

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -59,13 +60,12 @@ func ListAllSchools(ctx *gin.Context) {
 func ListSchoolByCodeOrID(ctx *gin.Context) {
 	key := ctx.Param("key")
 	val := ctx.Param("val")
-	if cachestore.CheckCache(ctx, key) {
-		res := cachestore.GetCache(ctx, key)
+	if cachestore.CheckCache(ctx, val) {
+		res := cachestore.GetCache(ctx, val)
+		fmt.Println("Reading school details from cache!!")
 		ctx.JSON(http.StatusOK, res)
-	} else if cachestore.CheckCache(ctx, val) {
-		res := cachestore.GetCache(ctx, key)
+	} else {
+		res := service.FetchSchoolByCodeOrID(key, val)
 		ctx.JSON(http.StatusOK, res)
 	}
-	res := service.FetchSchoolByCodeOrID(key, val)
-	ctx.JSON(http.StatusOK, res)
 }
