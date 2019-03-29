@@ -1,12 +1,12 @@
 package config
 
 import (
-	"intelliq/app/cachestore"
 	"intelliq/app/common"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/cache"
 	"github.com/go-redis/redis"
+	log "github.com/sirupsen/logrus"
 	"github.com/vmihailenco/msgpack"
 )
 
@@ -14,7 +14,7 @@ import (
 func CacheConnect(router *gin.Engine) {
 	ring := redis.NewRing(&redis.RingOptions{
 		Addrs: map[string]string{
-			"localhost": ":6379",
+			common.CACHE_DOMAIN: common.CACHE_PORT,
 		},
 		//	DB:       10,
 		//		Password: "appPwd",
@@ -29,8 +29,8 @@ func CacheConnect(router *gin.Engine) {
 		},
 	}
 	if store != nil {
+		log.Info("Successfully connected to Redis at ", common.CACHE_DOMAIN, common.CACHE_PORT)
 		router.Use(addRedisToContext(store))
-		router.Use(cachestore.RegisterRequestValidation())
 	}
 }
 
