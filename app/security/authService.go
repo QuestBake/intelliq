@@ -26,12 +26,10 @@ func EnableSecurity(router *gin.Engine) {
 
 func enableCors() gin.HandlerFunc {
 	return cors.New(cors.Config{
-		AllowAllOrigins:        true,
-		AllowMethods:           []string{"PUT", "GET", "POST", "DELETE", "OPTIONS"},
-		AllowHeaders:           []string{"Origin", "Content-Type", "X-Requested-With", "Accept"},
-		AllowCredentials:       false,
-		MaxAge:                 12 * time.Hour,
-		AllowBrowserExtensions: true,
+		AllowCredentials: true,
+		AllowOrigins:     []string{"https://localhost:4200"},
+		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"X-Xsrf-Token", "Content-Type", "Accept"},
 	})
 }
 
@@ -44,23 +42,32 @@ func authenticateRequest() gin.HandlerFunc {
 				return
 			}
 		}
-		sessionToken, err := ctx.Cookie(common.COOKIE_SESSION_KEY)
-		if err != nil {
-			fmt.Println("COOKIE FETCH ERROR: ", err)
-			ctx.AbortWithStatusJSON(http.StatusForbidden,
-				common.GetErrorResponse(common.MSG_USER_SESSION_ERROR))
-			return
-		}
-		if len(sessionToken) == 0 {
-			ctx.AbortWithStatusJSON(http.StatusForbidden,
-				common.GetErrorResponse(common.MSG_USER_SESSION_ERROR))
-			return
-		}
-		isSessionOK, status := VerifyToken(sessionToken)
-		if !isSessionOK {
-			ctx.AbortWithStatusJSON(http.StatusForbidden,
-				common.GetErrorResponse(common.MSG_USER_AUTH_ERROR+"\n"+status))
-			return
+		if ctx.Request.Method != common.CORS_REQUEST_METHOD {
+			sessionToken, err := ctx.Cookie(common.COOKIE_SESSION_KEY)
+			if err != nil || len(sessionToken) == 0 {
+				fmt.Println("COOKIE FETCH ERROR: ", err)
+				ctx.AbortWithStatusJSON(http.StatusForbidden,
+					common.GetErrorResponse(common.MSG_USER_SESSION_ERROR))
+				return
+			}
+			isSessionOK, status := VerifyToken(sessionToken)
+			if !isSessionOK {
+				ctx.AbortWithStatusJSON(http.StatusForbidden,
+					common.GetErrorResponse(common.MSG_USER_AUTH_ERROR+"\n"+status))
+				return
+			}
+			xsrfHeader := ctx.Request.Header[common.HEADER_XSRF_KEY]
+			if len(xsrfHeader) == 0 {
+				ctx.AbortWithStatusJSON(http.StatusForbidden,
+					common.GetErrorResponse(common.MSG_USER_FORGERY_ERROR))
+				return
+			}
+			isUserOK, _ := VerifyToken(xsrfHeader[0])
+			if !isUserOK {
+				ctx.AbortWithStatusJSON(http.StatusForbidden,
+					common.GetErrorResponse(common.MSG_USER_FORGERY_ERROR))
+				return
+			}
 		}
 		ctx.Next()
 	}
@@ -143,7 +150,6 @@ func VerifyToken(token string) (bool, string) {
 			return false, status
 		}
 		return true, ""
-
 	}
 	return false, ""
 }
@@ -155,9 +161,21 @@ func SetCookie(ctx *gin.Context, body string, expiry int) {
 		true, true)
 }
 
+//SetSecureCookie generate XSRF cookie against CSRF attacks
+func SetSecureCookie(ctx *gin.Context, body string) {
+	ctx.SetCookie(common.COOKIE_XSRF_KEY, body,
+		common.COOKIE_SESSION_TIMEOUT*60, "/", "localhost",
+		true, false)
+}
+
 //RemoveCookie removes cookie attribute
 func RemoveCookie(ctx *gin.Context) {
+	fmt.Println("removed cookies")
 	ctx.SetCookie(common.COOKIE_SESSION_KEY, "",
 		-1, "", "localhost",
 		true, true)
+	ctx.SetCookie(common.COOKIE_XSRF_KEY, "",
+		-1, "", "localhost",
+		true, true)
+
 }

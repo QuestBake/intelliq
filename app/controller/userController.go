@@ -247,9 +247,13 @@ func AuthenticateUser(ctx *gin.Context) {
 		sessionToken := security.GenerateToken(
 			"UserID", user.UserID.Hex(),
 			common.USER_SESSION_TIMEOUT)
-		if len(sessionToken) > 0 {
+		xsrfToken := security.GenerateToken(
+			"NONCE", utility.GenerateUUID(),
+			common.USER_SESSION_TIMEOUT)
+		if len(sessionToken) > 0 && len(xsrfToken) > 0 {
 			security.SetCookie(ctx, sessionToken,
-				common.USER_SESSION_TIMEOUT)
+				common.COOKIE_SESSION_TIMEOUT)
+			security.SetSecureCookie(ctx, xsrfToken)
 		} else {
 			res = utility.GetErrorResponse(
 				"Could not create session!! Try later ...")

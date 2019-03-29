@@ -41,6 +41,7 @@ const ( // app msgs
 	MSG_MOBILE_UPDATE_SUCCESS      string = "Mobile number changed successfully !!"
 	MSG_USER_AUTH_ERROR            string = "User Authentication Error !!"
 	MSG_USER_SESSION_ERROR         string = "Session Not Found !!"
+	MSG_USER_FORGERY_ERROR         string = "Detected user forgery !! !!"
 )
 
 const ( // codes
@@ -80,9 +81,13 @@ const ( // congfig params
 	REQUEST_OTP_SESSION_ID_KEY  = "RQST_OTP_SESS_ID"
 	RESPONSE_OTP_SESSION_ID_KEY = "RESP_OTP_SESS_ID"
 
-	COOKIE_SESSION_KEY = "sessionToken"
+	COOKIE_SESSION_KEY  = "c_user"
+	COOKIE_XSRF_KEY     = "XSRF-TOKEN"
+	HEADER_XSRF_KEY     = "X-Xsrf-Token"
+	CORS_REQUEST_METHOD = "OPTIONS"
 
 	USER_SESSION_TIMEOUT    = 120 //minutes
+	COOKIE_SESSION_TIMEOUT  = 180
 	CACHE_OTP_TIMEOUT       = 5
 	CACHE_OBJ_LONG_TIMEOUT  = 60
 	CACHE_OBJ_SHORT_TIMEOUT = 30

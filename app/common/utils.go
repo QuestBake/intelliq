@@ -176,7 +176,6 @@ func GenerateUUID() string {
 		fmt.Printf(err.Error())
 		return ""
 	}
-	fmt.Printf("UUIDv4: %s\n", uuid)
 	return uuid.String()
 }
 
