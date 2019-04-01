@@ -1,17 +1,20 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin"
+
 	"intelliq/app/approuter"
 	"intelliq/app/common"
 	"intelliq/app/config"
+	"intelliq/app/logger"
 	"intelliq/app/security"
-
-	"github.com/gin-gonic/gin"
 )
 
 var router *gin.Engine
 
 func main() {
+	logger.Init(common.LOG_FILE, common.LOG_MAX_BYTES, common.LOG_BACKUP_COUNT)
+	defer logger.Close()
 	router = gin.Default()
 	if router != nil {
 		config.DBConnect()
