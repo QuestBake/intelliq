@@ -126,30 +126,30 @@ func FetchSelectedTeachers(schoolID string, roleType string) *dto.AppResponseDto
 }
 
 //TransferUserRole transfers user roles
-func TransferUserRole(roleType string, fromUserID string, toUserID string) *dto.AppResponseDto {
+func TransferUserRole(roleType string, fromUserID string, toUserID string) (*dto.AppResponseDto, []string) {
 	role, errs := strconv.Atoi(roleType)
 	if errs != nil || role < common.MIN_VALID_ROLE ||
 		role > common.MAX_VALID_ROLE {
-		return utility.GetErrorResponse(common.MSG_NO_ROLE)
+		return utility.GetErrorResponse(common.MSG_NO_ROLE), nil
 	}
 	if !utility.IsStringIDValid(fromUserID) || !utility.IsStringIDValid(toUserID) {
-		return utility.GetErrorResponse(common.MSG_INVALID_ID)
+		return utility.GetErrorResponse(common.MSG_INVALID_ID), nil
 	}
 	userRepo := repo.NewUserRepository()
-	msg, err := userRepo.TransferRole(enums.UserRole(role),
+	msg, mobiles, err := userRepo.TransferRole(enums.UserRole(role),
 		bson.ObjectIdHex(fromUserID), bson.ObjectIdHex(toUserID))
 	if err != nil || len(msg) > 0 {
 		if len(msg) > 0 {
-			return utility.GetErrorResponse(msg)
+			return utility.GetErrorResponse(msg), nil
 		}
 		fmt.Println(err.Error())
 		errorMsg := utility.GetErrorMsg(err)
 		if len(errorMsg) > 0 {
-			return utility.GetErrorResponse(errorMsg)
+			return utility.GetErrorResponse(errorMsg), nil
 		}
-		return utility.GetErrorResponse(common.MSG_UPDATE_ERROR)
+		return utility.GetErrorResponse(common.MSG_UPDATE_ERROR), nil
 	}
-	return utility.GetSuccessResponse(common.MSG_UPDATE_SUCCESS)
+	return utility.GetSuccessResponse(common.MSG_UPDATE_SUCCESS), mobiles
 }
 
 //RemoveUserFromSchool transfers user roles

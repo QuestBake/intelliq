@@ -89,9 +89,15 @@ func TransferRole(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
-	res := service.TransferUserRole(roleType, fromUserID, toUserID)
+	res, mobiles := service.TransferUserRole(roleType, fromUserID, toUserID)
 	if res.Status == enums.Status.SUCCESS {
 		//TODO
+		if mobiles != nil {
+			cachestore.RemoveCache(ctx, mobiles[0])
+			cachestore.RemoveCache(ctx, mobiles[1])
+		}
+		cachestore.RemoveCache(ctx, fromUserID)
+		cachestore.RemoveCache(ctx, toUserID)
 	}
 	ctx.JSON(http.StatusOK, res)
 }
