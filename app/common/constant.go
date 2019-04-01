@@ -73,6 +73,7 @@ const ( // congfig params
 	DEF_REQUESTS_PAGE  = 0
 	QUES_BATCH_SIZE    = 10000
 
+	OTP_LENGTH      = 6
 	OTP_UPPER_BOUND = 989899
 	OTP_LOWER_BOUND = 101010
 

@@ -41,8 +41,8 @@ type Standard struct {
 
 //Subject subject model
 type Subject struct {
-	Title    string        `json:"title" bson:"title"`
-	Reviewer bson.ObjectId `json:"reviewerId" bson:"reviewer_id,omitempty"`
-	Topics   []string      `json:"topics" bson:"topics"`
-	Tags     []string      `json:"tags" bson:"tags"`
+	Title    string      `json:"title" bson:"title"`
+	Reviewer Contributor `json:"reviewer" bson:"reviewer"`
+	Topics   []string    `json:"topics" bson:"topics"`
+	Tags     []string    `json:"tags" bson:"tags"`
 }

@@ -329,5 +329,5 @@ func SendOTP(mobile string, forgotPassword bool) (*dto.AppResponseDto, string) {
 	}
 	otp := utility.GenerateRandom(common.OTP_LOWER_BOUND, common.OTP_UPPER_BOUND)
 	fmt.Println("OTP=> ", otp)
-	return utility.GetSuccessResponse("OTP sent successfullt !!"), strconv.Itoa(otp)
+	return utility.GetSuccessResponse("OTP sent successfully !!"), strconv.Itoa(otp)
 }

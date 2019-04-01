@@ -20,8 +20,8 @@ var skipURIS = []string{"login", "forgot"}
 
 //EnableSecurity enables app security
 func EnableSecurity(router *gin.Engine) {
-	router.Use(authenticateRequest())
 	router.Use(enableCors())
+	router.Use(authenticateRequest())
 }
 
 func enableCors() gin.HandlerFunc {
@@ -47,25 +47,28 @@ func authenticateRequest() gin.HandlerFunc {
 			if err != nil || len(sessionToken) == 0 {
 				fmt.Println("COOKIE FETCH ERROR: ", err)
 				ctx.AbortWithStatusJSON(http.StatusForbidden,
-					common.GetErrorResponse(common.MSG_USER_SESSION_ERROR))
+					common.MSG_USER_SESSION_ERROR)
 				return
 			}
 			isSessionOK, status := VerifyToken(sessionToken)
 			if !isSessionOK {
+				fmt.Println("Session Token=> falied verification = ", status)
 				ctx.AbortWithStatusJSON(http.StatusForbidden,
-					common.GetErrorResponse(common.MSG_USER_AUTH_ERROR+"\n"+status))
+					common.MSG_USER_AUTH_ERROR+"\n"+status)
 				return
 			}
 			xsrfHeader := ctx.Request.Header[common.HEADER_XSRF_KEY]
 			if len(xsrfHeader) == 0 {
-				ctx.AbortWithStatusJSON(http.StatusForbidden,
-					common.GetErrorResponse(common.MSG_USER_FORGERY_ERROR))
+				fmt.Println("xsrfHeader failed no header")
+				ctx.AbortWithStatusJSON(http.StatusOK,
+					common.MSG_USER_FORGERY_ERROR)
 				return
 			}
 			isUserOK, _ := VerifyToken(xsrfHeader[0])
 			if !isUserOK {
+				fmt.Println("xsrfHeader=> failed veriffication")
 				ctx.AbortWithStatusJSON(http.StatusForbidden,
-					common.GetErrorResponse(common.MSG_USER_FORGERY_ERROR))
+					common.MSG_USER_FORGERY_ERROR)
 				return
 			}
 		}
@@ -177,5 +180,4 @@ func RemoveCookie(ctx *gin.Context) {
 	ctx.SetCookie(common.COOKIE_XSRF_KEY, "",
 		-1, "", "localhost",
 		true, true)
-
 }

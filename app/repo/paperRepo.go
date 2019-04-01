@@ -36,12 +36,13 @@ func (repo *testPaperRepository) Update(testPaper *model.TestPaper) error {
 	return err
 }
 
-func (repo *testPaperRepository) FindAll(teacherID bson.ObjectId) (model.TestPapers, error) {
+func (repo *testPaperRepository) FindAll(teacherID bson.ObjectId,
+	paperStatus enums.TestPaperStatus) (model.TestPapers, error) {
 	defer db.CloseSession(repo.coll)
 	var drafts model.TestPapers
 	filter := bson.M{
 		"teacherId": teacherID,
-		"status":    enums.CurrentTestStatus.DRAFT,
+		"status":    paperStatus,
 	}
 	cols := bson.M{"_id": 1, "tag": 1, "lastModifiedDate": 1}
 	err := repo.coll.Find(filter).Select(cols).All(&drafts)
@@ -51,11 +52,11 @@ func (repo *testPaperRepository) FindAll(teacherID bson.ObjectId) (model.TestPap
 	return drafts, nil
 }
 
-func (repo *testPaperRepository) FindOne(draftID bson.ObjectId) (*model.TestPaper, error) {
+func (repo *testPaperRepository) FindOne(testID bson.ObjectId) (*model.TestPaper, error) {
 	defer db.CloseSession(repo.coll)
 	var testPaper model.TestPaper
 	filter := bson.M{
-		"_id": draftID,
+		"_id": testID,
 	}
 	err := repo.coll.Find(filter).One(&testPaper)
 	if err != nil {

@@ -27,7 +27,6 @@ func addMetaRouters() {
 		metaRoutes.POST("/add", controller.AddMetaData)
 		metaRoutes.PUT("/update", controller.UpdateMetaData)
 		metaRoutes.DELETE("/remove", controller.RemoveMetaData)
-
 	}
 }
 
@@ -48,7 +47,7 @@ func addUserRouters() {
 		userRoutes.GET("/logout", controller.Logout)
 		userRoutes.GET("/info/:key/:val", controller.ListUserByMobileOrID)
 		userRoutes.GET("/forgot/pwd/:mobile", controller.ForgotPasswordOTP)
-		userRoutes.GET("/new/mobile/:mobile", controller.SendUserOTP)
+		userRoutes.GET("/new/mobile/:mobile", controller.UpdateMobileOTP)
 		userRoutes.GET("/otp/verify/:otp", controller.VerifyOTP)
 		userRoutes.POST("/reset/pwd", controller.ResetUserPassword)
 		userRoutes.POST("/update/mobile", controller.UpdateUserMobile)
@@ -109,6 +108,7 @@ func addQuestionPaperRouters() {
 		paperRoutes.GET("/template/:groupCode/:templateId", controller.FindTemplate)
 		paperRoutes.DELETE("/template/:groupCode/:testId", controller.RemoveTemplate)
 
+		paperRoutes.GET("/release/:groupCode/:teacherId", controller.GetReleasePaperSuggestions)
 		paperRoutes.GET("/drafts/:groupCode/:teacherId", controller.GetDraftSuggestions)
 		paperRoutes.GET("/draft/:groupCode/:testId", controller.FindDraft)
 		paperRoutes.DELETE("/draft/:groupCode/:testId", controller.RemoveDraft)
