@@ -82,7 +82,7 @@ func SaveTestDetails(testDto *dto.TestDto, saveAsDraft bool) *dto.AppResponseDto
 func saveTemplate(template *model.Template, wg *sync.WaitGroup,
 	tempChannel chan<- string) {
 	wg.Add(1)
-	defer cleanPanic(tempChannel, wg)
+	defer recoverPanic(tempChannel, wg)
 	if template == nil {
 		tempChannel <- ""
 	}
@@ -117,15 +117,14 @@ func saveTemplate(template *model.Template, wg *sync.WaitGroup,
 func saveTestPaper(testPaper *model.TestPaper, saveAsDraft bool,
 	wg *sync.WaitGroup, paperChannel chan<- string) {
 	wg.Add(1)
-	defer cleanPanic(paperChannel, wg)
+	defer recoverPanic(paperChannel, wg)
 	if testPaper == nil {
 		paperChannel <- ""
 	}
 	testPaper.LastModifiedDate = time.Now().UTC()
+	testPaper.Status = enums.CurrentTestStatus.RELEASE
 	if saveAsDraft {
 		testPaper.Status = enums.CurrentTestStatus.DRAFT
-	} else {
-		testPaper.Status = enums.CurrentTestStatus.RELEASE
 	}
 	testPaperRepo := repo.NewTestPaperRepository(testPaper.GroupCode)
 	if testPaperRepo == nil {
@@ -150,21 +149,26 @@ func saveTestPaper(testPaper *model.TestPaper, saveAsDraft bool,
 	paperChannel <- common.MSG_SAVE_SUCCESS
 }
 
-func cleanPanic(channel chan<- string, wg *sync.WaitGroup) {
+func recoverPanic(channel chan<- string, wg *sync.WaitGroup) {
 	wg.Done()
 	if rec := recover(); rec != nil {
 		channel <- common.MSG_REQUEST_FAILED
 	}
 }
 
-//FetchAllDrafts gets all drafted test papers under a teacher
-func FetchAllDrafts(groupCode, teacherID string) *dto.AppResponseDto {
+//FetchTestPapers gets all drafted/released test papers under a teacher
+func FetchTestPapers(groupCode, teacherID string, fectchDraft bool) *dto.AppResponseDto {
 	if utility.IsStringIDValid(teacherID) {
 		testPaperRepo := repo.NewTestPaperRepository(groupCode)
 		if testPaperRepo == nil {
 			return utility.GetErrorResponse(common.MSG_UNATHORIZED_ACCESS)
 		}
-		drafts, err := testPaperRepo.FindAll(bson.ObjectIdHex(teacherID))
+		status := enums.CurrentTestStatus.RELEASE
+		if fectchDraft {
+			status = enums.CurrentTestStatus.DRAFT
+		}
+		papers, err := testPaperRepo.FindAll(bson.ObjectIdHex(teacherID),
+			status)
 		if err != nil {
 			fmt.Println(err.Error())
 			errorMsg := utility.GetErrorMsg(err)
@@ -173,7 +177,7 @@ func FetchAllDrafts(groupCode, teacherID string) *dto.AppResponseDto {
 			}
 			return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 		}
-		return utility.GetSuccessResponse(drafts)
+		return utility.GetSuccessResponse(papers)
 	}
 	return utility.GetErrorResponse(common.MSG_INVALID_ID)
 }

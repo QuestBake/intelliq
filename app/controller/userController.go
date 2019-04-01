@@ -172,6 +172,7 @@ func ForgotPasswordOTP(ctx *gin.Context) {
 			if len(sessionToken) > 0 {
 				security.SetCookie(ctx, sessionToken,
 					common.CACHE_OTP_TIMEOUT)
+				security.SetSecureCookie(ctx, sessionToken)
 				ctx.JSON(http.StatusOK, res)
 				return
 			}
@@ -181,8 +182,8 @@ func ForgotPasswordOTP(ctx *gin.Context) {
 	}
 }
 
-//SendUserOTP sends OTP to new mobile number
-func SendUserOTP(ctx *gin.Context) {
+//UpdateMobileOTP sends OTP to new mobile number
+func UpdateMobileOTP(ctx *gin.Context) {
 	mobile := ctx.Param("mobile")
 	res, otp := service.SendOTP(mobile, false)
 	if res.Status == enums.Status.SUCCESS {
@@ -210,7 +211,7 @@ func createOTPSession(ctx *gin.Context, otp string) bool {
 //VerifyOTP verifies OTP
 func VerifyOTP(ctx *gin.Context) {
 	userOTP := ctx.Param("otp")
-	if len(userOTP) != 6 {
+	if len(userOTP) != common.OTP_LENGTH {
 		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 	} else {

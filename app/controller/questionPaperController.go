@@ -53,7 +53,15 @@ func DraftTestPapers(ctx *gin.Context) {
 func GetDraftSuggestions(ctx *gin.Context) {
 	groupCode := ctx.Param("groupCode")
 	teacherID := ctx.Param("teacherId")
-	res := service.FetchAllDrafts(groupCode, teacherID)
+	res := service.FetchTestPapers(groupCode, teacherID, true)
+	ctx.JSON(http.StatusOK, res)
+}
+
+//GetReleasePaperSuggestions loads all released Testpapers
+func GetReleasePaperSuggestions(ctx *gin.Context) {
+	groupCode := ctx.Param("groupCode")
+	teacherID := ctx.Param("teacherId")
+	res := service.FetchTestPapers(groupCode, teacherID, false)
 	ctx.JSON(http.StatusOK, res)
 }
 
