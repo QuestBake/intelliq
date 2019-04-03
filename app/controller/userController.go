@@ -25,10 +25,6 @@ func AddNewUser(ctx *gin.Context) {
 		return
 	}
 	res := service.AddNewUser(&user)
-	if res.Status == enums.Status.SUCCESS {
-		cachestore.SetCache(ctx, user.Mobile, user, common.CACHE_OBJ_LONG_TIMEOUT)
-		cachestore.SetCache(ctx, user.UserID.String(), user, common.CACHE_OBJ_LONG_TIMEOUT)
-	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -43,8 +39,12 @@ func UpdateUserProfile(ctx *gin.Context) {
 	}
 	res := service.UpdateUser(&user)
 	if res.Status == enums.Status.SUCCESS {
-		cachestore.SetCache(ctx, user.Mobile, user, common.CACHE_OBJ_LONG_TIMEOUT)
-		cachestore.SetCache(ctx, user.UserID.String(), user, common.CACHE_OBJ_LONG_TIMEOUT)
+		if cachestore.CheckCache(ctx, user.Mobile) {
+			cachestore.SetCache(ctx, user.Mobile, user, common.CACHE_OBJ_LONG_TIMEOUT)
+		}
+		if cachestore.CheckCache(ctx, user.UserID.String()) {
+			cachestore.SetCache(ctx, user.UserID.String(), user, common.CACHE_OBJ_LONG_TIMEOUT)
+		}
 	}
 	ctx.JSON(http.StatusOK, res)
 }
@@ -120,13 +120,6 @@ func AddBulkUsers(ctx *gin.Context) {
 		return
 	}
 	res := service.AddBulkUser(users)
-	if res.Status == enums.Status.SUCCESS {
-		for i := 0; i < len(users); i++ {
-			u := users[i]
-			cachestore.SetCache(ctx, u.Mobile, u, common.CACHE_OBJ_LONG_TIMEOUT)
-			cachestore.SetCache(ctx, u.UserID.String(), u, common.CACHE_OBJ_LONG_TIMEOUT)
-		}
-	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -140,13 +133,6 @@ func UpdateBulkUsers(ctx *gin.Context) {
 		return
 	}
 	res := service.UpdateBulkUsers(users)
-	if res.Status == enums.Status.SUCCESS {
-		for i := 0; i < len(users); i++ {
-			u := users[i]
-			cachestore.SetCache(ctx, u.Mobile, u, common.CACHE_OBJ_LONG_TIMEOUT)
-			cachestore.SetCache(ctx, u.UserID.String(), u, common.CACHE_OBJ_LONG_TIMEOUT)
-		}
-	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -161,14 +147,14 @@ func ListUserByMobileOrID(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
-	if cachestore.CheckCache(ctx, key) {
-		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, key))
-		ctx.JSON(http.StatusOK, res)
-	} else if cachestore.CheckCache(ctx, val) {
-		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, key))
+	if cachestore.CheckCache(ctx, val) {
+		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, val))
 		ctx.JSON(http.StatusOK, res)
 	} else {
 		res := service.FetchUserByMobileOrID(key, val)
+		if res.Status == enums.Status.SUCCESS && res.Body != nil {
+			cachestore.SetCache(ctx, val, res.Body, common.CACHE_OBJ_LONG_TIMEOUT)
+		}
 		ctx.JSON(http.StatusOK, res)
 	}
 

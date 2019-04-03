@@ -24,10 +24,6 @@ func AddNewSchool(ctx *gin.Context) {
 		return
 	}
 	res := service.AddNewSchool(&school)
-	if res.Status == enums.Status.SUCCESS {
-		cachestore.SetCache(ctx, school.Code, school, common.CACHE_OBJ_LONG_TIMEOUT)
-		cachestore.SetCache(ctx, school.SchoolID.String(), school, common.CACHE_OBJ_LONG_TIMEOUT)
-	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -42,8 +38,12 @@ func UpdateSchoolProfile(ctx *gin.Context) {
 	}
 	res := service.UpdateSchool(&school)
 	if res.Status == enums.Status.SUCCESS {
-		cachestore.SetCache(ctx, school.Code, school, common.CACHE_OBJ_LONG_TIMEOUT)
-		cachestore.SetCache(ctx, school.SchoolID.String(), school, common.CACHE_OBJ_LONG_TIMEOUT)
+		if cachestore.CheckCache(ctx, school.Code) {
+			cachestore.SetCache(ctx, school.Code, school, common.CACHE_OBJ_LONG_TIMEOUT)
+		}
+		if cachestore.CheckCache(ctx, school.SchoolID.String()) {
+			cachestore.SetCache(ctx, school.SchoolID.String(), school, common.CACHE_OBJ_LONG_TIMEOUT)
+		}
 	}
 	ctx.JSON(http.StatusOK, res)
 }
@@ -61,11 +61,14 @@ func ListSchoolByCodeOrID(ctx *gin.Context) {
 	key := ctx.Param("key")
 	val := ctx.Param("val")
 	if cachestore.CheckCache(ctx, val) {
-		res := cachestore.GetCache(ctx, val)
+		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, val))
 		fmt.Println("Reading school details from cache!!")
 		ctx.JSON(http.StatusOK, res)
 	} else {
 		res := service.FetchSchoolByCodeOrID(key, val)
+		if res.Status == enums.Status.SUCCESS && res.Body != nil {
+			cachestore.SetCache(ctx, val, res.Body, common.CACHE_OBJ_LONG_TIMEOUT)
+		}
 		ctx.JSON(http.StatusOK, res)
 	}
 }
