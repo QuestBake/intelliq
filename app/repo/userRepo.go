@@ -101,7 +101,7 @@ func (repo *userRepository) FindAllteachersUnderReviewer(schoolID bson.ObjectId,
 }
 
 func (repo *userRepository) TransferRole(roleType enums.UserRole,
-	fromUserID bson.ObjectId, toUserID bson.ObjectId) (string, error) {
+	fromUserID bson.ObjectId, toUserID bson.ObjectId) (string, []string, error) {
 	defer db.CloseSession(repo.coll)
 	var users model.Users
 	fromUserFilter := bson.M{
@@ -121,11 +121,11 @@ func (repo *userRepository) TransferRole(roleType enums.UserRole,
 
 	err := repo.coll.Find(orFilter).Select(cols).All(&users)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	count := len(users)
 	if count < 2 {
-		return common.MSG_INSUFFICIENT_USER_COUNT + strconv.Itoa(count), nil
+		return common.MSG_INSUFFICIENT_USER_COUNT + strconv.Itoa(count), nil, nil
 	}
 	bulk := repo.coll.Bulk()
 	for _, user := range users {
@@ -150,9 +150,10 @@ func (repo *userRepository) TransferRole(roleType enums.UserRole,
 	}
 	_, errs := bulk.Run()
 	if errs != nil {
-		return "", err
+		return "", nil, errs
 	}
-	return "", nil
+	mobiles := []string{users[0].Mobile, users[1].Mobile}
+	return "", mobiles, nil
 }
 
 func (repo *userRepository) RemoveSchoolTeacher(schoolID bson.ObjectId,

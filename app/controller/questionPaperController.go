@@ -1,13 +1,14 @@
 package controller
 
 import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+
 	"intelliq/app/common"
 	utility "intelliq/app/common"
 	"intelliq/app/dto"
 	"intelliq/app/service"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
 //GenerateQuestionPaper generates question paper as per criteria

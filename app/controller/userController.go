@@ -1,17 +1,17 @@
 package controller
 
 import (
-	"intelliq/app/cachestore"
-	"intelliq/app/dto"
-	"intelliq/app/enums"
-	"intelliq/app/security"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
+	"intelliq/app/cachestore"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/dto"
+	"intelliq/app/enums"
 	"intelliq/app/model"
+	"intelliq/app/security"
 	"intelliq/app/service"
 )
 
@@ -38,6 +38,14 @@ func UpdateUserProfile(ctx *gin.Context) {
 		return
 	}
 	res := service.UpdateUser(&user)
+	if res.Status == enums.Status.SUCCESS {
+		if cachestore.CheckCache(ctx, user.Mobile) {
+			cachestore.SetCache(ctx, user.Mobile, user, common.CACHE_OBJ_LONG_TIMEOUT)
+		}
+		if cachestore.CheckCache(ctx, user.UserID.String()) {
+			cachestore.SetCache(ctx, user.UserID.String(), user, common.CACHE_OBJ_LONG_TIMEOUT)
+		}
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -81,7 +89,16 @@ func TransferRole(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
-	res := service.TransferUserRole(roleType, fromUserID, toUserID)
+	res, mobiles := service.TransferUserRole(roleType, fromUserID, toUserID)
+	if res.Status == enums.Status.SUCCESS {
+		//TODO
+		if mobiles != nil {
+			cachestore.RemoveCache(ctx, mobiles[0])
+			cachestore.RemoveCache(ctx, mobiles[1])
+		}
+		cachestore.RemoveCache(ctx, fromUserID)
+		cachestore.RemoveCache(ctx, toUserID)
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -130,8 +147,17 @@ func ListUserByMobileOrID(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
-	res := service.FetchUserByMobileOrID(key, val)
-	ctx.JSON(http.StatusOK, res)
+	if cachestore.CheckCache(ctx, val) {
+		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, val))
+		ctx.JSON(http.StatusOK, res)
+	} else {
+		res := service.FetchUserByMobileOrID(key, val)
+		if res.Status == enums.Status.SUCCESS && res.Body != nil {
+			cachestore.SetCache(ctx, val, res.Body, common.CACHE_OBJ_LONG_TIMEOUT)
+		}
+		ctx.JSON(http.StatusOK, res)
+	}
+
 }
 
 //ResetUserPassword resets user password either forgotten or renew
