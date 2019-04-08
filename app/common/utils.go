@@ -159,7 +159,7 @@ func GenerateHash(obj interface{}) string {
 	return fmt.Sprintf("%x", sha512.Sum(nil))
 }
 
-//ObjectToJSON converts obj to json string
+//ObjectToJSON converts obj to json bytes
 func ObjectToJSON(obj interface{}) []byte {
 	json, err := json.Marshal(obj)
 	if err != nil {
@@ -167,6 +167,21 @@ func ObjectToJSON(obj interface{}) []byte {
 		return nil
 	}
 	return json
+}
+
+//ObjectToJSONString converts obj to json string
+func ObjectToJSONString(obj interface{}) string {
+	data, err := json.Marshal(obj)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	return string(data)
+}
+
+//JSONToObject converts json to object string
+func JSONToObject(data string, obj *interface{}) interface{} {
+	return json.Unmarshal([]byte(data), obj)
 }
 
 //GenerateUUID generates random uuid

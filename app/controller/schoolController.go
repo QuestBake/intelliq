@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -37,12 +38,14 @@ func UpdateSchoolProfile(ctx *gin.Context) {
 		return
 	}
 	res := service.UpdateSchool(&school)
-	if res.Status == enums.Status.SUCCESS {
+	if res.Status == enums.Status.SUCCESS && res.Body != nil {
 		if cachestore.CheckCache(ctx, school.Code) {
-			cachestore.SetCache(ctx, school.Code, school, common.CACHE_OBJ_LONG_TIMEOUT)
+			cachestore.SetCache(ctx, school.Code, school,
+				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 		if cachestore.CheckCache(ctx, school.SchoolID.String()) {
-			cachestore.SetCache(ctx, school.SchoolID.String(), school, common.CACHE_OBJ_LONG_TIMEOUT)
+			cachestore.SetCache(ctx, school.SchoolID.String(), school,
+				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 	}
 	ctx.JSON(http.StatusOK, res)
@@ -61,13 +64,16 @@ func ListSchoolByCodeOrID(ctx *gin.Context) {
 	key := ctx.Param("key")
 	val := ctx.Param("val")
 	if cachestore.CheckCache(ctx, val) {
-		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, val))
+		cacheVal := cachestore.GetCache(ctx, val).(string)
+		var school model.School
+		json.Unmarshal([]byte(cacheVal), &school)
 		fmt.Println("Reading school details from cache!!")
-		ctx.JSON(http.StatusOK, res)
+		ctx.JSON(http.StatusOK, utility.GetSuccessResponse(school))
 	} else {
 		res := service.FetchSchoolByCodeOrID(key, val)
 		if res.Status == enums.Status.SUCCESS && res.Body != nil {
-			cachestore.SetCache(ctx, val, res.Body, common.CACHE_OBJ_LONG_TIMEOUT)
+			cachestore.SetCache(ctx, val, res.Body,
+				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 		ctx.JSON(http.StatusOK, res)
 	}

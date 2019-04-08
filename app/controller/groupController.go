@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -38,12 +39,14 @@ func UpdateGroup(ctx *gin.Context) {
 		return
 	}
 	res := service.UpdateGroup(&group)
-	if res.Status == enums.Status.SUCCESS {
+	if res.Status == enums.Status.SUCCESS && res.Body != nil {
 		if cachestore.CheckCache(ctx, group.Code) {
-			cachestore.SetCache(ctx, group.Code, group, common.CACHE_OBJ_LONG_TIMEOUT)
+			cachestore.SetCache(ctx, group.Code, group,
+				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 		if cachestore.CheckCache(ctx, group.GroupID.String()) {
-			cachestore.SetCache(ctx, group.GroupID.String(), group, common.CACHE_OBJ_LONG_TIMEOUT)
+			cachestore.SetCache(ctx, group.GroupID.String(), group,
+				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 	}
 	ctx.JSON(http.StatusOK, res)
@@ -67,13 +70,16 @@ func ListGroupByCodeOrID(ctx *gin.Context) {
 	key := ctx.Param("key")
 	val := ctx.Param("val")
 	if cachestore.CheckCache(ctx, val) {
-		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, val))
+		cacheVal := cachestore.GetCache(ctx, val).(string)
+		var group model.Group
+		json.Unmarshal([]byte(cacheVal), &group)
 		fmt.Println("Reading group details from cache!!")
-		ctx.JSON(http.StatusOK, res)
+		ctx.JSON(http.StatusOK, utility.GetSuccessResponse(group))
 	} else {
 		res := service.FetchGroupByCodeOrID(key, val)
 		if res.Status == enums.Status.SUCCESS && res.Body != nil {
-			cachestore.SetCache(ctx, val, res.Body, common.CACHE_OBJ_LONG_TIMEOUT)
+			cachestore.SetCache(ctx, val, res.Body,
+				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 		ctx.JSON(http.StatusOK, res)
 	}

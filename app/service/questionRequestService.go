@@ -60,7 +60,7 @@ func RequestApprovedQuestionUpdate(question *model.Question) *dto.AppResponseDto
 		question.OriginID = &_id
 		question.QuestionID = ""
 		question.CreateDate = time.Now().UTC()
-		updateQuestionAttributes(question, enums.CurrentQuestionStatus.TRANSIT, true, true)
+		updateQuestionAttributes(question, enums.CurrentQuestionStatus.TRANSIT, true, false)
 		break
 	case enums.CurrentQuestionStatus.REJECTED: // resubmit of approved ques which has been rejected before
 		if !utility.IsPrimaryIDValid(*question.OriginID) { //checks for validity of original question for this updated version
@@ -232,10 +232,8 @@ func FetchReviewerRequests(requestDto *dto.QuesRequestDto) *dto.AppResponseDto {
 
 //FetchTeacherRequests fetches all ques with either od status : APPROVED / REJECTED/ PENDING for a teacher
 func FetchTeacherRequests(requestDto *dto.QuesRequestDto) *dto.AppResponseDto {
-	errResponse := validateRequest(requestDto.GroupCode,
-		requestDto.Subject, requestDto.Standard)
-	if errResponse != nil {
-		return errResponse
+	if !utility.IsValidGroupCode(requestDto.GroupCode) {
+		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
 	}
 	if !utility.IsPrimaryIDValid(requestDto.SchoolID) ||
 		!utility.IsPrimaryIDValid(requestDto.UserID) {

@@ -23,7 +23,7 @@ func FetchOneQuestion(groupCode string, quesID string) *dto.AppResponseDto {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
 	quesRepo := repo.NewQuestionRepository(groupCode)
-	if quesRepo == nil { // panic - recover can be used here .....
+	if quesRepo == nil {
 		return utility.GetErrorResponse(common.MSG_UNATHORIZED_ACCESS)
 	}
 	ques, err := quesRepo.FindOne(bson.ObjectIdHex(quesID))
@@ -65,10 +65,8 @@ func RemoveQuestion(question *model.Question) *dto.AppResponseDto {
 
 //FetchApprovedQuestions fetches all approved ques excluding requester's
 func FetchApprovedQuestions(requestDto *dto.QuesRequestDto) *dto.AppResponseDto {
-	errResponse := validateRequest(requestDto.GroupCode,
-		requestDto.Subject, requestDto.Standard)
-	if errResponse != nil {
-		return errResponse
+	if !utility.IsValidGroupCode(requestDto.GroupCode) {
+		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
 	}
 	if !utility.IsPrimaryIDValid(requestDto.UserID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
