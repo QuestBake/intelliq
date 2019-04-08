@@ -88,6 +88,9 @@ func (repo *questionRepository) FindOne(quesID bson.ObjectId) (*model.Question, 
 	var question model.Question
 	filter := bson.M{
 		"_id": quesID,
+		"status": bson.M{
+			"$ne": enums.CurrentQuestionStatus.OBSOLETE,
+		},
 	}
 	err := repo.coll.Find(filter).One(&question)
 	if err != nil {
@@ -100,10 +103,7 @@ func (repo *questionRepository) FindApprovedQuestions(
 	quesRequestDto *dto.QuesRequestDto) (model.Questions, error) {
 	defer db.CloseSession(repo.coll)
 	filter := bson.M{
-		"std":       quesRequestDto.Standard,
-		"subject":   quesRequestDto.Subject,
-		"status":    enums.CurrentQuestionStatus.APPROVED,
-		"owner._id": bson.M{"$ne": quesRequestDto.UserID},
+		"status": enums.CurrentQuestionStatus.APPROVED,
 	}
 	return findAllRequests(repo, filter, quesRequestDto)
 }
@@ -126,27 +126,12 @@ func (repo *questionRepository) FindTeachersRequests(quesRequestDto *dto.QuesReq
 	defer db.CloseSession(repo.coll)
 	filter := bson.M{
 		"school._id": quesRequestDto.SchoolID,
-		"std":        quesRequestDto.Standard,
-		"subject":    quesRequestDto.Subject,
 		"owner._id":  quesRequestDto.UserID,
 		"status": bson.M{
 			"$in": status,
 		},
 	}
 	return findAllRequests(repo, filter, quesRequestDto)
-}
-
-func findAllRequests(repo *questionRepository, filter bson.M,
-	quesRequestDto *dto.QuesRequestDto) (model.Questions, error) {
-	//	cols := bson.M{"_id": 1, "title": 1, "status": 1, "std": 1, "subject": 1, "lastModifiedDate": 1}
-	skip := quesRequestDto.Page * common.DEF_REQUESTS_LIMIT
-	var questions model.Questions
-	err := repo.coll.Find(filter).Sort("lastModifiedDate").
-		Limit(common.DEF_REQUESTS_LIMIT).Skip(skip).All(&questions)
-	if err != nil {
-		return nil, err
-	}
-	return questions, nil
 }
 
 func (repo *questionRepository) FilterQuestionsForPaper(
@@ -201,7 +186,7 @@ func (repo *questionRepository) FilterQuestionsPerCriteria(
 	}
 	cols := bson.M{"_id": 1, "title": 1, "difficulty": 1, "length": 1,
 		"topic": 1, "tags": 1, "imageUrl": 1}
-	err := repo.coll.Find(filter).Select(cols).Limit(common.DEF_REQUESTS_LIMIT).
+	err := repo.coll.Find(filter).Select(cols).Limit(common.DEF_REQUESTS_PAGE_SIZE).
 		Skip(quesCriteriaDto.Page).All(&questions)
 	if err != nil {
 		return nil, err
@@ -222,9 +207,57 @@ func (repo *questionRepository) FilterQuestionsPerSearchTerm(
 	}
 	cols := bson.M{"_id": 0, "title": 1}
 	err := repo.coll.Find(filter).Select(cols).Sort("-_id").
-		Limit(common.DEF_REQUESTS_LIMIT).Skip(quesCriteriaDto.Page * common.DEF_REQUESTS_LIMIT).All(&questions)
+		Limit(common.DEF_REQUESTS_PAGE_SIZE).Skip(quesCriteriaDto.Page *
+		common.DEF_REQUESTS_PAGE_SIZE).All(&questions)
 	if err != nil {
 		return nil, err
 	}
 	return questions, nil
+}
+
+func findAllRequests(repo *questionRepository, filter bson.M,
+	quesRequestDto *dto.QuesRequestDto) (model.Questions, error) {
+	//	cols := bson.M{"_id": 1, "title": 1, "status": 1, "std": 1, "subject": 1, "lastModifiedDate": 1}
+	filter = createStdSubjectFilter(filter, quesRequestDto.Standards)
+	skip := quesRequestDto.Page * common.DEF_REQUESTS_PAGE_SIZE
+	var questions model.Questions
+	err := repo.coll.Find(filter).Sort("lastModifiedDate").
+		Limit(common.DEF_REQUESTS_PAGE_SIZE).Skip(skip).All(&questions)
+	if err != nil {
+		return nil, err
+	}
+	return questions, nil
+}
+
+func createStdSubjectFilter(basicFilter bson.M, standards []model.Standard) bson.M {
+	var stdFilters []bson.M
+	for _, standard := range standards {
+		subjects := getStringSubjects(standard.Subjects)
+		if len(subjects) > 0 {
+			subFilter := bson.M{"$and": []bson.M{
+				{"std": standard.Std},
+				{"subject": bson.M{
+					"$in": subjects},
+				},
+			},
+			}
+			stdFilters = append(stdFilters, subFilter)
+		}
+	}
+	orStdFilter := bson.M{"$or": stdFilters}
+	mainFilter := bson.M{"$and": []bson.M{
+		basicFilter,
+		orStdFilter,
+	},
+	}
+	fmt.Println(mainFilter)
+	return mainFilter
+}
+
+func getStringSubjects(subjects []model.Subject) []string {
+	var subs []string
+	for _, subject := range subjects {
+		subs = append(subs, subject.Title)
+	}
+	return subs
 }

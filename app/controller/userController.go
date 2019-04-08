@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -38,12 +39,14 @@ func UpdateUserProfile(ctx *gin.Context) {
 		return
 	}
 	res := service.UpdateUser(&user)
-	if res.Status == enums.Status.SUCCESS {
+	if res.Status == enums.Status.SUCCESS && res.Body != nil {
 		if cachestore.CheckCache(ctx, user.Mobile) {
-			cachestore.SetCache(ctx, user.Mobile, user, common.CACHE_OBJ_LONG_TIMEOUT)
+			cachestore.SetCache(ctx, user.Mobile, user,
+				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 		if cachestore.CheckCache(ctx, user.UserID.String()) {
-			cachestore.SetCache(ctx, user.UserID.String(), user, common.CACHE_OBJ_LONG_TIMEOUT)
+			cachestore.SetCache(ctx, user.UserID.String(), user,
+				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 	}
 	ctx.JSON(http.StatusOK, res)
@@ -91,7 +94,6 @@ func TransferRole(ctx *gin.Context) {
 	}
 	res, mobiles := service.TransferUserRole(roleType, fromUserID, toUserID)
 	if res.Status == enums.Status.SUCCESS {
-		//TODO
 		if mobiles != nil {
 			cachestore.RemoveCache(ctx, mobiles[0])
 			cachestore.RemoveCache(ctx, mobiles[1])
@@ -148,12 +150,15 @@ func ListUserByMobileOrID(ctx *gin.Context) {
 		return
 	}
 	if cachestore.CheckCache(ctx, val) {
-		res := utility.GetSuccessResponse(cachestore.GetCache(ctx, val))
-		ctx.JSON(http.StatusOK, res)
+		cacheVal := cachestore.GetCache(ctx, val).(string)
+		var user model.User
+		json.Unmarshal([]byte(cacheVal), &user)
+		ctx.JSON(http.StatusOK, utility.GetSuccessResponse(user))
 	} else {
 		res := service.FetchUserByMobileOrID(key, val)
 		if res.Status == enums.Status.SUCCESS && res.Body != nil {
-			cachestore.SetCache(ctx, val, res.Body, common.CACHE_OBJ_LONG_TIMEOUT)
+			cachestore.SetCache(ctx, val, res.Body,
+				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 		ctx.JSON(http.StatusOK, res)
 	}
@@ -226,7 +231,7 @@ func createOTPSession(ctx *gin.Context, otp string) bool {
 	OTPSessionID := cachestore.GenerateSessionID(ctx)
 	if len(OTPSessionID) > 0 {
 		cachestore.SetCache(ctx, OTPSessionID, otp,
-			common.CACHE_OTP_TIMEOUT)
+			common.CACHE_OTP_TIMEOUT, false)
 		ctx.Writer.Header().Set(common.RESPONSE_OTP_SESSION_ID_KEY,
 			OTPSessionID)
 		return true
@@ -243,7 +248,7 @@ func VerifyOTP(ctx *gin.Context) {
 	} else {
 		otpSessionID := ctx.Request.Header.Get(common.REQUEST_OTP_SESSION_ID_KEY)
 		if cachestore.CheckCache(ctx, otpSessionID) {
-			sessionOTP := cachestore.GetCache(ctx, otpSessionID).(string)
+			sessionOTP := cachestore.GetCache(ctx, otpSessionID)
 			if sessionOTP == userOTP {
 				cachestore.RemoveCache(ctx, otpSessionID)
 				ctx.JSON(http.StatusOK, utility.GetSuccessResponse(
