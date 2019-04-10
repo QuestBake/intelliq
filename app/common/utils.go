@@ -6,7 +6,6 @@ import (
 	"crypto/sha512"
 	"encoding/json"
 	"fmt"
-	"intelliq/app/dto"
 	"io"
 	"log"
 	"math/rand"
@@ -20,6 +19,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 
+	"intelliq/app/dto"
 	"intelliq/app/enums"
 )
 
@@ -186,9 +186,9 @@ func JSONToObject(data string, obj *interface{}) interface{} {
 
 //GenerateUUID generates random uuid
 func GenerateUUID() string {
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		fmt.Printf(err.Error())
+	uuid := uuid.NewV4()
+	if len(uuid.String()) == 0 {
+		fmt.Printf("Failed to generate the UUID")
 		return ""
 	}
 	return uuid.String()
