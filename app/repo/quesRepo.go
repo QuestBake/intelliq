@@ -250,7 +250,6 @@ func createStdSubjectFilter(basicFilter bson.M, standards []model.Standard) bson
 		orStdFilter,
 	},
 	}
-	fmt.Println(mainFilter)
 	return mainFilter
 }
 

@@ -117,7 +117,7 @@ func (repo *userRepository) TransferRole(roleType enums.UserRole,
 		toUserFilter,
 	},
 	}
-	cols := bson.M{"_id": 1, "roles": 1}
+	cols := bson.M{"_id": 1, "roles": 1, "mobile": 1}
 
 	err := repo.coll.Find(orFilter).Select(cols).All(&users)
 	if err != nil {

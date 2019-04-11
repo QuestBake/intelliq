@@ -63,7 +63,7 @@ func RemoveQuestion(question *model.Question) *dto.AppResponseDto {
 	return utility.GetSuccessResponse(common.MSG_QUES_REMOVE_SUCCESS)
 }
 
-//FetchApprovedQuestions fetches all approved ques excluding requester's
+//FetchApprovedQuestions fetches all approved ques
 func FetchApprovedQuestions(requestDto *dto.QuesRequestDto) *dto.AppResponseDto {
 	if !utility.IsValidGroupCode(requestDto.GroupCode) {
 		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
