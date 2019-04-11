@@ -41,9 +41,9 @@ type Questions []Question
 
 //FormatTopicTags formats topic and tags to lowercase
 func (question *Question) FormatTopicTags() {
-	question.Topic = strings.ToLower(question.Topic)
-	question.Category = strings.ToLower(question.Category)
+	question.Topic = strings.Title(strings.ToLower(question.Topic))
+	question.Category = strings.Title(strings.ToLower(question.Category))
 	for i := 0; i < len(question.Tags); i++ {
-		question.Tags[i] = strings.ToLower(question.Tags[i])
+		question.Tags[i] = strings.Title(strings.ToLower(question.Tags[i]))
 	}
 }

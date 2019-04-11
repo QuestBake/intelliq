@@ -162,7 +162,11 @@ func GenerateQuestionPaper(sectionList []dto.Section, currentSet int,
 	var sectionalQuesList model.Questions
 	for _, section := range sectionList {
 		for _, difficulty := range difficultyList {
-			sectionalQuesList = append(sectionalQuesList, section.LevelMap[difficulty.Level][currentSet]...)
+			if quesSets, ok := section.LevelMap[difficulty.Level]; ok {
+				if len(quesSets) >= (currentSet + 1) {
+					sectionalQuesList = append(sectionalQuesList, section.LevelMap[difficulty.Level][currentSet]...)
+				}
+			}
 		}
 		sections = append(sections, dto.Section{Type: section.Type, Questions: sectionalQuesList})
 		sectionalQuesList = nil
