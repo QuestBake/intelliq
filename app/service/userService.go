@@ -9,6 +9,7 @@ import (
 
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/config"
 	"intelliq/app/dto"
 	"intelliq/app/enums"
 	"intelliq/app/model"
@@ -20,10 +21,10 @@ func AddNewUser(user *model.User) *dto.AppResponseDto {
 	if !utility.IsValidMobile(user.Mobile) {
 		return utility.GetErrorResponse(common.MSG_MOBILE_MIN_LENGTH_ERROR)
 	}
-	if len(user.FullName) < common.USERNAME_MIN_LENGTH {
+	if len(user.FullName) < config.Conf.Get("misc.username_min_length").(int) {
 		return utility.GetErrorResponse(common.MSG_NAME_MIN_LENGTH_ERROR)
 	}
-	user.Password = utility.EncryptData(common.TEMP_PWD_PREFIX + user.Mobile)
+	user.Password = utility.EncryptData(config.Conf.Get("misc.temp_pwd_prefix").(string) + user.Mobile)
 	user.UserName = utility.GenerateUserName(user.FullName, user.Mobile)
 	user.CreateDate = time.Now().UTC()
 	user.LastModifiedDate = time.Now()
@@ -45,7 +46,7 @@ func UpdateUser(user *model.User) *dto.AppResponseDto {
 	if !utility.IsPrimaryIDValid(user.UserID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
-	if len(user.FullName) < common.USERNAME_MIN_LENGTH {
+	if len(user.FullName) < config.Conf.Get("misc.username_min_length").(int) {
 		return utility.GetErrorResponse(common.MSG_NAME_MIN_LENGTH_ERROR)
 	}
 	user.LastModifiedDate = time.Now().UTC()
@@ -109,7 +110,7 @@ func FetchAllTeachersUnderReviewer(schoolID string, reviewerID string) *dto.AppR
 //FetchSelectedTeachers gets all teachers within school for specific role
 func FetchSelectedTeachers(schoolID string, roleType string) *dto.AppResponseDto {
 	role, errs := strconv.Atoi(roleType)
-	if errs != nil || role < common.MIN_VALID_ROLE || role > common.MAX_VALID_ROLE {
+	if errs != nil || role < config.Conf.Get("misc.min_valid_role").(int) || role > config.Conf.Get("misc.max_valid_role").(int) {
 		return utility.GetErrorResponse(common.MSG_NO_ROLE)
 	}
 	if utility.IsStringIDValid(schoolID) {
@@ -128,8 +129,8 @@ func FetchSelectedTeachers(schoolID string, roleType string) *dto.AppResponseDto
 //TransferUserRole transfers user roles
 func TransferUserRole(roleType string, fromUserID string, toUserID string) (*dto.AppResponseDto, []string) {
 	role, errs := strconv.Atoi(roleType)
-	if errs != nil || role < common.MIN_VALID_ROLE ||
-		role > common.MAX_VALID_ROLE {
+	if errs != nil || role < config.Conf.Get("misc.min_valid_role").(int) ||
+		role > config.Conf.Get("misc.max_valid_role").(int) {
 		return utility.GetErrorResponse(common.MSG_NO_ROLE), nil
 	}
 	if !utility.IsStringIDValid(fromUserID) || !utility.IsStringIDValid(toUserID) {
@@ -174,7 +175,7 @@ func RemoveUserFromSchool(schoolID string, userID string) *dto.AppResponseDto {
 func AddBulkUser(users model.Users) *dto.AppResponseDto {
 	var userList []interface{}
 	for _, user := range users {
-		user.Password = utility.EncryptData(common.TEMP_PWD_PREFIX + user.Mobile)
+		user.Password = utility.EncryptData(config.Conf.Get("misc.temp_pwd_prefix").(string) + user.Mobile)
 		user.UserName = utility.GenerateUserName(user.FullName, user.Mobile)
 		user.CreateDate = time.Now().UTC()
 		user.LastModifiedDate = time.Now()
@@ -228,13 +229,13 @@ func AuthenticateUser(user *model.User) *dto.AppResponseDto {
 //FetchUserByMobileOrID fetch user info by mobile or ID
 func FetchUserByMobileOrID(key string, val string) *dto.AppResponseDto {
 	var value interface{} = val
-	if key == common.PARAM_KEY_ID {
+	if key == config.Conf.Get("misc.param_key_id").(string) {
 		if utility.IsStringIDValid(val) {
 			value = bson.ObjectIdHex(val)
 		} else {
 			return utility.GetErrorResponse(common.MSG_INVALID_ID)
 		}
-	} else if key == common.PARAM_KEY_MOBILE {
+	} else if key == config.Conf.Get("misc.param_key_mobile").(string) {
 		if !utility.IsValidMobile(val) {
 			return utility.GetErrorResponse(common.MSG_INVALID_MOBILE)
 		}
@@ -254,7 +255,7 @@ func FetchUserByMobileOrID(key string, val string) *dto.AppResponseDto {
 
 //ResetPassword resets user password
 func ResetPassword(pwdDTO *dto.PasswordDto) *dto.AppResponseDto {
-	if len(pwdDTO.NewPwd) < common.PWD_MIN_LENGTH {
+	if len(pwdDTO.NewPwd) < config.Conf.Get("misc.pwd_min_length").(int) {
 		return utility.GetErrorResponse(common.MSG_PWD_MIN_LENGTH_ERROR)
 	}
 	if pwdDTO.ForgotPwd {
@@ -327,7 +328,8 @@ func SendOTP(mobile string, forgotPassword bool) (*dto.AppResponseDto, string) {
 			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_MOBILE), ""
 		}
 	}
-	otp := utility.GenerateRandom(common.OTP_LOWER_BOUND, common.OTP_UPPER_BOUND)
+	otp := utility.GenerateRandom(config.Conf.Get("otp.otp_lower_bound").(int),
+		config.Conf.Get("otp.otp_upper_bound").(int))
 	fmt.Println("OTP=> ", otp)
 	return utility.GetSuccessResponse("OTP sent successfully !!"), strconv.Itoa(otp)
 }

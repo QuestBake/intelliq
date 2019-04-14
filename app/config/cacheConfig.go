@@ -1,8 +1,6 @@
 package config
 
 import (
-	"intelliq/app/common"
-
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/cache"
 	"github.com/go-redis/redis"
@@ -12,9 +10,11 @@ import (
 
 //CacheConnect connects to redis server
 func CacheConnect(router *gin.Engine) {
+	cacheDomain := Conf.Get("cache.cache_domain").(string)
+	cachePort := Conf.Get("cache.cache_port").(string)
 	ring := redis.NewRing(&redis.RingOptions{
 		Addrs: map[string]string{
-			common.CACHE_DOMAIN: common.CACHE_PORT,
+			cacheDomain: cachePort,
 		},
 		//	DB:       10,
 		//		Password: "appPwd",
@@ -29,13 +29,13 @@ func CacheConnect(router *gin.Engine) {
 		},
 	}
 	if store != nil {
-		log.Info("Successfully connected to Redis at ", common.CACHE_DOMAIN, common.CACHE_PORT)
+		log.Info("Successfully connected to Redis at ", cacheDomain, cachePort)
 		router.Use(addRedisToContext(store))
 	}
 }
 
 func addRedisToContext(cacheStore *cache.Codec) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctx.Set(common.CACHE_STORE_KEY, cacheStore)
+		ctx.Set(Conf.Get("cache.cache_store_key").(string), cacheStore)
 	}
 }

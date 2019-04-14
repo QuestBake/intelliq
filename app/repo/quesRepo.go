@@ -2,15 +2,16 @@ package repo
 
 import (
 	"fmt"
-	"intelliq/app/common"
+
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
+
+	"intelliq/app/config"
 	db "intelliq/app/config"
 	"intelliq/app/dto"
 	"intelliq/app/enums"
 	"intelliq/app/helper"
 	"intelliq/app/model"
-
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
 )
 
 type questionRepository struct {
@@ -155,7 +156,7 @@ func (repo *questionRepository) FilterQuestionsForPaper(
 	cols := bson.M{"_id": 1, "title": 1, "difficulty": 1, "length": 1,
 		"topic": 1, "tags": 1, "imageUrl": 1}
 	var ques model.Question
-	itr := repo.coll.Find(filter).Batch(common.QUES_BATCH_SIZE).Select(cols).Iter()
+	itr := repo.coll.Find(filter).Batch(config.Conf.Get("misc.question_batch_size").(int)).Select(cols).Iter()
 	sectionQuesMap := make(map[enums.QuesLength]map[enums.QuesDifficulty]model.Questions)
 	ctr := 0
 	for itr.Next(&ques) {
@@ -186,7 +187,7 @@ func (repo *questionRepository) FilterQuestionsPerCriteria(
 	}
 	cols := bson.M{"_id": 1, "title": 1, "difficulty": 1, "length": 1,
 		"topic": 1, "tags": 1, "imageUrl": 1}
-	err := repo.coll.Find(filter).Select(cols).Limit(common.DEF_REQUESTS_PAGE_SIZE).
+	err := repo.coll.Find(filter).Select(cols).Limit(config.Conf.Get("misc.def_requests_page_size").(int)).
 		Skip(quesCriteriaDto.Page).All(&questions)
 	if err != nil {
 		return nil, err
@@ -207,8 +208,8 @@ func (repo *questionRepository) FilterQuestionsPerSearchTerm(
 	}
 	cols := bson.M{"_id": 0, "title": 1}
 	err := repo.coll.Find(filter).Select(cols).Sort("-_id").
-		Limit(common.DEF_REQUESTS_PAGE_SIZE).Skip(quesCriteriaDto.Page *
-		common.DEF_REQUESTS_PAGE_SIZE).All(&questions)
+		Limit(config.Conf.Get("misc.def_requests_page_size").(int)).Skip(quesCriteriaDto.Page *
+		config.Conf.Get("misc.def_requests_page_size").(int)).All(&questions)
 	if err != nil {
 		return nil, err
 	}
@@ -219,10 +220,10 @@ func findAllRequests(repo *questionRepository, filter bson.M,
 	quesRequestDto *dto.QuesRequestDto) (model.Questions, error) {
 	//	cols := bson.M{"_id": 1, "title": 1, "status": 1, "std": 1, "subject": 1, "lastModifiedDate": 1}
 	filter = createStdSubjectFilter(filter, quesRequestDto.Standards)
-	skip := quesRequestDto.Page * common.DEF_REQUESTS_PAGE_SIZE
+	skip := quesRequestDto.Page * config.Conf.Get("misc.def_requests_page_size").(int)
 	var questions model.Questions
 	err := repo.coll.Find(filter).Sort("lastModifiedDate").
-		Limit(common.DEF_REQUESTS_PAGE_SIZE).Skip(skip).All(&questions)
+		Limit(config.Conf.Get("misc.def_requests_page_size").(int)).Skip(skip).All(&questions)
 	if err != nil {
 		return nil, err
 	}

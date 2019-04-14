@@ -11,6 +11,7 @@ import (
 	"intelliq/app/cachestore"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/config"
 	"intelliq/app/enums"
 	"intelliq/app/model"
 	"intelliq/app/service"
@@ -42,11 +43,11 @@ func UpdateGroup(ctx *gin.Context) {
 	if res.Status == enums.Status.SUCCESS && res.Body != nil {
 		if cachestore.CheckCache(ctx, group.Code) {
 			cachestore.SetCache(ctx, group.Code, group,
-				common.CACHE_OBJ_LONG_TIMEOUT, true)
+				config.Conf.Get("cache.cache_object_long_timeout").(int), true)
 		}
 		if cachestore.CheckCache(ctx, group.GroupID.String()) {
 			cachestore.SetCache(ctx, group.GroupID.String(), group,
-				common.CACHE_OBJ_LONG_TIMEOUT, true)
+				config.Conf.Get("cache.cache_object_long_timeout").(int), true)
 		}
 	}
 	ctx.JSON(http.StatusOK, res)
@@ -79,7 +80,7 @@ func ListGroupByCodeOrID(ctx *gin.Context) {
 		res := service.FetchGroupByCodeOrID(key, val)
 		if res.Status == enums.Status.SUCCESS && res.Body != nil {
 			cachestore.SetCache(ctx, val, res.Body,
-				common.CACHE_OBJ_LONG_TIMEOUT, true)
+				config.Conf.Get("cache.cache_object_long_timeout").(int), true)
 		}
 		ctx.JSON(http.StatusOK, res)
 	}

@@ -5,8 +5,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"intelliq/app/common"
-	utility "intelliq/app/common"
 	"net/http"
 	"strings"
 	"time"
@@ -14,6 +12,10 @@ import (
 	"github.com/gbrlsnchs/jwt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	"intelliq/app/common"
+	utility "intelliq/app/common"
+	"intelliq/app/config"
 )
 
 var skipURIS = []string{"login", "forgot"}
@@ -42,8 +44,8 @@ func authenticateRequest() gin.HandlerFunc {
 				return
 			}
 		}
-		if ctx.Request.Method != common.CORS_REQUEST_METHOD {
-			sessionToken, err := ctx.Cookie(common.COOKIE_SESSION_KEY)
+		if ctx.Request.Method != config.Conf.Get("misc.cors_request_method").(string) {
+			sessionToken, err := ctx.Cookie(config.Conf.Get("session.cookie_session_key").(string))
 			if err != nil || len(sessionToken) == 0 {
 				fmt.Println("COOKIE FETCH ERROR: ", err)
 				ctx.AbortWithStatusJSON(http.StatusForbidden,
@@ -57,7 +59,7 @@ func authenticateRequest() gin.HandlerFunc {
 					common.MSG_USER_AUTH_ERROR+"\n"+status)
 				return
 			}
-			xsrfHeader := ctx.Request.Header[common.HEADER_XSRF_KEY]
+			xsrfHeader := ctx.Request.Header[config.Conf.Get("security.header_xsrf_key").(string)]
 			if len(xsrfHeader) == 0 {
 				fmt.Println("xsrfHeader failed no header")
 				ctx.AbortWithStatusJSON(http.StatusOK,
@@ -84,7 +86,7 @@ func GenerateToken(subject, val string, expiry int) string {
 		ecdsa512 := jwt.NewECDSA(jwt.SHA256, privKey, &privKey.PublicKey)
 		jot := &jwt.JWT{
 			Claims: &jwt.Claims{
-				Issuer:         common.APP_NAME,
+				Issuer:         config.Conf.Get("app.app_name").(string),
 				Subject:        subject,
 				ExpirationTime: now.Add(time.Duration(expiry) * time.Minute).Unix(),
 				ID:             val,
@@ -101,7 +103,7 @@ func GenerateToken(subject, val string, expiry int) string {
 }
 
 func getPrivateKey() *ecdsa.PrivateKey {
-	privKeyString := utility.ReadFile(common.PRIVATE_KEY_FILEPATH)
+	privKeyString := utility.ReadFile(config.Conf.Get("security.private_key_filepath").(string))
 	if privKeyString == nil {
 		fmt.Println("Could not fetch private key from file")
 		return nil
@@ -138,7 +140,7 @@ func VerifyToken(token string) (bool, string) {
 			return false, "Corrupt Token"
 		}
 		expValidator := jwt.ExpirationTimeValidator(now)
-		issuerValidator := jwt.IssuerValidator(common.APP_NAME)
+		issuerValidator := jwt.IssuerValidator(config.Conf.Get("app.app_name").(string))
 		issuedAtValidator := jwt.IssuedAtValidator(now)
 		if err := jot.Validate(expValidator, issuerValidator, issuedAtValidator); err != nil {
 			var status string
@@ -159,25 +161,25 @@ func VerifyToken(token string) (bool, string) {
 
 //SetCookie sets cookie attribute
 func SetCookie(ctx *gin.Context, body string, expiry int) {
-	ctx.SetCookie(common.COOKIE_SESSION_KEY, body,
+	ctx.SetCookie(config.Conf.Get("session.cookie_session_key").(string), body,
 		expiry*60, "", "localhost",
 		true, true)
 }
 
 //SetSecureCookie generate XSRF cookie against CSRF attacks
 func SetSecureCookie(ctx *gin.Context, body string) {
-	ctx.SetCookie(common.COOKIE_XSRF_KEY, body,
-		common.COOKIE_SESSION_TIMEOUT*60, "/", "localhost",
+	ctx.SetCookie(config.Conf.Get("security.cookie_xsrf_key").(string), body,
+		config.Conf.Get("session.cookie_session_timeout").(int)*60, "/", "localhost",
 		true, false)
 }
 
 //RemoveCookie removes cookie attribute
 func RemoveCookie(ctx *gin.Context) {
 	fmt.Println("removed cookies")
-	ctx.SetCookie(common.COOKIE_SESSION_KEY, "",
+	ctx.SetCookie(config.Conf.Get("session.cookie_session_key").(string), "",
 		-1, "", "localhost",
 		true, true)
-	ctx.SetCookie(common.COOKIE_XSRF_KEY, "",
+	ctx.SetCookie(config.Conf.Get("security.cookie_xsrf_key").(string), "",
 		-1, "", "localhost",
 		true, true)
 }

@@ -10,6 +10,7 @@ import (
 	"intelliq/app/cachestore"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/config"
 	"intelliq/app/enums"
 	"intelliq/app/model"
 	"intelliq/app/service"
@@ -41,11 +42,11 @@ func UpdateSchoolProfile(ctx *gin.Context) {
 	if res.Status == enums.Status.SUCCESS && res.Body != nil {
 		if cachestore.CheckCache(ctx, school.Code) {
 			cachestore.SetCache(ctx, school.Code, school,
-				common.CACHE_OBJ_LONG_TIMEOUT, true)
+				config.Conf.Get("cache.cache_object_long_timeout").(int), true)
 		}
 		if cachestore.CheckCache(ctx, school.SchoolID.String()) {
 			cachestore.SetCache(ctx, school.SchoolID.String(), school,
-				common.CACHE_OBJ_LONG_TIMEOUT, true)
+				config.Conf.Get("cache.cache_object_long_timeout").(int), true)
 		}
 	}
 	ctx.JSON(http.StatusOK, res)
@@ -73,7 +74,7 @@ func ListSchoolByCodeOrID(ctx *gin.Context) {
 		res := service.FetchSchoolByCodeOrID(key, val)
 		if res.Status == enums.Status.SUCCESS && res.Body != nil {
 			cachestore.SetCache(ctx, val, res.Body,
-				common.CACHE_OBJ_LONG_TIMEOUT, true)
+				config.Conf.Get("cache.cache_object_long_timeout").(int), true)
 		}
 		ctx.JSON(http.StatusOK, res)
 	}

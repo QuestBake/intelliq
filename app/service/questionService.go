@@ -2,16 +2,18 @@ package service
 
 import (
 	"fmt"
-	"intelliq/app/common"
-	utility "intelliq/app/common"
-	"intelliq/app/dto"
-	"intelliq/app/enums"
-	"intelliq/app/model"
-	"intelliq/app/repo"
 	"strconv"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
+
+	"intelliq/app/common"
+	utility "intelliq/app/common"
+	"intelliq/app/config"
+	"intelliq/app/dto"
+	"intelliq/app/enums"
+	"intelliq/app/model"
+	"intelliq/app/repo"
 )
 
 //FetchOneQuestion fetches single ques based on quesID
@@ -141,8 +143,8 @@ func validateRequest(groupCode, subject string, std int) *dto.AppResponseDto {
 	if !utility.IsValidGroupCode(groupCode) {
 		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
 	}
-	if std < common.MIN_VALID_STD ||
-		std > common.MAX_VALID_STD ||
+	if std < config.Conf.Get("misc.min_valid_std").(int) ||
+		std > config.Conf.Get("misc.max_valid_std").(int) ||
 		subject == "" {
 		return utility.GetErrorResponse(common.MSG_BAD_INPUT)
 	}

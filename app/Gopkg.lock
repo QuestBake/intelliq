@@ -118,6 +118,14 @@
   revision = "57fdcb988a5c543893cc61bce354a6e24ab70022"
 
 [[projects]]
+  digest = "1:e0f50a07c0def90588d69f77178712c6fdc67eb6576365f551cce98b44b501bf"
+  name = "github.com/pelletier/go-toml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "63909f0a90ab0f36909e8e044e46ace10cf13ba2"
+  version = "v1.3.0"
+
+[[projects]]
   digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
   name = "github.com/satori/go.uuid"
   packages = ["."]
@@ -225,6 +233,7 @@
     "github.com/go-ozzo/ozzo-log",
     "github.com/go-redis/cache",
     "github.com/go-redis/redis",
+    "github.com/pelletier/go-toml",
     "github.com/satori/go.uuid",
     "github.com/sirupsen/logrus",
     "github.com/vmihailenco/msgpack",

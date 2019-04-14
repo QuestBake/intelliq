@@ -9,6 +9,7 @@ import (
 
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/config"
 	"intelliq/app/dto"
 	"intelliq/app/model"
 	"intelliq/app/repo"
@@ -56,14 +57,14 @@ func UpdateSchool(school *model.School) *dto.AppResponseDto {
 func FetchAllSchools(key string, val string) *dto.AppResponseDto {
 	var value interface{}
 	switch key {
-	case common.PARAM_KEY_ID: // key == _id
+	case config.Conf.Get("misc.param_key_id").(string): // key == _id
 		if utility.IsStringIDValid(val) {
 			value = bson.ObjectIdHex(val)
 		} else {
 			return utility.GetErrorResponse(common.MSG_INVALID_ID)
 		}
 		break
-	case common.PARAM_KEY_CODE: // key == code
+	case config.Conf.Get("misc.param_key_code").(string): // key == code
 		val = strings.ToUpper(val)
 		if !utility.IsValidGroupCode(val) {
 			return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
@@ -90,14 +91,14 @@ func FetchAllSchools(key string, val string) *dto.AppResponseDto {
 func FetchSchoolByCodeOrID(key string, val string) *dto.AppResponseDto {
 	var value interface{}
 	switch key {
-	case common.PARAM_KEY_ID: // key == _id
+	case config.Conf.Get("misc.param_key_id").(string): // key == _id
 		if utility.IsStringIDValid(val) {
 			value = bson.ObjectIdHex(val)
 		} else {
 			return utility.GetErrorResponse(common.MSG_INVALID_ID)
 		}
 		break
-	case common.PARAM_KEY_CODE: // key == code
+	case config.Conf.Get("misc.param_key_code").(string): // key == code
 		value = strings.ToUpper(val)
 		break
 	default:

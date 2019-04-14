@@ -2,18 +2,20 @@ package service
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/config"
 	"intelliq/app/dto"
 	"intelliq/app/enums"
 	"intelliq/app/model"
 	"intelliq/app/repo"
-	"strings"
-	"time"
 )
 
 func isQuestionInfoValid(question *model.Question) bool {
-	return strings.HasPrefix(question.GroupCode, common.GROUP_CODE_PREFIX) &&
+	return strings.HasPrefix(question.GroupCode, config.Conf.Get("misc.group_code_prefix").(string)) &&
 		utility.IsPrimaryIDValid(question.Reviewer.UserID) &&
 		utility.IsPrimaryIDValid(question.Owner.UserID) &&
 		utility.IsPrimaryIDValid(question.School.SchoolID)
