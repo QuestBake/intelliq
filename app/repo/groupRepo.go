@@ -28,12 +28,29 @@ func NewGroupRepository() *groupRepository {
 func (repo *groupRepository) Save(group *model.Group) error {
 	defer db.CloseSession(repo.coll)
 	err := repo.coll.Insert(group)
+	if err == nil {
+		newErr := db.CreateGroupCollWithIndices(group.Code)
+		if newErr != nil {
+			fmt.Println("deleting group: ", group.Code)
+			repo.Delete(group.Code, true)
+		}
+	}
 	return err
 }
 
 func (repo *groupRepository) Update(group *model.Group) error {
 	defer db.CloseSession(repo.coll)
 	err := repo.coll.Update(bson.M{"_id": group.GroupID}, group)
+	return err
+}
+
+func (repo *groupRepository) Delete(groupCode string, removeColl bool) error {
+	defer db.CloseSession(repo.coll)
+	err := repo.coll.Remove(bson.M{"code": groupCode})
+	if err == nil && removeColl {
+		fmt.Println("drop group collections: ", groupCode)
+		db.DropCollections(groupCode)
+	}
 	return err
 }
 

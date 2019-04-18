@@ -34,7 +34,7 @@ const ( // app msgs
 	MSG_QUES_REMOVE_ERROR          string = "Question could not be removed !!"
 	MSG_CORRUPT_DATA               string = "Corrupt Criteria Data"
 	MSG_DUPLICATE_RECORD           string = "Duplicate Record"
-	MSG_NAME_MIN_LENGTH_ERROR      string = "Name should be atleast 3 characters"
+	MSG_FULL_NAME_ERROR            string = "First & Last name required !!"
 	MSG_MOBILE_MIN_LENGTH_ERROR    string = "Mobile should be 10 digits"
 	MSG_PWD_MIN_LENGTH_ERROR       string = "Password should be atleast 8 characters"
 	MSG_PWD_RESET_SUCCESS          string = "Password changed successfully !!"
@@ -66,7 +66,7 @@ const ( // congfig params
 	MAX_VALID_STD = 12
 
 	MOBILE_LENGTH       = 10
-	USERNAME_MIN_LENGTH = 3
+	FULLNAME_MIN_LENGTH = 2
 	PWD_MIN_LENGTH      = 8
 
 	DEF_REQUESTS_PAGE_SIZE = 20
@@ -79,7 +79,7 @@ const ( // congfig params
 
 	GROUP_CODE_PREFIX           = "GP_"
 	CACHE_STORE_KEY             = "CACHE_STORE"
-	REQUEST_OTP_SESSION_ID_KEY  = "RQST_OTP_SESS_ID"
+	REQUEST_OTP_SESSION_ID_KEY  = "rqst_otp_sess_id"
 	RESPONSE_OTP_SESSION_ID_KEY = "RESP_OTP_SESS_ID"
 
 	COOKIE_SESSION_KEY  = "c_user"
@@ -87,8 +87,8 @@ const ( // congfig params
 	HEADER_XSRF_KEY     = "X-Xsrf-Token"
 	CORS_REQUEST_METHOD = "OPTIONS"
 
-	USER_SESSION_TIMEOUT    = 120 //minutes
-	COOKIE_SESSION_TIMEOUT  = 180
+	USER_SESSION_TIMEOUT    = 180 //minutes
+	COOKIE_SESSION_TIMEOUT  = 240
 	CACHE_OTP_TIMEOUT       = 5
 	CACHE_OBJ_LONG_TIMEOUT  = 60
 	CACHE_OBJ_SHORT_TIMEOUT = 30

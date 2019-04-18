@@ -46,6 +46,12 @@ func (repo *questionRepository) Delete(questionID bson.ObjectId) error {
 	return err
 }
 
+func (repo *questionRepository) DeleteAll() (int, error) {
+	defer db.CloseSession(repo.coll)
+	info, err := repo.coll.RemoveAll(bson.M{"status": enums.CurrentQuestionStatus.OBSOLETE})
+	return info.Removed, err
+}
+
 func (repo *questionRepository) UpdateLimitedCols(question *model.Question) error {
 	defer db.CloseSession(repo.coll)
 	selector := bson.M{"_id": question.QuestionID}
@@ -180,9 +186,12 @@ func (repo *questionRepository) FilterQuestionsPerCriteria(
 		"topic":      quesCriteriaDto.Topics[0],
 		"length":     quesCriteriaDto.NativeLength[0],
 		"difficulty": quesCriteriaDto.NativeDifficulty[0],
-		"tags": bson.M{
-			"$in": quesCriteriaDto.Tags,
-		},
+	}
+	if quesCriteriaDto.Tags != nil && len(quesCriteriaDto.Tags) > 0 {
+		filter = bson.M{"$and": []bson.M{
+			filter,
+			bson.M{"tags": bson.M{
+				"$all": quesCriteriaDto.Tags}}}}
 	}
 	cols := bson.M{"_id": 1, "title": 1, "difficulty": 1, "length": 1,
 		"topic": 1, "tags": 1, "imageUrl": 1}
@@ -201,6 +210,7 @@ func (repo *questionRepository) FilterQuestionsPerSearchTerm(
 	filter := bson.M{
 		"std":     quesCriteriaDto.Standard,
 		"subject": quesCriteriaDto.Subject,
+		"status":  enums.CurrentQuestionStatus.APPROVED,
 		"$text": bson.M{
 			"$search": quesCriteriaDto.SearchTerm,
 		},
@@ -221,7 +231,7 @@ func findAllRequests(repo *questionRepository, filter bson.M,
 	filter = createStdSubjectFilter(filter, quesRequestDto.Standards)
 	skip := quesRequestDto.Page * common.DEF_REQUESTS_PAGE_SIZE
 	var questions model.Questions
-	err := repo.coll.Find(filter).Sort("lastModifiedDate").
+	err := repo.coll.Find(filter).Sort("-lastModifiedDate").
 		Limit(common.DEF_REQUESTS_PAGE_SIZE).Skip(skip).All(&questions)
 	if err != nil {
 		return nil, err
