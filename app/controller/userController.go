@@ -196,10 +196,11 @@ func ForgotPasswordOTP(ctx *gin.Context) {
 	mobile := ctx.Param("mobile")
 	res, otp := service.SendOTP(mobile, true)
 	if res.Status == enums.Status.SUCCESS {
-		if createOTPSession(ctx, otp) {
+		if ok, sessID := createOTPSession(ctx, otp); ok {
 			sessionToken := security.GenerateToken(
 				"Contact", mobile,
 				common.CACHE_OTP_TIMEOUT)
+			res.Body = sessID
 			if len(sessionToken) > 0 {
 				security.SetCookie(ctx, sessionToken,
 					common.CACHE_OTP_TIMEOUT)
@@ -218,7 +219,8 @@ func UpdateMobileOTP(ctx *gin.Context) {
 	mobile := ctx.Param("mobile")
 	res, otp := service.SendOTP(mobile, false)
 	if res.Status == enums.Status.SUCCESS {
-		if createOTPSession(ctx, otp) {
+		if ok, sessID := createOTPSession(ctx, otp); ok {
+			res.Body = sessID
 			ctx.JSON(http.StatusOK, res)
 		} else {
 			ctx.JSON(http.StatusOK, utility.GetErrorResponse(
@@ -227,16 +229,16 @@ func UpdateMobileOTP(ctx *gin.Context) {
 	}
 }
 
-func createOTPSession(ctx *gin.Context, otp string) bool {
+func createOTPSession(ctx *gin.Context, otp string) (bool, string) {
 	OTPSessionID := cachestore.GenerateSessionID(ctx)
 	if len(OTPSessionID) > 0 {
 		cachestore.SetCache(ctx, OTPSessionID, otp,
 			common.CACHE_OTP_TIMEOUT, false)
 		ctx.Writer.Header().Set(common.RESPONSE_OTP_SESSION_ID_KEY,
 			OTPSessionID)
-		return true
+		return true, OTPSessionID
 	}
-	return false
+	return false, ""
 }
 
 //VerifyOTP verifies OTP

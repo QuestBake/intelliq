@@ -75,7 +75,7 @@ func SaveTestDetails(testDto *dto.TestDto, saveAsDraft bool) *dto.AppResponseDto
 	go saveTemplate(testDto.Template, &wg, tempChannel)
 	go saveTestPaper(testDto.TestPaper, saveAsDraft, &wg, paperChannel)
 	wg.Wait()
-	res := <-tempChannel + "\n" + <-paperChannel
+	res := <-tempChannel + ":" + <-paperChannel
 	return utility.GetSuccessResponse(res)
 }
 
@@ -86,6 +86,7 @@ func saveTemplate(template *model.Template, wg *sync.WaitGroup,
 	if template == nil {
 		tempChannel <- ""
 	}
+	template.Criteria.TeacherID = template.TeacherID
 	template.Criteria512Hash = utility.GenerateHash(template.Criteria)
 	if len(template.Criteria512Hash) == 0 {
 		tempChannel <- common.MSG_CORRUPT_DATA

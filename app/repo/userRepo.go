@@ -39,7 +39,7 @@ func (repo *userRepository) Update(user *model.User) error {
 	selector := bson.M{"_id": user.UserID}
 	updator := bson.M{"$set": bson.M{"name": user.FullName, "gender": user.Gender,
 		"email": user.Email, "dob": user.DOB, "school": user.School,
-		"roles": user.Roles, "lastModifiedDate": time.Now().UTC()}}
+		"roles": user.Roles, "lastModifiedDate": user.LastModifiedDate}}
 	err := repo.coll.Update(selector, updator)
 	return err
 }

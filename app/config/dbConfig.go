@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"intelliq/app/common"
 	"strings"
@@ -90,23 +91,37 @@ type searchField struct {
 func createIndices(session *mgo.Session) {
 	db := session.DB(dbName)
 	if db == nil {
-		panic("No DB session")
+		log.Error("No DB session while creating indices")
 	}
 	addUniqueIndex(db, COLL_GROUP, []string{"code"})
 	addUniqueIndex(db, COLL_SCHOOL, []string{"code"})
-	addUniqueIndex(db, "GP_DPS"+COLL_TEMPLATE, []string{"criteria512Hash"})
+	db.Session.Close()
+}
+
+//CreateGroupCollWithIndices creates group specific colls with indices
+func CreateGroupCollWithIndices(groupCode string) error {
+	if dbSession == nil {
+		return errors.New("No DB Session")
+	}
+	session := dbSession.Copy()
+	db := session.DB(dbName)
+	if db == nil {
+		return errors.New("No DB Session")
+	}
 	var searchFields []searchField
 	searchFields = append(searchFields, searchField{field: "title", weight: 4})
 	searchFields = append(searchFields, searchField{field: "topic", weight: 2})
 	searchFields = append(searchFields, searchField{field: "tags", weight: 1})
-	addSearchIndex(db, "GP_DPS"+COLL_QUES, searchFields)
-	db.Session.Close()
+	addSearchIndex(db, groupCode+COLL_QUES, searchFields)
+	addUniqueIndex(db, groupCode+COLL_TEMPLATE, []string{"criteria512Hash"})
+	addIndex(db, groupCode+COLL_PAPER, []string{"lastModifiedDate"})
+	return nil
 }
 
 func addSearchIndex(db *mgo.Database, collName string, searchFields []searchField) {
 	coll := db.C(collName)
 	if coll == nil {
-		panic("No such Collection in DB" + collName)
+		log.Error("No such Collection in DB" + collName)
 	}
 	var fields []string
 	weights := make(map[string]int)
@@ -123,14 +138,14 @@ func addSearchIndex(db *mgo.Database, collName string, searchFields []searchFiel
 	log.Info("Creating search index for " + collName)
 	err := coll.EnsureIndex(index)
 	if err != nil {
-		panic("Could not create search index for " + collName + err.Error())
+		log.Error("Could not create search index for " + collName + err.Error())
 	}
 }
 
 func addUniqueIndex(db *mgo.Database, collName string, fields []string) {
 	coll := db.C(collName)
 	if coll == nil {
-		panic("No such Collection in DB" + collName)
+		log.Error("No such Collection in DB" + collName)
 	}
 	for _, key := range fields {
 		index := mgo.Index{
@@ -139,7 +154,7 @@ func addUniqueIndex(db *mgo.Database, collName string, fields []string) {
 		}
 		fmt.Println("Creating unique index on := ", key, " for coll := ", collName)
 		if err := coll.EnsureIndex(index); err != nil {
-			panic("Could not create unique index for " + collName)
+			log.Error("Could not create unique index for " + collName)
 		}
 	}
 }
@@ -147,7 +162,7 @@ func addUniqueIndex(db *mgo.Database, collName string, fields []string) {
 func addIndex(db *mgo.Database, collName string, fields []string) {
 	coll := db.C(collName)
 	if coll == nil {
-		panic("No such Collection in DB" + collName)
+		log.Error("No such Collection in DB" + collName)
 	}
 	for _, key := range fields {
 		index := mgo.Index{
@@ -155,7 +170,27 @@ func addIndex(db *mgo.Database, collName string, fields []string) {
 			Sparse: true,
 		}
 		if err := coll.EnsureIndex(index); err != nil {
-			panic("Could not create index for " + collName)
+			log.Error("Could not create index for " + collName)
+		}
+	}
+}
+
+//DropCollections drops unused  group-specific colls
+func DropCollections(groupCode string) {
+	if dbSession == nil {
+		log.Error("No DB Session")
+	}
+	session := dbSession.Copy()
+	db := session.DB(dbName)
+	if db == nil {
+		log.Error("No DB found : " + dbName)
+	}
+	colls := []string{groupCode + COLL_PAPER, groupCode + COLL_TEMPLATE, groupCode + COLL_QUES}
+	for _, collName := range colls {
+		coll := db.C(collName)
+		coll.DropCollection()
+		if coll == nil {
+			log.Error("No such Collection in DB" + collName)
 		}
 	}
 }

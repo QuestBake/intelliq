@@ -59,7 +59,6 @@ func RequestApprovedQuestionUpdate(question *model.Question) *dto.AppResponseDto
 		_id := question.QuestionID // create copy of original ques
 		question.OriginID = &_id
 		question.QuestionID = ""
-		question.CreateDate = time.Now().UTC()
 		updateQuestionAttributes(question, enums.CurrentQuestionStatus.TRANSIT, true, false)
 		break
 	case enums.CurrentQuestionStatus.REJECTED: // resubmit of approved ques which has been rejected before

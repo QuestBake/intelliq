@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
@@ -20,11 +21,11 @@ func AddNewUser(user *model.User) *dto.AppResponseDto {
 	if !utility.IsValidMobile(user.Mobile) {
 		return utility.GetErrorResponse(common.MSG_MOBILE_MIN_LENGTH_ERROR)
 	}
-	if len(user.FullName) < common.USERNAME_MIN_LENGTH {
-		return utility.GetErrorResponse(common.MSG_NAME_MIN_LENGTH_ERROR)
+	user.UserName = utility.GenerateUserName(user.FullName, user.Mobile)
+	if len(user.UserName) == 0 {
+		return utility.GetErrorResponse(common.MSG_FULL_NAME_ERROR)
 	}
 	user.Password = utility.EncryptData(common.TEMP_PWD_PREFIX + user.Mobile)
-	user.UserName = utility.GenerateUserName(user.FullName, user.Mobile)
 	user.CreateDate = time.Now().UTC()
 	user.LastModifiedDate = time.Now()
 	userRepo := repo.NewUserRepository()
@@ -45,9 +46,10 @@ func UpdateUser(user *model.User) *dto.AppResponseDto {
 	if !utility.IsPrimaryIDValid(user.UserID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
-	if len(user.FullName) < common.USERNAME_MIN_LENGTH {
-		return utility.GetErrorResponse(common.MSG_NAME_MIN_LENGTH_ERROR)
+	if len(strings.Split(user.FullName, " ")) < common.FULLNAME_MIN_LENGTH {
+		return utility.GetErrorResponse(common.MSG_FULL_NAME_ERROR)
 	}
+	user.Email = strings.ToLower(user.Email)
 	user.LastModifiedDate = time.Now().UTC()
 	userRepo := repo.NewUserRepository()
 	err := userRepo.Update(user)
@@ -286,9 +288,9 @@ func ResetPassword(pwdDTO *dto.PasswordDto) *dto.AppResponseDto {
 		if !utility.ComparePasswords(user.Password, pwdDTO.OldPwd) {
 			return utility.GetErrorResponse(common.MSG_INVALID_CREDENTIALS_PWD)
 		}
-		userRepo1 := repo.NewUserRepository()
+		userRepo = repo.NewUserRepository()
 		pwdDTO.NewPwd = utility.EncryptData(pwdDTO.NewPwd)
-		updateErr := userRepo1.UpdateMobilePwd("_id", "password", user.UserID, pwdDTO.NewPwd)
+		updateErr := userRepo.UpdateMobilePwd("_id", "password", user.UserID, pwdDTO.NewPwd)
 		if updateErr != nil {
 			fmt.Println(updateErr.Error())
 			return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)

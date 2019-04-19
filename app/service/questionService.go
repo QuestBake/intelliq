@@ -137,6 +137,27 @@ func FilterQuestions(criteriaDto *dto.QuestionCriteriaDto) *dto.AppResponseDto {
 	return utility.GetSuccessResponse(questions)
 }
 
+//RemoveObsoleteQuestions filters questions as per criteria provided
+func RemoveObsoleteQuestions(groupCode string) *dto.AppResponseDto {
+	if !utility.IsValidGroupCode(groupCode) {
+		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)
+	}
+	quesRepo := repo.NewQuestionRepository(groupCode)
+	if quesRepo == nil {
+		return utility.GetErrorResponse(common.MSG_UNATHORIZED_ACCESS)
+	}
+	info, err := quesRepo.DeleteAll()
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_QUES_REMOVE_ERROR)
+	}
+	return utility.GetSuccessResponse("Removed " + strconv.Itoa(info) + " from group " + groupCode)
+}
+
 func validateRequest(groupCode, subject string, std int) *dto.AppResponseDto {
 	if !utility.IsValidGroupCode(groupCode) {
 		return utility.GetErrorResponse(common.MSG_INVALID_GROUP)

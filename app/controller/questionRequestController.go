@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"intelliq/app/cachestore"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
 	"intelliq/app/dto"
@@ -71,7 +72,13 @@ func ApproveRequest(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
 	}
+	qStatus := question.Status
 	res := service.ApproveRequest(&question)
+	if res.Status == enums.Status.SUCCESS &&
+		(qStatus == enums.CurrentQuestionStatus.NEW ||
+			qStatus == enums.CurrentQuestionStatus.TRANSIT) {
+		cachestore.RemoveCache(ctx, question.GroupCode)
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 

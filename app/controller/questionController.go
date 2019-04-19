@@ -56,3 +56,10 @@ func GetFilteredQuestions(ctx *gin.Context) {
 	res := service.FilterQuestions(&quesCriteriaDto)
 	ctx.JSON(http.StatusOK, res)
 }
+
+//RemoveObsoleteQuestions removes all obsolete questions
+func RemoveObsoleteQuestions(ctx *gin.Context) {
+	groupCode := ctx.Param("groupCode")
+	res := service.RemoveObsoleteQuestions(groupCode)
+	ctx.JSON(http.StatusOK, res)
+}

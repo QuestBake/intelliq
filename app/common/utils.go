@@ -116,11 +116,14 @@ func IsValidMobile(mobile string) bool {
 	return err == nil && len(mobile) == MOBILE_LENGTH
 }
 
-//GenerateUserName generates username from name,mobile e.g. user@FIR_MOB
+//GenerateUserName generates username from name,mobile e.g. first@last__mob
 func GenerateUserName(name string, mobile string) string {
-	return USERNAME_PREFIX + strings.ToLower(
-		name[0:USERNAME_MIN_LENGTH]) + "_" +
-		mobile[MOBILE_LENGTH-USERNAME_MIN_LENGTH:MOBILE_LENGTH]
+	fullname := strings.Split(name, " ")
+	if len(fullname) >= FULLNAME_MIN_LENGTH {
+		return strings.ToLower(fullname[0] + "@" + fullname[1] +
+			"_" + mobile[MOBILE_LENGTH-FULLNAME_MIN_LENGTH:MOBILE_LENGTH])
+	}
+	return ""
 }
 
 //IsValidGroupCode checks for groupPrefix

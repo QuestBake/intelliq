@@ -12,7 +12,7 @@ import (
 type Question struct {
 	QuestionID       bson.ObjectId        `json:"quesId" bson:"_id,omitempty"`
 	Title            string               `json:"title" bson:"title"`
-	Std              uint16               `json:"std" bson:"std"`
+	Std              int                  `json:"std" bson:"std"`
 	Subject          string               `json:"subject" bson:"subject"`
 	Topic            string               `json:"topic" bson:"topic"`
 	Difficulty       enums.QuesDifficulty `json:"difficulty" bson:"difficulty"`
@@ -41,9 +41,14 @@ type Questions []Question
 
 //FormatTopicTags formats topic and tags to lowercase
 func (question *Question) FormatTopicTags() {
-	question.Topic = strings.Title(strings.ToLower(question.Topic))
-	question.Category = strings.Title(strings.ToLower(question.Category))
-	for i := 0; i < len(question.Tags); i++ {
-		question.Tags[i] = strings.Title(strings.ToLower(question.Tags[i]))
+	question.Topic = strings.Title(strings.ToLower(strings.TrimSpace(question.Topic)))
+	question.Category = strings.Title(strings.ToLower(strings.TrimSpace(question.Category)))
+	var tags []string
+	for _, tag := range question.Tags {
+		tag := strings.TrimSpace(tag)
+		if len(tag) > 0 {
+			tags = append(tags, strings.Title(strings.ToLower(tag)))
+		}
 	}
+	question.Tags = tags
 }

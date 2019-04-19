@@ -65,6 +65,7 @@ func CheckCache(ctx *gin.Context, key string) bool {
 //RemoveCache removes key-value from cache
 func RemoveCache(ctx *gin.Context, key string) error {
 	store, _ := ctx.Get(common.CACHE_STORE_KEY)
+	fmt.Printf("Removed %s from cache..", key)
 	if store == nil {
 		fmt.Println("NO REDIS INSTANCE RUNNING...")
 		return errors.New("NO REDIS INSTANCE RUNNING")
