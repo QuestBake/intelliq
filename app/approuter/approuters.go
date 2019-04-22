@@ -81,6 +81,7 @@ func addQuestionRouters() {
 		quesRoutes.POST("/all", controller.GetQuestionsFromBank)       // all approved ques from bank
 		quesRoutes.POST("/suggestions", controller.GetQuestionSuggestions)
 		quesRoutes.POST("/filter", controller.GetFilteredQuestions)
+		quesRoutes.DELETE("/all/:groupCode", controller.RemoveObsoleteQuestions) // removes all obsolete ques
 	}
 }
 
@@ -111,7 +112,8 @@ func addQuestionPaperRouters() {
 		paperRoutes.GET("/release/:groupCode/:teacherId", controller.GetReleasePaperSuggestions)
 		paperRoutes.GET("/drafts/:groupCode/:teacherId", controller.GetDraftSuggestions)
 		paperRoutes.GET("/draft/:groupCode/:testId", controller.FindDraft)
-		paperRoutes.DELETE("/draft/:groupCode/:testId", controller.RemoveDraft)
+
+		paperRoutes.DELETE("/remove/:groupCode/:testId", controller.RemoveDraft)
 
 	}
 }

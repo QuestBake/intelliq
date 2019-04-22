@@ -31,7 +31,7 @@ func enableCors() gin.HandlerFunc {
 		AllowCredentials: true,
 		AllowOrigins:     []string{"https://localhost:4200"},
 		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"X-Xsrf-Token", "Content-Type", "Accept"},
+		AllowHeaders:     []string{"rqst_otp_sess_id", "X-Xsrf-Token", "Content-Type", "Accept"},
 	})
 }
 

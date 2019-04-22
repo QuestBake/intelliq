@@ -40,16 +40,15 @@ func GetCache(ctx *gin.Context, key string) interface{} {
 	if store == nil {
 		fmt.Println("NO REDIS INSTANCE RUNNING...")
 		return false
-	} else {
-		cacheStore := store.(*cache.Codec)
-		var value interface{}
-		err := cacheStore.Get(key, &value)
-		if err != nil {
-			fmt.Println("KEY DOESNT EXISTS : ", key)
-			return nil
-		}
-		return value
 	}
+	cacheStore := store.(*cache.Codec)
+	var value interface{}
+	err := cacheStore.Get(key, &value)
+	if err != nil {
+		fmt.Println("KEY DOESNT EXISTS : ", key)
+		return nil
+	}
+	return value
 }
 
 //CheckCache checks for key in cache
@@ -66,6 +65,7 @@ func CheckCache(ctx *gin.Context, key string) bool {
 //RemoveCache removes key-value from cache
 func RemoveCache(ctx *gin.Context, key string) error {
 	store, _ := ctx.Get(config.Conf.Get("cache.cache_store_key").(string))
+	fmt.Printf("Removed %s from cache..", key)
 	if store == nil {
 		fmt.Println("NO REDIS INSTANCE RUNNING...")
 		return errors.New("NO REDIS INSTANCE RUNNING")

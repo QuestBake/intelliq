@@ -117,12 +117,15 @@ func IsValidMobile(mobile string) bool {
 	return err == nil && len(mobile) == config.Conf.Get("misc.mobile_length").(int)
 }
 
-//GenerateUserName generates username from name,mobile e.g. user@FIR_MOB
+//GenerateUserName generates username from name,mobile e.g. first@last__mob
 func GenerateUserName(name string, mobile string) string {
-	return config.Conf.Get("misc.username_prefix").(string) + strings.ToLower(
-		name[0:config.Conf.Get("misc.username_min_length").(int)]) + "_" +
-		mobile[config.Conf.Get("misc.mobile_length").(int)-
-			config.Conf.Get("misc.username_min_length").(int):config.Conf.Get("misc.mobile_length").(int)]
+	fullname := strings.Split(name, " ")
+	if len(fullname) >= config.Conf.Get("misc.fullname_min_length").(int) {
+		return strings.ToLower(fullname[0] + "@" + fullname[1] +
+			"_" + mobile[config.Conf.Get("misc.mobile_length").(int)-
+			config.Conf.Get("misc.fullname_min_length").(int):config.Conf.Get("misc.mobile_length").(int)])
+	}
+	return ""
 }
 
 //IsValidGroupCode checks for groupPrefix

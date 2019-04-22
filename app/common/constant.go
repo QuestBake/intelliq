@@ -34,7 +34,7 @@ const ( // app msgs
 	MSG_QUES_REMOVE_ERROR          string = "Question could not be removed !!"
 	MSG_CORRUPT_DATA               string = "Corrupt Criteria Data"
 	MSG_DUPLICATE_RECORD           string = "Duplicate Record"
-	MSG_NAME_MIN_LENGTH_ERROR      string = "Name should be atleast 3 characters"
+	MSG_FULL_NAME_ERROR            string = "First & Last name required !!"
 	MSG_MOBILE_MIN_LENGTH_ERROR    string = "Mobile should be 10 digits"
 	MSG_PWD_MIN_LENGTH_ERROR       string = "Password should be atleast 8 characters"
 	MSG_PWD_RESET_SUCCESS          string = "Password changed successfully !!"

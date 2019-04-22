@@ -51,6 +51,7 @@
 	question_batch_size         = 10000
 	group_code_prefix           = "GP_"
 	cors_request_method = "OPTIONS"
+	fullname_min_length = 2
 
 	
 

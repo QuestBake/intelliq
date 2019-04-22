@@ -9,7 +9,7 @@ import (
 
 //Template test paper template
 type Template struct {
-	TemplateID       bson.ObjectId `json:"testId" bson:"_id,omitempty"`
+	TemplateID       bson.ObjectId `json:"templateId" bson:"_id,omitempty"`
 	TeacherID        bson.ObjectId `json:"teacherId" bson:"teacherId,omitempty"`
 	GroupCode        string        `json:"groupCode" bson:"groupCode"`
 	Tag              string        `json:"tag" bson:"tag"`
@@ -25,8 +25,10 @@ type criteria struct {
 	Topics     []string     `json:"topics" bson:"topics"`
 	Tags       []string     `json:"tags" bson:"tags"`
 	Sets       int          `json:"sets" bson:"sets"`
+	Marks      int          `json:"totalMarks" bson:"marks"`
 	Length     []length     `json:"length" bson:"length"`
 	Difficulty []difficulty `json:"difficulty" bson:"difficulty"`
+	TeacherID  bson.ObjectId
 }
 
 type length struct {
