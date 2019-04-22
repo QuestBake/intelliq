@@ -3,18 +3,19 @@ package cachestore
 import (
 	"errors"
 	"fmt"
-	"intelliq/app/common"
-	utility "intelliq/app/common"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/cache"
+
+	utility "intelliq/app/common"
+	"intelliq/app/config"
 )
 
 //SetCache sets value in cache
 func SetCache(ctx *gin.Context, key string, val interface{},
 	minutes int, convertToJSON bool) {
-	store, _ := ctx.Get(common.CACHE_STORE_KEY)
+	store, _ := ctx.Get(config.Conf.Get("cache.cache_store_key").(string))
 	if store == nil {
 		fmt.Println("NO REDIS INSTANCE RUNNING...")
 	} else {
@@ -35,25 +36,24 @@ func SetCache(ctx *gin.Context, key string, val interface{},
 
 //GetCache gets value from cache
 func GetCache(ctx *gin.Context, key string) interface{} {
-	store, _ := ctx.Get(common.CACHE_STORE_KEY)
+	store, _ := ctx.Get(config.Conf.Get("cache.cache_store_key").(string))
 	if store == nil {
 		fmt.Println("NO REDIS INSTANCE RUNNING...")
 		return false
-	} else {
-		cacheStore := store.(*cache.Codec)
-		var value interface{}
-		err := cacheStore.Get(key, &value)
-		if err != nil {
-			fmt.Println("KEY DOESNT EXISTS : ", key)
-			return nil
-		}
-		return value
 	}
+	cacheStore := store.(*cache.Codec)
+	var value interface{}
+	err := cacheStore.Get(key, &value)
+	if err != nil {
+		fmt.Println("KEY DOESNT EXISTS : ", key)
+		return nil
+	}
+	return value
 }
 
 //CheckCache checks for key in cache
 func CheckCache(ctx *gin.Context, key string) bool {
-	store, _ := ctx.Get(common.CACHE_STORE_KEY)
+	store, _ := ctx.Get(config.Conf.Get("cache.cache_store_key").(string))
 	if store == nil {
 		fmt.Println("NO REDIS INSTANCE RUNNING...")
 		return false
@@ -64,7 +64,7 @@ func CheckCache(ctx *gin.Context, key string) bool {
 
 //RemoveCache removes key-value from cache
 func RemoveCache(ctx *gin.Context, key string) error {
-	store, _ := ctx.Get(common.CACHE_STORE_KEY)
+	store, _ := ctx.Get(config.Conf.Get("cache.cache_store_key").(string))
 	fmt.Printf("Removed %s from cache..", key)
 	if store == nil {
 		fmt.Println("NO REDIS INSTANCE RUNNING...")

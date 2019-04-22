@@ -1,0 +1,58 @@
+
+[cache]
+	cache_otp_timeout       = 5
+	cache_object_long_timeout  = 60
+	cache_object_short_timeout = 30
+	cache_store_key             = "CACHE_STORE"
+	cache_port   = ":6379"
+	cache_domain = "localhost"
+
+[session]
+	request_otp_session_id_key  = "RQST_OTP_SESS_ID"
+	response_otp_session_id_key = "RESP_OTP_SESS_ID"
+	cookie_session_key  = "c_user"
+	user_session_timeout    = 120
+	cookie_session_timeout  = 180
+[security]
+	ssl_certificate_filepath    = "/Users/lionheart/.ssh/ssl.crt"
+	ssl_key_filepath     = "/Users/lionheart/.ssh/sslKey.key"
+	cookie_xsrf_key     = "XSRF-TOKEN"
+	header_xsrf_key     = "X-Xsrf-Token"
+	private_key_filepath  = "/Users/lionheart/.ssh/appKey.priv"
+
+[otp]
+	otp_length       = 6
+	otp_upper_bound = 989899
+	otp_lower_bound = 101010
+[app]
+	app_name     = "IntelliQ"
+	app_port     = ":8080"
+[logging]
+	log_file          = "/var/log/intelliq/intelliq.log"
+	log_max_bytes     = 1000000
+	log_backup_count  = 20
+[misc]
+    param_key_id     = "_id"
+	param_key_code = "code"
+	param_key_name = "mobile"
+	date_time_format = "02 Jan,2006 03:04:05 PM"
+	date_format = "02 Jan,2006"
+	temp_pwd_frefix = "TP_"
+	username_prefix = "user@"
+	min_valid_role = 0
+	max_valid_role = 4
+	min_valid_std = 1
+	max_valid_srd = 12
+	mobile_length        = 10
+	user_min_length = 3
+	pwd_min_length      = 8
+	def_request_page_size = 20
+	def_request_page      = 0
+	question_batch_size         = 10000
+	group_code_prefix           = "GP_"
+	cors_request_method = "OPTIONS"
+	fullname_min_length = 2
+
+	
+
+

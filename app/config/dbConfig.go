@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"intelliq/app/common"
 	"strings"
 
 	"github.com/globalsign/mgo"
@@ -51,7 +50,7 @@ func GetCollection(collName string) *mgo.Collection {
 	if db == nil {
 		return nil
 	}
-	if strings.HasPrefix(collName, common.GROUP_CODE_PREFIX) {
+	if strings.HasPrefix(collName, Conf.Get("misc.group_code_prefix").(string)) {
 		collNames, err := db.CollectionNames()
 		if err != nil {
 			log.Error("Failed to get coll names:", err)

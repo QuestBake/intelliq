@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"intelliq/app/approuter"
-	"intelliq/app/common"
 	"intelliq/app/config"
 	"intelliq/app/logger"
 	"intelliq/app/security"
@@ -13,7 +12,13 @@ import (
 var router *gin.Engine
 
 func main() {
-	logger.InitLogger(common.LOG_FILE, common.LOG_MAX_BYTES, common.LOG_BACKUP_COUNT)
+	logger.InitLogger(config.Conf.Get("log.log_file").(string),
+		config.Conf.Get("log.log_max_bytes").(int64), config.Conf.Get("log.log_backup_count").(int))
+	var configErr error
+	config.Conf, configErr = config.LoadConfig("app_config.toml")
+	if configErr != nil {
+		logger.Logger.Error("Error while reading config file!!")
+	}
 	defer logger.Logger.Close()
 	router = gin.Default()
 	if router != nil {
@@ -22,8 +27,8 @@ func main() {
 		security.EnableSecurity(router)
 		approuter.AddRouters(router)
 		//router.Run(common.APP_PORT)
-		router.RunTLS(common.APP_PORT, common.SSL_CERT_FILEPATH,
-			common.SSL_KEY_FILEPATH)
+		router.RunTLS(config.Conf.Get("app.app_port").(string), config.Conf.Get("security.ssl_certificate_path").(string),
+			config.Conf.Get("security.ssl_key_filepath").(string))
 	} else {
 		logger.Logger.Error("Router Failed")
 	}

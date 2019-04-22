@@ -6,7 +6,6 @@ import (
 	"crypto/sha512"
 	"encoding/json"
 	"fmt"
-	"intelliq/app/dto"
 	"io"
 	"log"
 	"math/rand"
@@ -20,6 +19,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 
+	"intelliq/app/config"
+	"intelliq/app/dto"
 	"intelliq/app/enums"
 )
 
@@ -79,12 +80,12 @@ func GetErrorMsg(err error) string {
 
 //FormatDateToString formats date to readable string
 func FormatDateToString(date time.Time) string {
-	return date.Format(DATE_TIME_FORMAT)
+	return date.Format(config.Conf.Get("misc.date_time_format").(string))
 }
 
 //FormatStringToDate formats string to time
 func FormatStringToDate(date string) time.Time {
-	t, _ := time.Parse(DATE_TIME_FORMAT, date)
+	t, _ := time.Parse(config.Conf.Get("misc.date_time_format").(string), date)
 	return t
 }
 
@@ -113,15 +114,16 @@ func ComparePasswords(hashedPwd string, plainPwd string) bool {
 //IsValidMobile checks mobile number format or not
 func IsValidMobile(mobile string) bool {
 	_, err := strconv.ParseUint(mobile, 10, 64)
-	return err == nil && len(mobile) == MOBILE_LENGTH
+	return err == nil && len(mobile) == config.Conf.Get("misc.mobile_length").(int)
 }
 
 //GenerateUserName generates username from name,mobile e.g. first@last__mob
 func GenerateUserName(name string, mobile string) string {
 	fullname := strings.Split(name, " ")
-	if len(fullname) >= FULLNAME_MIN_LENGTH {
+	if len(fullname) >= config.Conf.Get("misc.fullname_min_length").(int) {
 		return strings.ToLower(fullname[0] + "@" + fullname[1] +
-			"_" + mobile[MOBILE_LENGTH-FULLNAME_MIN_LENGTH:MOBILE_LENGTH])
+			"_" + mobile[config.Conf.Get("misc.mobile_length").(int)-
+			config.Conf.Get("misc.fullname_min_length").(int):config.Conf.Get("misc.mobile_length").(int)])
 	}
 	return ""
 }
@@ -129,7 +131,7 @@ func GenerateUserName(name string, mobile string) string {
 //IsValidGroupCode checks for groupPrefix
 func IsValidGroupCode(groupCode string) bool {
 	return strings.HasPrefix(groupCode,
-		GROUP_CODE_PREFIX) && len(GROUP_CODE_PREFIX) < len(groupCode)
+		config.Conf.Get("misc.group_code_prefix").(string)) && len(config.Conf.Get("misc.group_code_prefix").(string)) < len(groupCode)
 }
 
 //GenerateRandom generated random number between give 0 & upperlimit excluding upperlimit
@@ -189,9 +191,9 @@ func JSONToObject(data string, obj *interface{}) interface{} {
 
 //GenerateUUID generates random uuid
 func GenerateUUID() string {
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		fmt.Printf(err.Error())
+	uuid := uuid.NewV4()
+	if len(uuid.String()) == 0 {
+		fmt.Printf("Failed to generate the UUID")
 		return ""
 	}
 	return uuid.String()

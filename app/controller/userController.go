@@ -9,6 +9,7 @@ import (
 	"intelliq/app/cachestore"
 	"intelliq/app/common"
 	utility "intelliq/app/common"
+	"intelliq/app/config"
 	"intelliq/app/dto"
 	"intelliq/app/enums"
 	"intelliq/app/model"
@@ -42,11 +43,11 @@ func UpdateUserProfile(ctx *gin.Context) {
 	if res.Status == enums.Status.SUCCESS && res.Body != nil {
 		if cachestore.CheckCache(ctx, user.Mobile) {
 			cachestore.SetCache(ctx, user.Mobile, user,
-				common.CACHE_OBJ_LONG_TIMEOUT, true)
+				config.Conf.Get("cache.cache_object_long_timeout").(int), true)
 		}
 		if cachestore.CheckCache(ctx, user.UserID.String()) {
 			cachestore.SetCache(ctx, user.UserID.String(), user,
-				common.CACHE_OBJ_LONG_TIMEOUT, true)
+				config.Conf.Get("cache.cache_object_long_timeout").(int), true)
 		}
 	}
 	ctx.JSON(http.StatusOK, res)
@@ -143,8 +144,8 @@ func ListUserByMobileOrID(ctx *gin.Context) {
 	key := ctx.Param("key")
 	val := ctx.Param("val")
 	if len(key) == 0 || len(val) == 0 ||
-		(key != common.PARAM_KEY_ID &&
-			key != common.PARAM_KEY_MOBILE) {
+		(key != config.Conf.Get("misc.param_key_id").(string) &&
+			key != config.Conf.Get("misc.param_key_mobile").(string)) {
 		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
@@ -158,7 +159,7 @@ func ListUserByMobileOrID(ctx *gin.Context) {
 		res := service.FetchUserByMobileOrID(key, val)
 		if res.Status == enums.Status.SUCCESS && res.Body != nil {
 			cachestore.SetCache(ctx, val, res.Body,
-				common.CACHE_OBJ_LONG_TIMEOUT, true)
+				config.Conf.Get("cache.cache_object_long_timeout").(int), true)
 		}
 		ctx.JSON(http.StatusOK, res)
 	}
@@ -199,11 +200,11 @@ func ForgotPasswordOTP(ctx *gin.Context) {
 		if ok, sessID := createOTPSession(ctx, otp); ok {
 			sessionToken := security.GenerateToken(
 				"Contact", mobile,
-				common.CACHE_OTP_TIMEOUT)
+				config.Conf.Get("cache.cache_otp_timeout").(int))
 			res.Body = sessID
 			if len(sessionToken) > 0 {
 				security.SetCookie(ctx, sessionToken,
-					common.CACHE_OTP_TIMEOUT)
+					config.Conf.Get("cache.cache_otp_timeout").(int))
 				security.SetSecureCookie(ctx, sessionToken)
 				ctx.JSON(http.StatusOK, res)
 				return
@@ -233,8 +234,8 @@ func createOTPSession(ctx *gin.Context, otp string) (bool, string) {
 	OTPSessionID := cachestore.GenerateSessionID(ctx)
 	if len(OTPSessionID) > 0 {
 		cachestore.SetCache(ctx, OTPSessionID, otp,
-			common.CACHE_OTP_TIMEOUT, false)
-		ctx.Writer.Header().Set(common.RESPONSE_OTP_SESSION_ID_KEY,
+			config.Conf.Get("cache.cache_otp_timeout").(int), false)
+		ctx.Writer.Header().Set(config.Conf.Get("session.response_otp_session_id_key").(string),
 			OTPSessionID)
 		return true, OTPSessionID
 	}
@@ -244,11 +245,11 @@ func createOTPSession(ctx *gin.Context, otp string) (bool, string) {
 //VerifyOTP verifies OTP
 func VerifyOTP(ctx *gin.Context) {
 	userOTP := ctx.Param("otp")
-	if len(userOTP) != common.OTP_LENGTH {
+	if len(userOTP) != config.Conf.Get("otp.otp_length").(int) {
 		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 	} else {
-		otpSessionID := ctx.Request.Header.Get(common.REQUEST_OTP_SESSION_ID_KEY)
+		otpSessionID := ctx.Request.Header.Get(config.Conf.Get("session.request_otp_session_id_key").(string))
 		if cachestore.CheckCache(ctx, otpSessionID) {
 			sessionOTP := cachestore.GetCache(ctx, otpSessionID)
 			if sessionOTP == userOTP {
@@ -280,13 +281,13 @@ func AuthenticateUser(ctx *gin.Context) {
 		user := res.Body.(*model.User)
 		sessionToken := security.GenerateToken(
 			"UserID", user.UserID.Hex(),
-			common.USER_SESSION_TIMEOUT)
+			config.Conf.Get("session.user_session_timeout").(int))
 		xsrfToken := security.GenerateToken(
 			"NONCE", utility.GenerateUUID(),
-			common.USER_SESSION_TIMEOUT)
+			config.Conf.Get("session.user_session_timeout").(int))
 		if len(sessionToken) > 0 && len(xsrfToken) > 0 {
 			security.SetCookie(ctx, sessionToken,
-				common.COOKIE_SESSION_TIMEOUT)
+				config.Conf.Get("session.cookie_session_timeout").(int))
 			security.SetSecureCookie(ctx, xsrfToken)
 		} else {
 			res = utility.GetErrorResponse(
