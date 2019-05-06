@@ -25,6 +25,7 @@ func AddNewUser(user *model.User) *dto.AppResponseDto {
 	if len(user.UserName) == 0 {
 		return utility.GetErrorResponse(common.MSG_FULL_NAME_ERROR)
 	}
+	user.FullName = strings.Title(user.FullName)
 	user.Password = utility.EncryptData(common.TEMP_PWD_PREFIX + user.Mobile)
 	user.CreateDate = time.Now().UTC()
 	user.LastModifiedDate = time.Now()
