@@ -33,6 +33,7 @@ func UpdateSchoolProfile(ctx *gin.Context) {
 	var school model.School
 	err := ctx.BindJSON(&school)
 	if err != nil {
+		fmt.Println(err)
 		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
@@ -43,8 +44,8 @@ func UpdateSchoolProfile(ctx *gin.Context) {
 			cachestore.SetCache(ctx, school.Code, school,
 				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
-		if cachestore.CheckCache(ctx, school.SchoolID.String()) {
-			cachestore.SetCache(ctx, school.SchoolID.String(), school,
+		if cachestore.CheckCache(ctx, school.SchoolID.Hex()) {
+			cachestore.SetCache(ctx, school.SchoolID.Hex(), school,
 				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 	}

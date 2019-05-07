@@ -22,7 +22,8 @@ type School struct {
 	CreateDate       time.Time     `json:"createDate" bson:"createDate"`
 	LastModifiedDate time.Time     `json:"lastModifiedDate" bson:"lastModifiedDate"`
 	RenewalDate      time.Time     `json:"renewalDate" bson:"renewalDate"`
-	PrevUserRoles    []Role        `json:"prevUserRoles" bson:"prevUserRoles"`
+	PrevUserRoles    []Role        `json:"prevUserRoles" bson:"prevUserRoles"` // to know teacher's role in previous school
+	Schedule         schedule      `json:"schedule" bson:"schedule"`
 }
 
 //Address address model
@@ -41,6 +42,11 @@ type Contact struct {
 	Mobile   []string `json:"mobile" bson:"mobile"`
 	Email    string   `json:"email" bson:"email"`
 	Website  string   `json:"website" bson:"website"`
+}
+
+type schedule struct {
+	Days    int `json:"days" bson:"days"`
+	Periods int `json:"periods" bson:"periods"`
 }
 
 //Schools school array

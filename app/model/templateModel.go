@@ -25,7 +25,7 @@ type criteria struct {
 	Topics     []string     `json:"topics" bson:"topics"`
 	Tags       []string     `json:"tags" bson:"tags"`
 	Sets       int          `json:"sets" bson:"sets"`
-	Marks      int          `json:"totalMarks" bson:"marks"`
+	Marks      int          `json:"totalMarks" bson:"totalMarks"`
 	Length     []length     `json:"length" bson:"length"`
 	Difficulty []difficulty `json:"difficulty" bson:"difficulty"`
 	TeacherID  bson.ObjectId

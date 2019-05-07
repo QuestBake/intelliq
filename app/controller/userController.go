@@ -44,8 +44,8 @@ func UpdateUserProfile(ctx *gin.Context) {
 			cachestore.SetCache(ctx, user.Mobile, user,
 				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
-		if cachestore.CheckCache(ctx, user.UserID.String()) {
-			cachestore.SetCache(ctx, user.UserID.String(), user,
+		if cachestore.CheckCache(ctx, user.UserID.Hex()) {
+			cachestore.SetCache(ctx, user.UserID.Hex(), user,
 				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 	}
@@ -138,13 +138,13 @@ func UpdateBulkUsers(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-//ListUserByMobileOrID get user info by id or mobile number
+//ListUserByMobileOrID get user info by id/mobile/username
 func ListUserByMobileOrID(ctx *gin.Context) {
 	key := ctx.Param("key")
 	val := ctx.Param("val")
 	if len(key) == 0 || len(val) == 0 ||
 		(key != common.PARAM_KEY_ID &&
-			key != common.PARAM_KEY_MOBILE) {
+			key != common.PARAM_KEY_MOBILE && key != common.PARAM_KEY_USERNAME) {
 		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
 		return
@@ -162,7 +162,6 @@ func ListUserByMobileOrID(ctx *gin.Context) {
 		}
 		ctx.JSON(http.StatusOK, res)
 	}
-
 }
 
 //ResetUserPassword resets user password either forgotten or renew
@@ -178,7 +177,7 @@ func ResetUserPassword(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-//UpdateUserMobile updates user mobile no post OTP verification
+//UpdateUserMobile updates user mobile num post OTP verification
 func UpdateUserMobile(ctx *gin.Context) {
 	var pwdDto dto.PasswordDto
 	err := ctx.BindJSON(&pwdDto)
@@ -188,6 +187,22 @@ func UpdateUserMobile(ctx *gin.Context) {
 		return
 	}
 	res := service.UpdateMobile(&pwdDto)
+	if res.Status == enums.Status.SUCCESS && res.Body != nil {
+		if cachestore.CheckCache(ctx, pwdDto.UserID.Hex()) {
+			cacheVal := cachestore.GetCache(ctx, pwdDto.UserID.Hex()).(string)
+			var user model.User
+			err := json.Unmarshal([]byte(cacheVal), &user)
+			if err == nil {
+				oldMobile := user.Mobile
+				if len(oldMobile) == common.MOBILE_LENGTH {
+					user.Mobile = pwdDto.Mobile
+					cachestore.SetCache(ctx, pwdDto.UserID.Hex(), user,
+						common.CACHE_OBJ_LONG_TIMEOUT, true)
+					cachestore.RemoveCache(ctx, oldMobile)
+				}
+			}
+		}
+	}
 	ctx.JSON(http.StatusOK, res)
 }
 
@@ -301,5 +316,18 @@ func Logout(ctx *gin.Context) {
 	security.RemoveCookie(ctx)
 	res := utility.GetSuccessResponse(
 		"Logout Successful !!")
+	ctx.JSON(http.StatusOK, res)
+}
+
+//UpdateUserSchedule updates user's time-table
+func UpdateUserSchedule(ctx *gin.Context) {
+	var user model.User
+	err := ctx.BindJSON(&user)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.UpdateSchedule(&user)
 	ctx.JSON(http.StatusOK, res)
 }

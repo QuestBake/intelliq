@@ -39,6 +39,7 @@ const ( // app msgs
 	MSG_PWD_MIN_LENGTH_ERROR       string = "Password should be atleast 8 characters"
 	MSG_PWD_RESET_SUCCESS          string = "Password changed successfully !!"
 	MSG_MOBILE_UPDATE_SUCCESS      string = "Mobile number changed successfully !!"
+	MSG_SCHEDULE_UPDATE_SUCCESS    string = "Schedule updated successfully !!"
 	MSG_USER_AUTH_ERROR            string = "User Authentication Error !!"
 	MSG_USER_SESSION_ERROR         string = "Session Not Found !!"
 	MSG_USER_FORGERY_ERROR         string = "Detected user forgery !! !!"
@@ -49,9 +50,10 @@ const ( // codes
 )
 
 const ( // congfig params
-	PARAM_KEY_ID     = "_id"
-	PARAM_KEY_CODE   = "code"
-	PARAM_KEY_MOBILE = "mobile"
+	PARAM_KEY_ID       = "_id"
+	PARAM_KEY_CODE     = "code"
+	PARAM_KEY_MOBILE   = "mobile"
+	PARAM_KEY_USERNAME = "userName"
 
 	DATE_TIME_FORMAT = "02 Jan,2006 03:04:05 PM"
 	DATE_FORMAT      = "02 Jan,2006" // 01= Month , 02 = Date
@@ -69,7 +71,7 @@ const ( // congfig params
 	FULLNAME_MIN_LENGTH = 2
 	PWD_MIN_LENGTH      = 8
 
-	DEF_REQUESTS_PAGE_SIZE = 20
+	DEF_REQUESTS_PAGE_SIZE = 10
 	DEF_REQUESTS_PAGE      = 0
 	QUES_BATCH_SIZE        = 10000
 

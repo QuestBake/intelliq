@@ -22,6 +22,7 @@ type User struct {
 	School           School        `json:"school" bson:"school"`
 	PrevSchools      []School      `json:"prevSchools" bson:"prevSchools"`
 	Roles            []Role        `json:"roles" bson:"roles"`
+	Days             []Day         `json:"days" bson:"days"`
 }
 
 //Users user array
@@ -35,7 +36,7 @@ type Role struct {
 
 //Standard std model
 type Standard struct {
-	Std      uint16    `json:"std" bson:"std"`
+	Std      int       `json:"std" bson:"std"`
 	Subjects []Subject `json:"subjects" bson:"subjects"`
 }
 
@@ -45,4 +46,17 @@ type Subject struct {
 	Reviewer Contributor `json:"reviewer" bson:"reviewer"`
 	Topics   []string    `json:"topics" bson:"topics"`
 	Tags     []string    `json:"tags" bson:"tags"`
+}
+
+//Day subject model
+type Day struct {
+	Day     string   `json:"day" bson:"day"`
+	Periods []Period `json:"periods" bson:"periods"`
+}
+
+//Period subject model
+type Period struct {
+	Hour    int    `json:"hour" bson:"hour"`
+	Std     string `json:"std" bson:"std"`
+	Subject string `json:"subject" bson:"subject"`
 }

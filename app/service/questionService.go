@@ -75,7 +75,7 @@ func FetchApprovedQuestions(requestDto *dto.QuesRequestDto) *dto.AppResponseDto 
 	if quesRepo == nil {
 		return utility.GetErrorResponse(common.MSG_UNATHORIZED_ACCESS)
 	}
-	questions, err := quesRepo.FindApprovedQuestions(requestDto)
+	responseDto, err := quesRepo.FindApprovedQuestions(requestDto)
 	if err != nil {
 		fmt.Println(err.Error())
 		errorMsg := utility.GetErrorMsg(err)
@@ -84,7 +84,7 @@ func FetchApprovedQuestions(requestDto *dto.QuesRequestDto) *dto.AppResponseDto 
 		}
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
-	return utility.GetSuccessResponse(questions)
+	return utility.GetSuccessResponse(responseDto)
 }
 
 //FetchQuestionSuggestions fetch similar questions as per search term
