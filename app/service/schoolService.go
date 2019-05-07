@@ -16,8 +16,7 @@ import (
 
 //AddNewSchool adds new school
 func AddNewSchool(school *model.School) *dto.AppResponseDto {
-	school.ShortName = strings.ToUpper(school.ShortName)
-	school.Code = school.ShortName + "_" + school.Address.Pincode
+	school.FormatAttributes()
 	school.CreateDate = time.Now().UTC()
 	school.LastModifiedDate = time.Now().UTC()
 	schoolRepo := repo.NewSchoolRepository()
@@ -38,6 +37,7 @@ func UpdateSchool(school *model.School) *dto.AppResponseDto {
 	if !utility.IsPrimaryIDValid(school.SchoolID) {
 		return utility.GetErrorResponse(common.MSG_INVALID_ID)
 	}
+	school.FormatAttributes()
 	school.LastModifiedDate = time.Now().UTC()
 	schoolRepo := repo.NewSchoolRepository()
 	err := schoolRepo.Update(school)

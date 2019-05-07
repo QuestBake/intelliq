@@ -51,6 +51,7 @@ func addUserRouters() {
 		userRoutes.GET("/otp/verify/:otp", controller.VerifyOTP)
 		userRoutes.POST("/reset/pwd", controller.ResetUserPassword)
 		userRoutes.POST("/update/mobile", controller.UpdateUserMobile)
+		userRoutes.PUT("/updateSchedule", controller.UpdateUserSchedule)
 	}
 }
 
@@ -60,7 +61,7 @@ func addSchoolRouters() {
 		schoolRoutes.POST("/add", controller.AddNewSchool)
 		schoolRoutes.GET("/all/:key/:val", controller.ListAllSchools)
 		schoolRoutes.PUT("/update", controller.UpdateSchoolProfile)
-		schoolRoutes.GET("info/:key/:val", controller.ListSchoolByCodeOrID)
+		schoolRoutes.GET("/info/:key/:val", controller.ListSchoolByCodeOrID)
 	}
 }
 

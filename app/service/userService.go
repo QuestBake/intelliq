@@ -25,9 +25,10 @@ func AddNewUser(user *model.User) *dto.AppResponseDto {
 	if len(user.UserName) == 0 {
 		return utility.GetErrorResponse(common.MSG_FULL_NAME_ERROR)
 	}
+	user.FullName = strings.Title(user.FullName)
 	user.Password = utility.EncryptData(common.TEMP_PWD_PREFIX + user.Mobile)
 	user.CreateDate = time.Now().UTC()
-	user.LastModifiedDate = time.Now()
+	user.LastModifiedDate = user.CreateDate
 	userRepo := repo.NewUserRepository()
 	err := userRepo.Save(user)
 	if err != nil {
@@ -251,6 +252,8 @@ func FetchUserByMobileOrID(key string, val string) *dto.AppResponseDto {
 		}
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
+	user.Password = ""
+	user.Days = nil
 	return utility.GetSuccessResponse(user)
 }
 
@@ -332,4 +335,22 @@ func SendOTP(mobile string, forgotPassword bool) (*dto.AppResponseDto, string) {
 	otp := utility.GenerateRandom(common.OTP_LOWER_BOUND, common.OTP_UPPER_BOUND)
 	fmt.Println("OTP=> ", otp)
 	return utility.GetSuccessResponse("OTP sent successfully !!"), strconv.Itoa(otp)
+}
+
+//UpdateSchedule updates user's time-table
+func UpdateSchedule(user *model.User) *dto.AppResponseDto {
+	if !utility.IsPrimaryIDValid(user.UserID) {
+		return utility.GetErrorResponse(common.MSG_INVALID_ID)
+	}
+	userRepo := repo.NewUserRepository()
+	err := userRepo.UpdateSchedule(user)
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+	}
+	return utility.GetSuccessResponse(common.MSG_SCHEDULE_UPDATE_SUCCESS)
 }

@@ -217,7 +217,7 @@ func FetchReviewerRequests(requestDto *dto.QuesRequestDto) *dto.AppResponseDto {
 	if quesRepo == nil {
 		return utility.GetErrorResponse(common.MSG_UNATHORIZED_ACCESS)
 	}
-	questions, err := quesRepo.FindReviewersRequests(requestDto, status)
+	responseDto, err := quesRepo.FindReviewersRequests(requestDto, status)
 	if err != nil {
 		fmt.Println(err.Error())
 		errorMsg := utility.GetErrorMsg(err)
@@ -226,7 +226,7 @@ func FetchReviewerRequests(requestDto *dto.QuesRequestDto) *dto.AppResponseDto {
 		}
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
-	return utility.GetSuccessResponse(questions)
+	return utility.GetSuccessResponse(responseDto)
 }
 
 //FetchTeacherRequests fetches all ques with either od status : APPROVED / REJECTED/ PENDING for a teacher
@@ -257,7 +257,7 @@ func FetchTeacherRequests(requestDto *dto.QuesRequestDto) *dto.AppResponseDto {
 	if quesRepo == nil {
 		return utility.GetErrorResponse(common.MSG_UNATHORIZED_ACCESS)
 	}
-	questions, err := quesRepo.FindTeachersRequests(requestDto, status)
+	responseDto, err := quesRepo.FindTeachersRequests(requestDto, status)
 	if err != nil {
 		fmt.Println(err.Error())
 		errorMsg := utility.GetErrorMsg(err)
@@ -266,5 +266,5 @@ func FetchTeacherRequests(requestDto *dto.QuesRequestDto) *dto.AppResponseDto {
 		}
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
-	return utility.GetSuccessResponse(questions)
+	return utility.GetSuccessResponse(responseDto)
 }

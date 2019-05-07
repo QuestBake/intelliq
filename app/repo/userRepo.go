@@ -48,7 +48,7 @@ func (repo *userRepository) UpdateMobilePwd(selectorField string,
 	updatorField string, selectorVal interface{}, updatorVal string) error {
 	defer db.CloseSession(repo.coll)
 	selector := bson.M{selectorField: selectorVal}
-	updator := bson.M{"$set": bson.M{updatorField: updatorVal}}
+	updator := bson.M{"$set": bson.M{updatorField: updatorVal, "lastModifiedDate": time.Now().UTC()}}
 	err := repo.coll.Update(selector, updator)
 	return err
 }
@@ -60,7 +60,8 @@ func (repo *userRepository) FindAllSchoolAdmins(groupID bson.ObjectId) (model.Us
 		"school.group._id": groupID,
 		"roles.roleType":   enums.Role.SCHOOL,
 	}
-	err := repo.coll.Find(filter).All(&users)
+	cols := bson.M{"password": 0, "prevSchools": 0, "days": 0, "lastModifiedDate": 0}
+	err := repo.coll.Find(filter).Select(cols).All(&users)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +78,8 @@ func (repo *userRepository) FindAllSchoolTeachers(schoolID bson.ObjectId,
 	} else {
 		filter = bson.M{"school._id": schoolID, "roles.roleType": roleType}
 	}
-	err := repo.coll.Find(filter).All(&users)
+	cols := bson.M{"password": 0, "prevSchools": 0, "days": 0, "lastModifiedDate": 0, "school": 0}
+	err := repo.coll.Find(filter).Select(cols).All(&users)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +95,8 @@ func (repo *userRepository) FindAllteachersUnderReviewer(schoolID bson.ObjectId,
 		"roles.roleType":                 enums.Role.TEACHER,
 		"roles.std.subjects.approver_id": reviewerID,
 	}
-	err := repo.coll.Find(filter).All(&users)
+	cols := bson.M{"password": 0, "prevSchools": 0, "days": 0, "lastModifiedDate": 0, "school": 0}
+	err := repo.coll.Find(filter).Select(cols).All(&users)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +121,6 @@ func (repo *userRepository) TransferRole(roleType enums.UserRole,
 	},
 	}
 	cols := bson.M{"_id": 1, "roles": 1, "mobile": 1}
-
 	err := repo.coll.Find(orFilter).Select(cols).All(&users)
 	if err != nil {
 		return "", nil, err
@@ -218,4 +220,12 @@ func (repo *userRepository) FindOne(key string, val interface{}) (*model.User, e
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (repo *userRepository) UpdateSchedule(user *model.User) error {
+	defer db.CloseSession(repo.coll)
+	selector := bson.M{"_id": user.UserID}
+	updator := bson.M{"$set": bson.M{"days": user.Days}}
+	err := repo.coll.Update(selector, updator)
+	return err
 }

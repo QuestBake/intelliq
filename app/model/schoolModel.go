@@ -1,6 +1,7 @@
 package model
 
 import (
+	"strings"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
@@ -21,7 +22,8 @@ type School struct {
 	CreateDate       time.Time     `json:"createDate" bson:"createDate"`
 	LastModifiedDate time.Time     `json:"lastModifiedDate" bson:"lastModifiedDate"`
 	RenewalDate      time.Time     `json:"renewalDate" bson:"renewalDate"`
-	PrevUserRoles    []Role        `json:"prevUserRoles" bson:"prevUserRoles"`
+	PrevUserRoles    []Role        `json:"prevUserRoles" bson:"prevUserRoles"` // to know teacher's role in previous school
+	Schedule         schedule      `json:"schedule" bson:"schedule"`
 }
 
 //Address address model
@@ -42,5 +44,20 @@ type Contact struct {
 	Website  string   `json:"website" bson:"website"`
 }
 
+type schedule struct {
+	Days    int `json:"days" bson:"days"`
+	Periods int `json:"periods" bson:"periods"`
+}
+
 //Schools school array
 type Schools []School
+
+//FormatAttributes formats school attributes
+func (school *School) FormatAttributes() {
+	school.ShortName = strings.ToUpper(school.ShortName)
+	school.Code = school.ShortName + "_" + school.Address.Pincode
+	school.Address.Area = strings.Title(school.Address.Area)
+	school.Address.City = strings.Title(school.Address.City)
+	school.Address.State = strings.ToUpper(school.Address.State)
+	school.Board = strings.ToUpper(school.Board)
+}

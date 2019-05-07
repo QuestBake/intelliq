@@ -12,6 +12,7 @@ import (
 type Question struct {
 	QuestionID       bson.ObjectId        `json:"quesId" bson:"_id,omitempty"`
 	Title            string               `json:"title" bson:"title"`
+	TitleHTML        string               `json:"titleHtml" bson:"titleHtml"`
 	Std              int                  `json:"std" bson:"std"`
 	Subject          string               `json:"subject" bson:"subject"`
 	Topic            string               `json:"topic" bson:"topic"`

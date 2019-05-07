@@ -15,4 +15,5 @@ type QuesRequestDto struct {
 	Status    enums.QuestionStatus `json:"status"` // quest status
 	Page      int                  `json:"page"`   // for pagination
 	Standards []model.Standard     `json:"standards"`
+	GetCount  bool                 `json:"getCount"` // return total records count along with data
 }

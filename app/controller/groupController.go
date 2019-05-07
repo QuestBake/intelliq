@@ -44,8 +44,8 @@ func UpdateGroup(ctx *gin.Context) {
 			cachestore.SetCache(ctx, group.Code, group,
 				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
-		if cachestore.CheckCache(ctx, group.GroupID.String()) {
-			cachestore.SetCache(ctx, group.GroupID.String(), group,
+		if cachestore.CheckCache(ctx, group.GroupID.Hex()) {
+			cachestore.SetCache(ctx, group.GroupID.Hex(), group,
 				common.CACHE_OBJ_LONG_TIMEOUT, true)
 		}
 	}
