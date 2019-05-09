@@ -91,9 +91,9 @@ func (repo *userRepository) FindAllteachersUnderReviewer(schoolID bson.ObjectId,
 	defer db.CloseSession(repo.coll)
 	var users model.Users
 	filter := bson.M{
-		"school._id":                     schoolID,
-		"roles.roleType":                 enums.Role.TEACHER,
-		"roles.std.subjects.approver_id": reviewerID,
+		"school._id":                      schoolID,
+		"roles.roleType":                  enums.Role.TEACHER,
+		"roles.std.subjects.reviewer._id": reviewerID,
 	}
 	cols := bson.M{"password": 0, "prevSchools": 0, "days": 0, "lastModifiedDate": 0, "school": 0}
 	err := repo.coll.Find(filter).Select(cols).All(&users)
@@ -214,6 +214,21 @@ func (repo *userRepository) FindOne(key string, val interface{}) (*model.User, e
 	var user model.User
 	filter := bson.M{
 		key: val,
+	}
+	err := repo.coll.Find(filter).One(&user)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+func (repo *userRepository) FindOneFromSchool(key string, val interface{},
+	schoolID bson.ObjectId) (*model.User, error) {
+	defer db.CloseSession(repo.coll)
+	var user model.User
+	filter := bson.M{
+		key:          val,
+		"school._id": schoolID,
 	}
 	err := repo.coll.Find(filter).One(&user)
 	if err != nil {

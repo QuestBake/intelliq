@@ -46,6 +46,7 @@ func addUserRouters() {
 		userRoutes.POST("/login", controller.AuthenticateUser)
 		userRoutes.GET("/logout", controller.Logout)
 		userRoutes.GET("/info/:key/:val", controller.ListUserByMobileOrID)
+		userRoutes.GET("/school/info/:schoolId/:key/:val", controller.ListSchoolUserByMobileOrID)
 		userRoutes.GET("/forgot/pwd/:mobile", controller.ForgotPasswordOTP)
 		userRoutes.GET("/new/mobile/:mobile", controller.UpdateMobileOTP)
 		userRoutes.GET("/otp/verify/:otp", controller.VerifyOTP)
