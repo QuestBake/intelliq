@@ -158,7 +158,7 @@ func (repo *questionRepository) FilterQuestionsForPaper(
 			"$in": quesCriteriaDto.NativeDifficulty,
 		},
 	}
-	cols := bson.M{"_id": 1, "title": 1, "difficulty": 1, "length": 1,
+	cols := bson.M{"_id": 1, "title": 1, "titleHtml": 1, "difficulty": 1, "length": 1,
 		"topic": 1, "tags": 1, "imageUrl": 1}
 	var ques model.Question
 	itr := repo.coll.Find(filter).Batch(common.QUES_BATCH_SIZE).Select(cols).Iter()
@@ -193,7 +193,7 @@ func (repo *questionRepository) FilterQuestionsPerCriteria(
 			bson.M{"tags": bson.M{
 				"$all": quesCriteriaDto.Tags}}}}
 	}
-	cols := bson.M{"_id": 1, "title": 1, "difficulty": 1, "length": 1,
+	cols := bson.M{"_id": 1, "title": 1, "titleHtml": 1, "difficulty": 1, "length": 1,
 		"topic": 1, "tags": 1, "imageUrl": 1}
 	err := repo.coll.Find(filter).Select(cols).Limit(common.DEF_REQUESTS_PAGE_SIZE).
 		Skip(quesCriteriaDto.Page).All(&questions)
