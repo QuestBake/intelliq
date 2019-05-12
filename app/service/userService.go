@@ -253,7 +253,6 @@ func FetchUserByMobileOrID(key string, val string) *dto.AppResponseDto {
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
 	user.Password = ""
-	user.Days = nil
 	return utility.GetSuccessResponse(user)
 }
 
@@ -282,7 +281,6 @@ func FetchSchoolUserByMobileOrID(key string, val string, schoolID string) *dto.A
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
 	user.Password = ""
-	user.Days = nil
 	return utility.GetSuccessResponse(user)
 }
 

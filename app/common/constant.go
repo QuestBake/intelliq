@@ -89,9 +89,9 @@ const ( // congfig params
 	HEADER_XSRF_KEY     = "X-Xsrf-Token"
 	CORS_REQUEST_METHOD = "OPTIONS"
 
-	USER_SESSION_TIMEOUT    = 180 //minutes
-	COOKIE_SESSION_TIMEOUT  = 240
-	CACHE_OTP_TIMEOUT       = 5
+	USER_SESSION_TIMEOUT    = 360 //minutes
+	COOKIE_SESSION_TIMEOUT  = 360
+	CACHE_OTP_TIMEOUT       = 10
 	CACHE_OBJ_LONG_TIMEOUT  = 60
 	CACHE_OBJ_SHORT_TIMEOUT = 30
 
@@ -100,9 +100,13 @@ const ( // congfig params
 	CACHE_PORT   = ":6379"
 	CACHE_DOMAIN = "localhost"
 
-	PRIVATE_KEY_FILEPATH = "/Users/lionheart/.ssh/appKey.priv"
-	SSL_CERT_FILEPATH    = "/Users/lionheart/.ssh/ssl.crt"
-	SSL_KEY_FILEPATH     = "/Users/lionheart/.ssh/sslKey.key"
+	// PRIVATE_KEY_FILEPATH = "/Users/lionheart/.ssh/appKey.priv"
+	// SSL_CERT_FILEPATH    = "/Users/lionheart/.ssh/ssl.crt"
+	// SSL_KEY_FILEPATH     = "/Users/lionheart/.ssh/sslKey.key"
+
+	PRIVATE_KEY_FILEPATH = "/var/lib/intelliq/.ssh/appKey.priv"
+	SSL_CERT_FILEPATH    = "/var/lib/intelliq/.ssh/ssl.crt"
+	SSL_KEY_FILEPATH     = "/var/lib/intelliq/.ssh/sslKey.key"
 
 	LOG_FILE         = "/var/log/intelliq/intelliq.log"
 	LOG_MAX_BYTES    = 1000000
