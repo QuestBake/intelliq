@@ -7,10 +7,13 @@ RUN apt-get update \
 
 RUN apt-get install -y -q \
     curl \
-	wget \
-	git \
-	tar \
-	go-dep
+    wget \
+    git \
+    tar \
+    go-dep \
+    apt-transport-https \
+    ca-certificates \
+    software-properties-common
 
 WORKDIR /tmp/
 

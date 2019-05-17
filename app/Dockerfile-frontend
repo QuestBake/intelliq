@@ -6,7 +6,10 @@ RUN apt-get update \
 
 RUN apt-get install -y -q \
     curl \
-	git
+    git \
+    apt-transport-https \
+    ca-certificates \
+    software-properties-common
 
 RUN mkdir -p /project/front-end/
 
@@ -22,16 +25,15 @@ RUN npm install -g @angular/cli
 
 WORKDIR /project/front-end/
 
-RUN git clone https://github.com/parassaxena3/intelliQ-Client.git
+RUN git clone https://github.com/theramkrish8/intelliQ-Client.git
 
 WORKDIR /project/front-end/intelliQ-Client
 
-RUN git checkout release
+RUN git checkout docker_build
 
-WORKDIR /project/front-end/
+RUN npm install
 
-RUN ng new test-app
+#CMD ng s --open --port 4200 --ssl true --ssl-cert /var/lib/intelliq/.ssh/ssl.crt --ssl-key /var/lib/intelliq/.ssh/sslKey.key
 
-WORKDIR /project/front-end/intelliQ-Client
+CMD ng s --port 4200
 
-CMD ng s --open --port 4200 --ssl true --ssl-cert /var/lib/intelliq/.ssh/ssl.crt -ssl-key /var/lib/intelliq/.ssh/sslKey.key
