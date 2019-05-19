@@ -189,11 +189,7 @@ func JSONToObject(data string, obj *interface{}) interface{} {
 
 //GenerateUUID generates random uuid
 func GenerateUUID() string {
-	uuid, err := uuid.NewV4()
-	if err != nil {
-		fmt.Printf(err.Error())
-		return ""
-	}
+	uuid := uuid.NewV4()
 	return uuid.String()
 }
 

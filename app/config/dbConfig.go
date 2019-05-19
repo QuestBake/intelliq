@@ -3,15 +3,16 @@ package config
 import (
 	"errors"
 	"fmt"
-	"intelliq/app/common"
 	"strings"
 
 	"github.com/globalsign/mgo"
 	log "github.com/sirupsen/logrus"
+
+	"intelliq/app/common"
 )
 
 const (
-	url    = "localhost"
+	url    = "mongo-db"
 	port   = "27017"
 	dbName = "intelliQ"
 )
