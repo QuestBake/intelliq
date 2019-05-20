@@ -18,6 +18,12 @@ import (
 
 var skipURIS = []string{"login", "forgot"}
 
+//var clientIP = "35.200.183.136"
+//var origin = "https://35.200.183.136:5500"
+
+var clientIP = "localhost"
+var origin = "https://localhost:4200"
+
 //EnableSecurity enables app security
 func EnableSecurity(router *gin.Engine) {
 	router.Use(enableCors())
@@ -27,9 +33,9 @@ func EnableSecurity(router *gin.Engine) {
 func enableCors() gin.HandlerFunc {
 	return cors.New(cors.Config{
 		AllowCredentials: true,
-		AllowOrigins:     []string{"https://localhost:4200"},
+		AllowOrigins:     []string{origin},
 		AllowMethods:     []string{"GET", "PUT", "POST", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"rqst_otp_sess_id", "X-Xsrf-Token", "Content-Type", "Accept"},
+		AllowHeaders:     []string{"rqst_otp_sess_id", "X-Xsrf-Token", "Content-Type", "Accept", "origin"},
 	})
 }
 
@@ -160,14 +166,14 @@ func VerifyToken(token string) (bool, string) {
 //SetCookie sets cookie attribute
 func SetCookie(ctx *gin.Context, body string, expiry int) {
 	ctx.SetCookie(common.COOKIE_SESSION_KEY, body,
-		expiry*60, "", "localhost",
+		expiry*60, "", clientIP,
 		true, true)
 }
 
 //SetSecureCookie generate XSRF cookie against CSRF attacks
 func SetSecureCookie(ctx *gin.Context, body string) {
 	ctx.SetCookie(common.COOKIE_XSRF_KEY, body,
-		common.COOKIE_SESSION_TIMEOUT*60, "/", "localhost",
+		common.COOKIE_SESSION_TIMEOUT*60, "/", clientIP,
 		true, false)
 }
 
@@ -175,9 +181,9 @@ func SetSecureCookie(ctx *gin.Context, body string) {
 func RemoveCookie(ctx *gin.Context) {
 	fmt.Println("removed cookies")
 	ctx.SetCookie(common.COOKIE_SESSION_KEY, "",
-		-1, "", "localhost",
+		-1, "", clientIP,
 		true, true)
 	ctx.SetCookie(common.COOKIE_XSRF_KEY, "",
-		-1, "", "localhost",
+		-1, "", clientIP,
 		true, true)
 }

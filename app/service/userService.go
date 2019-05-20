@@ -65,6 +65,25 @@ func UpdateUser(user *model.User) *dto.AppResponseDto {
 	return utility.GetSuccessResponse(common.MSG_UPDATE_SUCCESS)
 }
 
+//UpdateUserRoles updates existing user's roles
+func UpdateUserRoles(user *model.User) *dto.AppResponseDto {
+	if !utility.IsPrimaryIDValid(user.UserID) {
+		return utility.GetErrorResponse(common.MSG_INVALID_ID)
+	}
+	user.LastModifiedDate = time.Now().UTC()
+	userRepo := repo.NewUserRepository()
+	err := userRepo.UpdateRoles(user)
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_UPDATE_ERROR)
+	}
+	return utility.GetSuccessResponse(common.MSG_UPDATE_SUCCESS)
+}
+
 //FetchAllSchoolAdmins gets all users with role school admin for a group
 func FetchAllSchoolAdmins(groupID string) *dto.AppResponseDto {
 	if utility.IsStringIDValid(groupID) {

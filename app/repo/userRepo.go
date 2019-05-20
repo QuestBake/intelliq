@@ -44,6 +44,14 @@ func (repo *userRepository) Update(user *model.User) error {
 	return err
 }
 
+func (repo *userRepository) UpdateRoles(user *model.User) error {
+	defer db.CloseSession(repo.coll)
+	selector := bson.M{"_id": user.UserID}
+	updator := bson.M{"$set": bson.M{"roles": user.Roles, "lastModifiedDate": user.LastModifiedDate}}
+	err := repo.coll.Update(selector, updator)
+	return err
+}
+
 func (repo *userRepository) UpdateMobilePwd(selectorField string,
 	updatorField string, selectorVal interface{}, updatorVal string) error {
 	defer db.CloseSession(repo.coll)

@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	url    = "mongo-db"
+	url = "mongo-db"
+	//url    = "localhost"
 	port   = "27017"
 	dbName = "intelliQ"
 )

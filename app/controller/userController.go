@@ -52,6 +52,23 @@ func UpdateUserProfile(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+//UpdateUserRoles updates user's roles
+func UpdateUserRoles(ctx *gin.Context) {
+	var user model.User
+	err := ctx.BindJSON(&user)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.UpdateUserRoles(&user)
+	if res.Status == enums.Status.SUCCESS && res.Body != nil {
+		cachestore.RemoveCache(ctx, user.Mobile)
+		cachestore.RemoveCache(ctx, user.UserID.Hex())
+	}
+	ctx.JSON(http.StatusOK, res)
+}
+
 //ListAllSchoolAdminsUnderGroup fetches all users with role schooladmin
 func ListAllSchoolAdminsUnderGroup(ctx *gin.Context) {
 	groupID := ctx.Param("groupId")

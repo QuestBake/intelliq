@@ -108,7 +108,8 @@ const ( // congfig params
 	SSL_CERT_FILEPATH    = "/var/lib/intelliq/.ssh/ssl.crt"
 	SSL_KEY_FILEPATH     = "/var/lib/intelliq/.ssh/sslKey.key"
 
-	LOG_FILE         = "/var/log/intelliq/intelliq.log"
+	LOG_FILE = "/var/log/intelliq/intelliq.log"
+	//LOG_FILE         = "/Users/lionheart/log/intelliq/intelliq.log"
 	LOG_MAX_BYTES    = 1000000
 	LOG_BACKUP_COUNT = 20
 )
