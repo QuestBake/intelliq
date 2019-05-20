@@ -216,7 +216,7 @@ func (repo *questionRepository) FilterQuestionsPerSearchTerm(
 		},
 	}
 	cols := bson.M{"_id": 0, "titleHtml": 1}
-	err := repo.coll.Find(filter).Select(cols).Sort("-_id").
+	err := repo.coll.Find(filter).Select(cols).
 		Limit(common.DEF_REQUESTS_PAGE_SIZE).Skip(quesCriteriaDto.Page *
 		common.DEF_REQUESTS_PAGE_SIZE).All(&questions)
 	if err != nil {
