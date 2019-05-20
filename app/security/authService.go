@@ -18,11 +18,11 @@ import (
 
 var skipURIS = []string{"login", "forgot"}
 
-//var clientIP = "35.200.183.136"
-//var origin = "https://35.200.183.136:5500"
+var clientIP = "35.200.183.136"
+var origin = "https://35.200.183.136:4200"
 
-var clientIP = "localhost"
-var origin = "https://localhost:4200"
+//var clientIP = "localhost"
+//var origin = "https://localhost:4200"
 
 //EnableSecurity enables app security
 func EnableSecurity(router *gin.Engine) {
