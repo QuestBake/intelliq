@@ -1,0 +1,41 @@
+
+FROM ubuntu:bionic
+
+RUN apt-get update \
+ && apt-get install gnupg -y
+
+RUN apt-get install -y -q \
+    curl \
+    git \
+    apt-transport-https \
+    ca-certificates \
+    software-properties-common
+
+RUN mkdir -p /project/front-end/
+
+RUN mkdir -p /var/lib/intelliq/.ssh/
+
+COPY ./keys/* /var/lib/intelliq/.ssh/
+
+RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
+
+RUN apt-get install -y -q nodejs
+
+RUN npm install -g @angular/cli
+
+WORKDIR /project/front-end/
+
+RUN git clone https://github.com/theramkrish8/intelliQ-Client.git
+
+WORKDIR /project/front-end/intelliQ-Client
+
+RUN git checkout docker_build
+
+RUN npm install
+
+RUN ng build
+
+CMD ng s --host 0.0.0.0 --disableHostCheck=true --port 4200 --ssl true --ssl-cert /var/lib/intelliq/.ssh/ssl.crt --ssl-key /var/lib/intelliq/.ssh/sslKey.key
+
+#CMD ng s --host 0.0.0.0 --disableHostCheck=true --port 4200
+

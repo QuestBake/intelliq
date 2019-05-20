@@ -18,6 +18,7 @@ type Question struct {
 	Topic            string               `json:"topic" bson:"topic"`
 	Difficulty       enums.QuesDifficulty `json:"difficulty" bson:"difficulty"`
 	Length           enums.QuesLength     `json:"length" bson:"length"`
+	Marks            int                  `json:"marks" bson:"marks"`
 	Status           enums.QuestionStatus `json:"status" bson:"status"`
 	Tags             []string             `json:"tags" bson:"tags"`
 	Category         string               `json:"category" bson:"category"`

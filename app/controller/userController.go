@@ -52,6 +52,23 @@ func UpdateUserProfile(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
+//UpdateUserRoles updates user's roles
+func UpdateUserRoles(ctx *gin.Context) {
+	var user model.User
+	err := ctx.BindJSON(&user)
+	if err != nil {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	res := service.UpdateUserRoles(&user)
+	if res.Status == enums.Status.SUCCESS && res.Body != nil {
+		cachestore.RemoveCache(ctx, user.Mobile)
+		cachestore.RemoveCache(ctx, user.UserID.Hex())
+	}
+	ctx.JSON(http.StatusOK, res)
+}
+
 //ListAllSchoolAdminsUnderGroup fetches all users with role schooladmin
 func ListAllSchoolAdminsUnderGroup(ctx *gin.Context) {
 	groupID := ctx.Param("groupId")
@@ -162,6 +179,40 @@ func ListUserByMobileOrID(ctx *gin.Context) {
 		}
 		ctx.JSON(http.StatusOK, res)
 	}
+}
+
+//ListSchoolUserByMobileOrID get user info by id/mobile/username
+func ListSchoolUserByMobileOrID(ctx *gin.Context) {
+	schoolID := ctx.Param("schoolId")
+	key := ctx.Param("key")
+	val := ctx.Param("val")
+	if !utility.IsStringIDValid(schoolID) {
+		res := utility.GetErrorResponse(common.MSG_INVALID_ID)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	if len(key) == 0 || len(val) == 0 ||
+		(key != common.PARAM_KEY_ID &&
+			key != common.PARAM_KEY_MOBILE && key != common.PARAM_KEY_USERNAME) {
+		res := utility.GetErrorResponse(common.MSG_BAD_INPUT)
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, res)
+		return
+	}
+	if cachestore.CheckCache(ctx, val) {
+		cacheVal := cachestore.GetCache(ctx, val).(string)
+		var user model.User
+		json.Unmarshal([]byte(cacheVal), &user)
+		if user.School.SchoolID.Hex() == schoolID {
+			ctx.JSON(http.StatusOK, utility.GetSuccessResponse(user))
+			return
+		}
+	}
+	res := service.FetchSchoolUserByMobileOrID(key, val, schoolID)
+	if res.Status == enums.Status.SUCCESS && res.Body != nil {
+		cachestore.SetCache(ctx, val, res.Body,
+			common.CACHE_OBJ_LONG_TIMEOUT, true)
+	}
+	ctx.JSON(http.StatusOK, res)
 }
 
 //ResetUserPassword resets user password either forgotten or renew

@@ -17,6 +17,7 @@ import (
 //AddNewSchool adds new school
 func AddNewSchool(school *model.School) *dto.AppResponseDto {
 	school.FormatAttributes()
+	school.Code = school.ShortName + "_" + school.Address.Pincode
 	school.CreateDate = time.Now().UTC()
 	school.LastModifiedDate = time.Now().UTC()
 	schoolRepo := repo.NewSchoolRepository()

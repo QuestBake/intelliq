@@ -44,7 +44,7 @@ func (repo *testPaperRepository) FindAll(teacherID bson.ObjectId,
 		"teacherId": teacherID,
 		"status":    paperStatus,
 	}
-	cols := bson.M{"_id": 1, "tag": 1, "lastModifiedDate": 1}
+	cols := bson.M{"_id": 1, "tag": 1, "lastModifiedDate": 1, "std": 1, "subject": 1, "marks": 1}
 	err := repo.coll.Find(filter).Select(cols).All(&drafts)
 	if err != nil {
 		return nil, err

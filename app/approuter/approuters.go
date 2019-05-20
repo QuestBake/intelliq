@@ -35,6 +35,7 @@ func addUserRouters() {
 	{
 		userRoutes.POST("/add", controller.AddNewUser)
 		userRoutes.PUT("/update", controller.UpdateUserProfile)
+		userRoutes.PUT("/update/roles", controller.UpdateUserProfile)
 		userRoutes.GET("/all/admins/:groupId", controller.ListAllSchoolAdminsUnderGroup)
 		userRoutes.GET("/all/school/:schoolId", controller.ListAllTeachersUnderSchool)
 		userRoutes.GET("/all/reviewer/:schoolId/:reviewerId", controller.ListAllTeachersUnderReviewer)
@@ -46,6 +47,7 @@ func addUserRouters() {
 		userRoutes.POST("/login", controller.AuthenticateUser)
 		userRoutes.GET("/logout", controller.Logout)
 		userRoutes.GET("/info/:key/:val", controller.ListUserByMobileOrID)
+		userRoutes.GET("/school/info/:schoolId/:key/:val", controller.ListSchoolUserByMobileOrID)
 		userRoutes.GET("/forgot/pwd/:mobile", controller.ForgotPasswordOTP)
 		userRoutes.GET("/new/mobile/:mobile", controller.UpdateMobileOTP)
 		userRoutes.GET("/otp/verify/:otp", controller.VerifyOTP)
@@ -108,13 +110,13 @@ func addQuestionPaperRouters() {
 
 		paperRoutes.GET("/templates/:groupCode/:teacherId", controller.GetTemplateSuggestions)
 		paperRoutes.GET("/template/:groupCode/:templateId", controller.FindTemplate)
-		paperRoutes.DELETE("/template/:groupCode/:testId", controller.RemoveTemplate)
+		paperRoutes.DELETE("/template/:groupCode/:templateId", controller.RemoveTemplate)
 
 		paperRoutes.GET("/release/:groupCode/:teacherId", controller.GetReleasePaperSuggestions)
 		paperRoutes.GET("/drafts/:groupCode/:teacherId", controller.GetDraftSuggestions)
 		paperRoutes.GET("/draft/:groupCode/:testId", controller.FindDraft)
 
-		paperRoutes.DELETE("/remove/:groupCode/:testId", controller.RemoveDraft)
+		paperRoutes.DELETE("/draft/:groupCode/:testId", controller.RemoveDraft)
 
 	}
 }

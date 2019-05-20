@@ -55,7 +55,6 @@ type Schools []School
 //FormatAttributes formats school attributes
 func (school *School) FormatAttributes() {
 	school.ShortName = strings.ToUpper(school.ShortName)
-	school.Code = school.ShortName + "_" + school.Address.Pincode
 	school.Address.Area = strings.Title(school.Address.Area)
 	school.Address.City = strings.Title(school.Address.City)
 	school.Address.State = strings.ToUpper(school.Address.State)

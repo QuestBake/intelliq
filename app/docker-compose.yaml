@@ -1,0 +1,46 @@
+version: '3.6'
+
+services:
+
+  intelliq-app:
+    build:
+      context: .
+      dockerfile: Dockerfile-backend
+    image: intelliq-app:${ISOLATION_ID}
+    container_name: intelliq-app
+    volumes:
+      - ./:/go/src/github.com/intelliq/app
+      - ./keys:/var/lib/intelliq/.ssh
+    depends_on:
+      - mongo-db
+      - redis
+    expose:
+      - 8080
+
+  mongo-db:
+    image: mongo:4.1.11-bionic
+    restart: always
+    container_name: mongo-db
+    expose:
+      - 27017
+
+  redis:
+    restart: always
+    image: redis:5.0.4-alpine
+    container_name: redis
+    expose:
+      - 6379
+
+  angular-app:
+    build:
+      context: .
+      dockerfile: Dockerfile-frontend
+    image: angular-app:${ISOLATION_ID}
+    container_name: angular-app
+    volumes:
+      - ./keys:/var/lib/intelliq/.ssh
+    depends_on:
+      - intelliq-app
+    ports:
+      - "4200:4200"
+  
