@@ -65,6 +65,25 @@ func UpdateUser(user *model.User) *dto.AppResponseDto {
 	return utility.GetSuccessResponse(common.MSG_UPDATE_SUCCESS)
 }
 
+//UpdateUserRoles updates existing user's roles
+func UpdateUserRoles(user *model.User) *dto.AppResponseDto {
+	if !utility.IsPrimaryIDValid(user.UserID) {
+		return utility.GetErrorResponse(common.MSG_INVALID_ID)
+	}
+	user.LastModifiedDate = time.Now().UTC()
+	userRepo := repo.NewUserRepository()
+	err := userRepo.UpdateRoles(user)
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_UPDATE_ERROR)
+	}
+	return utility.GetSuccessResponse(common.MSG_UPDATE_SUCCESS)
+}
+
 //FetchAllSchoolAdmins gets all users with role school admin for a group
 func FetchAllSchoolAdmins(groupID string) *dto.AppResponseDto {
 	if utility.IsStringIDValid(groupID) {
@@ -253,7 +272,34 @@ func FetchUserByMobileOrID(key string, val string) *dto.AppResponseDto {
 		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
 	}
 	user.Password = ""
-	user.Days = nil
+	return utility.GetSuccessResponse(user)
+}
+
+//FetchSchoolUserByMobileOrID fetch user info by mobile or ID for a school
+func FetchSchoolUserByMobileOrID(key string, val string, schoolID string) *dto.AppResponseDto {
+	var value interface{} = val
+	if key == common.PARAM_KEY_ID {
+		if utility.IsStringIDValid(val) {
+			value = bson.ObjectIdHex(val)
+		} else {
+			return utility.GetErrorResponse(common.MSG_INVALID_ID)
+		}
+	} else if key == common.PARAM_KEY_MOBILE {
+		if !utility.IsValidMobile(val) {
+			return utility.GetErrorResponse(common.MSG_INVALID_MOBILE)
+		}
+	}
+	userRepo := repo.NewUserRepository()
+	user, err := userRepo.FindOneFromSchool(key, value, bson.ObjectIdHex(schoolID))
+	if err != nil {
+		fmt.Println(err.Error())
+		errorMsg := utility.GetErrorMsg(err)
+		if len(errorMsg) > 0 {
+			return utility.GetErrorResponse(errorMsg)
+		}
+		return utility.GetErrorResponse(common.MSG_REQUEST_FAILED)
+	}
+	user.Password = ""
 	return utility.GetSuccessResponse(user)
 }
 

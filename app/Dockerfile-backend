@@ -1,0 +1,51 @@
+
+FROM ubuntu:bionic
+
+RUN apt-get update \
+ && apt-get install gnupg -y
+
+
+RUN apt-get install -y -q \
+    curl \
+    wget \
+    git \
+    tar \
+    go-dep \
+    apt-transport-https \
+    ca-certificates \
+    software-properties-common
+
+WORKDIR /tmp/
+
+RUN wget https://dl.google.com/go/go1.12.2.linux-amd64.tar.gz
+
+RUN tar -xvf go1.12.2.linux-amd64.tar.gz
+
+RUN mv go /usr/local
+
+ENV GOPATH=/go
+
+ENV GOROOT=/usr/local/go
+
+ENV PATH=$PATH:/go/bin:$GOROOT/bin:/usr/lib/go-1.12/bin
+
+RUN mkdir /go
+
+RUN mkdir /var/log/intelliq/
+
+RUN mkdir -p /var/lib/intelliq/.shh/
+
+COPY . /go/src/intelliq/app
+
+COPY ./keys/* var/lib/intelliq/.ssh/
+
+WORKDIR /go/src/intelliq/app/
+
+#RUN dep init
+
+RUN dep ensure
+
+RUN go build
+
+CMD ./app
+
