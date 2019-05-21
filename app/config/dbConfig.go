@@ -97,6 +97,7 @@ func createIndices(session *mgo.Session) {
 	}
 	addUniqueIndex(db, COLL_GROUP, []string{"code"})
 	addUniqueIndex(db, COLL_SCHOOL, []string{"code"})
+	addUniqueIndex(db, COLL_USER, []string{"mobile"})
 	db.Session.Close()
 }
 
