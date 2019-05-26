@@ -18,8 +18,8 @@ import (
 
 var skipURIS = []string{"login", "forgot"}
 
-var clientIP = "35.200.183.136"
-var origin = "https://35.200.183.136:4200"
+var clientIP = "35.244.57.15"
+var origin = "https://35.244.57.15:4200"
 
 //var clientIP = "localhost"
 //var origin = "https://localhost:4200"
