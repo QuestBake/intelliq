@@ -98,8 +98,8 @@ const ( // congfig params
 	APP_NAME     = "intelliq-app"
 	APP_PORT     = ":8080"
 	CACHE_PORT   = ":6379"
-	//CACHE_DOMAIN = "redis"
-	CACHE_DOMAIN = "localhost"
+	CACHE_DOMAIN = "redis"
+	//CACHE_DOMAIN = "localhost"
 
 	// PRIVATE_KEY_FILEPATH = "/Users/lionheart/.ssh/appKey.priv"
 	// SSL_CERT_FILEPATH    = "/Users/lionheart/.ssh/ssl.crt"
