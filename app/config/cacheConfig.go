@@ -15,9 +15,9 @@ func CacheConnect(router *gin.Engine) {
 	ring := redis.NewRing(&redis.RingOptions{
 		Addrs: map[string]string{
 			//common.CACHE_DOMAIN: common.CACHE_PORT,
-			"redis": common.CACHE_DOMAIN
+			"redis": common.CACHE_DOMAIN,
 		},
-		//	DB:       10,
+		DB:       1,
 		//		Password: "appPwd",
 	})
 	store := &cache.Codec{

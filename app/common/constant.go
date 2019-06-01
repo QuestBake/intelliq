@@ -95,7 +95,7 @@ const ( // congfig params
 	CACHE_OBJ_LONG_TIMEOUT  = 60
 	CACHE_OBJ_SHORT_TIMEOUT = 30
 
-	APP_NAME     = "IntelliQ"
+	APP_NAME     = "intelliq-app"
 	APP_PORT     = ":8080"
 	CACHE_PORT   = ":6379"
 	//CACHE_DOMAIN = "redis"
