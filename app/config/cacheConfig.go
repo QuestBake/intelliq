@@ -20,6 +20,9 @@ func CacheConnect(router *gin.Engine) {
 		DB:       1,
 		//		Password: "appPwd",
 	})
+	if err := ring.FlushDb().Err(); err != nil {
+		panic(err)
+	}
 	store := &cache.Codec{
 		Redis: ring,
 		Marshal: func(v interface{}) ([]byte, error) {
